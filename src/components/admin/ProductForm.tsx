@@ -93,42 +93,53 @@ export default function ProductForm({
         ]
   );
 
-  // Quick Preset Generators
-  const applyPanjabiPreset = () => {
-    const baseP = Number(price) || 2450;
-    const saleP = Number(salePrice) || 1750;
-    setVariantType("size");
-    setVariants([
-      { id: "v-38", name: "Size 38 (S)", price: baseP, salePrice: saleP, stock: 6, color: "Signature", colorCode: "#7A1C2C", material: "100% Combed Cotton" },
-      { id: "v-40", name: "Size 40 (M)", price: baseP, salePrice: saleP, stock: 8, color: "Signature", colorCode: "#7A1C2C", material: "100% Combed Cotton" },
-      { id: "v-42", name: "Size 42 (L)", price: baseP, salePrice: saleP, stock: 6, color: "Signature", colorCode: "#7A1C2C", material: "100% Combed Cotton" },
-      { id: "v-44", name: "Size 44 (XL)", price: baseP, salePrice: saleP, stock: 4, color: "Signature", colorCode: "#7A1C2C", material: "100% Combed Cotton" },
-    ]);
-    showToast("Applied Clothing / Panjabi Size Preset (38-44)!");
-  };
-
-  const applyAgroPreset = () => {
-    const baseP = Number(price) || 1100;
-    const saleP = Number(salePrice) || 850;
-    setVariantType("weight");
-    setVariants([
-      { id: "v-500g", name: "500g Glass Jar", price: baseP, salePrice: saleP, stock: 20, color: "Amber Gold", colorCode: "#D97706", material: "100% Pure Organic" },
-      { id: "v-1kg", name: "1kg Family Jar", price: baseP * 1.9, salePrice: saleP * 1.9, stock: 15, color: "Amber Gold", colorCode: "#D97706", material: "100% Pure Organic" },
-      { id: "v-2kg", name: "2kg Saver Pack", price: baseP * 3.6, salePrice: saleP * 3.6, stock: 10, color: "Amber Gold", colorCode: "#D97706", material: "100% Pure Organic" },
-    ]);
-    showToast("Applied Agro / Food Weight Preset (500g, 1kg, 2kg)!");
-  };
-
-  const applyBeddingPreset = () => {
-    const baseP = Number(price) || 1850;
-    const saleP = Number(salePrice) || 1350;
+  // Quick Preset Generators for Bedsheets & Window Curtains (Porda)
+  const applyBedsheetPreset = () => {
+    const baseP = Number(price) || 2650;
+    const saleP = Number(salePrice) || 1890;
     setVariantType("dimension");
     setVariants([
-      { id: "v-king", name: "King Size (7.5ft x 8.5ft)", price: baseP, salePrice: saleP, stock: 12, color: "Emerald Green", colorCode: "#047857", material: "100% Egyptian Cotton" },
-      { id: "v-queen", name: "Queen Size (7ft x 8ft)", price: baseP - 100, salePrice: saleP - 100, stock: 8, color: "Emerald Green", colorCode: "#047857", material: "100% Egyptian Cotton" },
+      { id: `v-king-${Date.now()}`, name: "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers", price: baseP, salePrice: saleP, stock: 16, color: "Signature Gold", colorCode: "#b8873f", material: "100% Egyptian Cotton (350 TC)" },
+      { id: `v-queen-${Date.now()}`, name: "Queen Size (7ft x 8ft / 84x96 in) + 2 Pillow Covers", price: baseP - 200, salePrice: saleP - 140, stock: 10, color: "Signature Gold", colorCode: "#b8873f", material: "100% Egyptian Cotton (350 TC)" },
+      { id: `v-single-${Date.now()}`, name: "Single Size (5ft x 7.5ft / 60x90 in) + 1 Pillow Cover", price: baseP - 800, salePrice: saleP - 540, stock: 6, color: "Signature Gold", colorCode: "#b8873f", material: "100% Egyptian Cotton (350 TC)" },
     ]);
-    showToast("Applied Bedding Dimensions Preset (King, Queen)!");
+    showToast("Applied Bedsheet Preset (King, Queen, Single)!");
   };
+
+  const applyCurtainPreset = () => {
+    const baseP = Number(price) || 2450;
+    const saleP = Number(salePrice) || 1750;
+    setVariantType("dimension");
+    setVariants([
+      { id: `v-win-${Date.now()}`, name: "Standard Window Size (4ft x 5ft / 48x60 in) - 1 Panel", price: baseP - 600, salePrice: saleP - 400, stock: 12, color: "Royal Emerald", colorCode: "#047857", material: "Triple-Weave Heavy Blackout" },
+      { id: `v-door-${Date.now()}`, name: "Standard Door / Long Window (4ft x 7ft / 48x84 in) - 1 Panel", price: baseP, salePrice: saleP, stock: 15, color: "Royal Emerald", colorCode: "#047857", material: "Triple-Weave Heavy Blackout" },
+      { id: `v-balcony-${Date.now()}`, name: "Balcony / Ceiling Drop (4ft x 9ft / 48x108 in) - 1 Panel", price: baseP + 500, salePrice: saleP + 400, stock: 8, color: "Royal Emerald", colorCode: "#047857", material: "Triple-Weave Heavy Blackout" },
+    ]);
+    showToast("Applied Window Curtain / Porda Preset (5ft, 7ft, 9ft)!");
+  };
+
+  const applyComforterPreset = () => {
+    const baseP = Number(price) || 3850;
+    const saleP = Number(salePrice) || 2750;
+    setVariantType("dimension");
+    setVariants([
+      { id: `v-cf-king-${Date.now()}`, name: "Double King Size (7.5ft x 8.5ft / 90x102 in)", price: baseP, salePrice: saleP, stock: 14, color: "Charcoal & Sand", colorCode: "#27272a", material: "350 GSM Cloud Microfiber" },
+      { id: `v-cf-single-${Date.now()}`, name: "Single AC Quilt (5ft x 7.5ft / 60x90 in)", price: baseP - 900, salePrice: saleP - 600, stock: 8, color: "Charcoal & Sand", colorCode: "#27272a", material: "350 GSM Cloud Microfiber" },
+    ]);
+    showToast("Applied Comforter & AC Quilt Dimensions Preset!");
+  };
+
+  const applyFittedSheetPreset = () => {
+    const baseP = Number(price) || 2550;
+    const saleP = Number(salePrice) || 1790;
+    setVariantType("dimension");
+    setVariants([
+      { id: `v-ft-king-${Date.now()}`, name: "King Fitted (6ft x 7ft x 12in) + 2 Pillow Covers", price: baseP, salePrice: saleP, stock: 15, color: "Ivory Pearl", colorCode: "#FDFBF7", material: "100% Combed Cotton Fitted" },
+      { id: `v-ft-queen-${Date.now()}`, name: "Queen Fitted (5ft x 7ft x 12in) + 2 Pillow Covers", price: baseP - 200, salePrice: saleP - 140, stock: 10, color: "Ivory Pearl", colorCode: "#FDFBF7", material: "100% Combed Cotton Fitted" },
+    ]);
+    showToast("Applied 360° Fitted Elastic Sheet Preset!");
+  };
+
 
   // SEO
   const [seoTitle, setSeoTitle] = useState(initialProduct?.seoTitle || "");
@@ -470,27 +481,35 @@ export default function ProductForm({
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={applyPanjabiPreset}
+                  onClick={applyBedsheetPreset}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
                 >
-                  <Shirt className="w-3 h-3" />
-                  <span>+ Panjabi Sizes</span>
+                  <BedDouble className="w-3 h-3" />
+                  <span>+ Bedsheet Sizes</span>
                 </button>
                 <button
                   type="button"
-                  onClick={applyAgroPreset}
+                  onClick={applyCurtainPreset}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
                 >
-                  <Leaf className="w-3 h-3" />
-                  <span>+ Agro Weights</span>
+                  <Sparkles className="w-3 h-3" />
+                  <span>+ Window Curtains (Porda)</span>
                 </button>
                 <button
                   type="button"
-                  onClick={applyBeddingPreset}
+                  onClick={applyComforterPreset}
                   className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
                 >
-                  <BedDouble className="w-3 h-3" />
-                  <span>+ Bedding</span>
+                  <Package className="w-3 h-3" />
+                  <span>+ Comforter / Quilt</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={applyFittedSheetPreset}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
+                >
+                  <Layers className="w-3 h-3" />
+                  <span>+ Fitted Elastic</span>
                 </button>
               </div>
             </div>
@@ -503,12 +522,13 @@ export default function ProductForm({
                 onChange={(e) => setVariantType(e.target.value as any)}
                 className="bg-slate-900 text-brand-400 font-bold px-3 py-1.5 rounded-lg border border-slate-800"
               >
-                <option value="size">Clothing / Sizes (S, M, L, XL)</option>
-                <option value="weight">Agro / Weights (500g, 1kg, 2kg)</option>
-                <option value="dimension">Bedding / Dimensions (King, Queen)</option>
+                <option value="dimension">Bedding & Curtain Dimensions (King, Window 5ft, Door 7ft)</option>
+                <option value="size">Size Options (Standard, Long)</option>
+                <option value="weight">Fill Weight (350 GSM, 450 GSM)</option>
                 <option value="custom">General / Custom Option</option>
               </select>
             </div>
+
 
             <div className="space-y-3">
               {variants.map((v, idx) => (

@@ -1,0 +1,37 @@
+{
+  "siteName": "HAZEN Luxury Home Living",
+  "tagline": "Artisanal Bedsheets & Designer Window Curtains",
+  "hotline": "+880 1700-000000",
+  "whatsappNumber": "8801700000000",
+  "supportEmail": "support@hazenbd.com",
+  "dhakaDeliveryFee": 60,
+  "outsideDhakaDeliveryFee": 120,
+  "suburbsDeliveryFee": 100,
+  "freeShippingThreshold": 2500,
+  "announcementBarActive": true,
+  "announcementBarText": "✨ Seasonal Home Makeover: Special discounts on Bedsheets & Window Porda sets • Cash on Delivery across all 64 districts!",
+  "seoTitle": "HAZEN — Luxury Bedsheets (বিছানার চাদর) & Window Curtains (জানালার পর্দা) in Bangladesh",
+  "seoDescription": "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online in Bangladesh with Cash on Delivery nationwide.",
+  "seoKeywords": [
+    "bedsheets bangladesh",
+    "badsheet",
+    "bichanar chador",
+    "window porda",
+    "curtains bd",
+    "blackout curtains dhaka",
+    "egyptian cotton bedsheet",
+    "comforter sets",
+    "luxury bedding"
+  ],
+  "heroBanners": [
+    {
+      "id": "hero-1",
+      "title": "Luxury Bedsheets & Designer Window Curtains",
+      "subtitle": "Export-grade 100% Egyptian cotton bedsheet sets, 100% blackout window drapes, and cloud comforters delivered with Cash on Delivery nationwide across Bangladesh.",
+      "buttonText": "Explore Collections",
+      "buttonLink": "/products",
+      "image": "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
+      "badge": "Seasonal Home Living Edition"
+    }
+  ]
+}

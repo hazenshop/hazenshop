@@ -1,264 +1,91 @@
-import { Category, Product, SiteSettings } from "@/lib/types";
+import { Category, Order, Product, SiteSettings } from "@/lib/types";
+
 
 export const initialCategories: Category[] = [
   {
-    id: "cat-panjabi",
-    slug: "mens-panjabi-fashion",
-    name: "Men's Panjabi & Fashion",
-    description: "Premium embroidered & solid combed cotton designer Panjabis for Eid & festivities",
-    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop",
-    productCount: 1,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "cat-agro",
-    slug: "organic-agro-food",
-    name: "Organic Agro & Pure Food",
-    description: "100% pure Sundarban raw honey, wood-pressed mustard oil & traditional cow ghee",
-    image: "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800&auto=format&fit=crop",
-    productCount: 2,
-    createdAt: new Date().toISOString(),
-  },
-  {
     id: "cat-bedsheets",
     slug: "luxury-bedsheets",
-    name: "Luxury Bedsheets",
-    description: "100% Egyptian & Organic Cotton 300+ TC bedsheet sets with pillow covers",
+    name: "Luxury Bedsheets (বিছানার চাদর)",
+    description: "100% Egyptian & Organic Combed Cotton 300+ TC bedsheet sets with matching pillow & bolster covers",
     image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
+    productCount: 4,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "cat-window-curtains",
+    slug: "window-curtains",
+    name: "Window Curtains & Porda (জানালার পর্দা)",
+    description: "Premium Jacquard, textured window drapery and sheer panels with anti-rust brass eyelet rings",
+    image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+    productCount: 3,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "cat-blackout-curtains",
+    slug: "blackout-curtains",
+    name: "100% Blackout Curtains (ব্ল্যাকআউট পর্দা)",
+    description: "Triple-weave thermal insulated room-darkening curtains for serene sleep and sound reduction",
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop",
     productCount: 2,
     createdAt: new Date().toISOString(),
   },
   {
     id: "cat-comforters",
     slug: "comforters-quilts",
-    name: "Comforters & Quilts",
-    description: "All-season microfiber cloud comforters and lightweight AC quilts",
+    name: "Comforters & AC Quilts (কমফোর্টার ও এসি কুইল্ট)",
+    description: "All-season 350 GSM cloud microfiber quilts and reversible luxury duvet bedding sets",
     image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=800&auto=format&fit=crop",
+    productCount: 2,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "cat-sheer-curtains",
+    slug: "sheer-curtains",
+    name: "Sheer & Net Curtains (শিয়ার ও শিফন পর্দা)",
+    description: "Light-filtering airy sheer window panels with elegant drape for living and dining spaces",
+    image: "https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?q=80&w=800&auto=format&fit=crop",
+    productCount: 1,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "cat-fitted-bedsheets",
+    slug: "fitted-bedsheets",
+    name: "Fitted Elastic Bedsheets (ফিটেড চাদর)",
+    description: "360-degree all-around elastic grip bedsheets that stay wrinkle-free on any mattress",
+    image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
     productCount: 1,
     createdAt: new Date().toISOString(),
   },
 ];
 
 export const initialProducts: Product[] = [
-  // 1. Mens Fashion / Panjabi
+  // 1. Royal Egyptian Cotton Bedsheet
   {
-    id: "prod-panjabi-maroon",
-    slug: "royal-maroon-embroidered-cotton-panjabi",
-    name: "Royal Maroon Embroidered Semi-Fit Cotton Panjabi",
-    shortDescription: "Premium 100% Combed Cotton with intricate collar & placket embroidery. Perfect for festivities & special occasions.",
-    description: `Experience unparalleled elegance with our Royal Maroon Embroidered Panjabi. Crafted from premium breathable combed cotton with high color fastness.
+    id: "prod-bedsheet-royal-cotton",
+    slug: "royal-heritage-egyptian-cotton-bedsheet-set",
+    name: "Royal Heritage 100% Egyptian Cotton Bedsheet Set",
+    shortDescription: "Export-grade 350 Thread Count combed cotton with matching 2 pillow covers. Ultra-soft, breathable, and colorfast.",
+    description: `Indulge in five-star luxury every evening with the Royal Heritage Egyptian Cotton Bedsheet Set. Woven from extra-long staple combed cotton for supreme breathability, silky smooth drape, and longevity.
 
 Key Highlights:
-• Fabric: 100% Pure Combed Cotton (Breathable & Soft)
-• Fit: Modern Semi-Fit with fine tailored stitching
-• Neckline: Mandarin Band Collar with delicate embroidery
-• Sleeve: Regular full sleeve with matching embroidered cuffs
-• Includes: 1 Panjabi with designer snap buttons`,
-    price: 2450,
-    salePrice: 1750,
-    images: [
-      "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800&auto=format&fit=crop",
-    ],
-    category: "mens-panjabi-fashion",
-    categoryName: "Men's Panjabi & Fashion",
-    stock: 24,
-    rating: 4.9,
-    reviewCount: 64,
-    badge: "Hot Deal",
-    featured: true,
-    flashSale: true,
-    variantType: "size",
-    variants: [
-      {
-        id: "v-pj-38",
-        name: "Size 38 (S)",
-        price: 2450,
-        salePrice: 1750,
-        stock: 6,
-        color: "Royal Maroon",
-        colorCode: "#7A1C2C",
-        material: "100% Combed Cotton",
-      },
-      {
-        id: "v-pj-40",
-        name: "Size 40 (M)",
-        price: 2450,
-        salePrice: 1750,
-        stock: 8,
-        color: "Royal Maroon",
-        colorCode: "#7A1C2C",
-        material: "100% Combed Cotton",
-      },
-      {
-        id: "v-pj-42",
-        name: "Size 42 (L)",
-        price: 2450,
-        salePrice: 1750,
-        stock: 6,
-        color: "Royal Maroon",
-        colorCode: "#7A1C2C",
-        material: "100% Combed Cotton",
-      },
-      {
-        id: "v-pj-44",
-        name: "Size 44 (XL)",
-        price: 2450,
-        salePrice: 1750,
-        stock: 4,
-        color: "Royal Maroon",
-        colorCode: "#7A1C2C",
-        material: "100% Combed Cotton",
-      },
-    ],
-    sizeGuide: [
-      { size: "38 (S)", chest: '39"', length: '39"', sleeve: '23.5"' },
-      { size: "40 (M)", chest: '41"', length: '41"', sleeve: '24.5"' },
-      { size: "42 (L)", chest: '43"', length: '43"', sleeve: '25.5"' },
-      { size: "44 (XL)", chest: '45"', length: '45"', sleeve: '26.0"' },
-      { size: "46 (XXL)", chest: '47"', length: '46"', sleeve: '26.5"' },
-    ],
-    trustBadges: [
-      { icon: "award", title: "100% Combed Cotton", subtitle: "Export Quality Fabric" },
-      { icon: "refresh", title: "7 Days Size Exchange", subtitle: "Hassle-Free Fit" },
-      { icon: "truck", title: "Fast Cash on Delivery", subtitle: "Nationwide Parcel" },
-    ],
-    bundleOffers: [
-      {
-        id: "b-panjabi-2",
-        title: "Buy 2 Panjabis — Save ৳300 + Free Delivery",
-        quantity: 2,
-        discountPercentage: 15,
-        freeShipping: true,
-        tag: "Most Popular",
-      },
-    ],
-    features: [
-      "100% Pure Combed Cotton Fabric",
-      "Semi-Fit Tailored Silhouette",
-      "Color Fastness & Anti-Shrink Guaranteed",
-      "7 Days Hassle-Free Size Exchange",
-    ],
-    specifications: {
-      "Fabric Type": "100% Combed Cotton",
-      "Weave Type": "Jacquard Slub Weave",
-      "Collar / Neck": "Mandarin Band Collar",
-      "Sleeve Length": "Full Length",
-      "Care Instructions": "Hand wash or gentle machine wash in cold water",
-    },
-    seoTitle: "Buy Royal Maroon Embroidered Panjabi Online in Bangladesh | Hazen",
-    seoDescription: "Shop 100% pure combed cotton designer Panjabi with Cash on Delivery across Bangladesh.",
-    createdAt: new Date().toISOString(),
-  },
-
-  // 2. Organic Agro / Raw Honey
-  {
-    id: "prod-agro-honey",
-    slug: "pure-sundarban-wildflower-raw-honey",
-    name: "100% Pure Organic Sundarban Raw Wild Honey (খাঁটি সুন্দরবনের মধু)",
-    shortDescription: "Unprocessed, unfiltered 100% raw wild honeycomb honey collected directly by Mowali from Sundarban deep mangrove forests.",
-    description: `Our 100% Pure Sundarban Raw Wild Honey is directly harvested from the mangrove forests by traditional honey-hunters (Mowali). 
-
-Unpasteurized and raw, it retains all natural enzymes, pollen, and therapeutic antioxidants without any added sugar or chemical processing.
-
-Purity Guarantee:
-• 100% Natural Raw Honey directly from deep Sundarban
-• No added sugar, syrup, or artificial preservatives
-• Lab-tested moisture content < 19%
-• Boosts natural immunity, throat wellness & energy`,
-    price: 1100,
-    salePrice: 850,
-    images: [
-      "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1587049352851-8d4e89133924?q=80&w=800&auto=format&fit=crop",
-    ],
-    category: "organic-agro-food",
-    categoryName: "Organic Agro & Pure Food",
-    stock: 35,
-    rating: 5.0,
-    reviewCount: 92,
-    badge: "Best Seller",
-    featured: true,
-    flashSale: true,
-    variantType: "weight",
-    variants: [
-      {
-        id: "v-honey-500g",
-        name: "500g Glass Jar",
-        price: 1100,
-        salePrice: 850,
-        stock: 20,
-        color: "Amber Gold",
-        colorCode: "#D97706",
-        material: "100% Pure Raw Honey",
-      },
-      {
-        id: "v-honey-1kg",
-        name: "1kg Family Glass Jar",
-        price: 2100,
-        salePrice: 1600,
-        stock: 15,
-        color: "Amber Gold",
-        colorCode: "#D97706",
-        material: "100% Pure Raw Honey",
-      },
-    ],
-    trustBadges: [
-      { icon: "leaf", title: "100% Raw & Organic", subtitle: "Zero Chemicals / No Sugar" },
-      { icon: "shield", title: "Lab Tested Purity", subtitle: "Direct from Forest" },
-      { icon: "truck", title: "Cash on Delivery", subtitle: "Open & Check Parcel" },
-    ],
-    bundleOffers: [
-      {
-        id: "b-honey-2",
-        title: "Buy 2 Jars (1kg Total) — Save ৳200 + Free Delivery",
-        quantity: 2,
-        discountPercentage: 12,
-        freeShipping: true,
-        tag: "Best Value",
-      },
-    ],
-    features: [
-      "100% Pure Wild Honey from deep Sundarban",
-      "Completely Unpasteurized & Unheated",
-      "Preserves all Natural Bee Pollen & Active Enzymes",
-      "Cash on Delivery nationwide with safe packaging",
-    ],
-    specifications: {
-      "Origin": "Sundarban Mangrove Forest, Bangladesh",
-      "Harvest Method": "Traditional Sustainable Mowali Wild Harvest",
-      "Purity Grade": "100% Natural Raw (No additives)",
-      "Shelf Life": "24 Months in cool room temperature",
-    },
-    seoTitle: "Buy 100% Pure Sundarban Raw Honey in Bangladesh | Hazen Agro",
-    seoDescription: "Order pure organic Sundarban wild honey online with 100% cash on delivery across BD.",
-    createdAt: new Date().toISOString(),
-  },
-
-  // 3. Bedding / Luxury Bedsheet Set
-  {
-    id: "prod-bedsheet-emerald",
-    slug: "royal-emerald-cotton-bedsheet-set",
-    name: "Royal Emerald 100% Egyptian Cotton King Bedsheet Set",
-    shortDescription: "Ultra-luxurious 300 Thread Count pure Egyptian cotton king bedsheet with 2 matching pillow covers.",
-    description: `Transform your bedroom into a 5-star sanctuary with the Royal Emerald Bedding Set. Made from 100% long-staple Egyptian cotton for silky softness and all-season breathability.
-
-Package Details:
-• 1 King Size Bedsheet: 7.5ft x 8.5ft (90" x 100")
-• 2 Matching Pillow Covers: 18" x 28" (Standard flap closure)
-• Color Fastness Guarantee & Anti-Pilling finish`,
-    price: 1850,
-    salePrice: 1350,
+• Fabric: 100% Premium Egyptian Combed Cotton (350 TC Sateen Weave)
+• Set Contents: 1 Large Bedsheet + 2 Matching Flanged Pillow Covers
+• King Dimensions: 7.5 ft x 8.5 ft (90 inch x 102 inch) - Suitable for 6x7 / 7x7 King Mattresses
+• Queen Dimensions: 7.0 ft x 8.0 ft (84 inch x 96 inch)
+• Hypoallergenic, eco-dyed, zero color bleeding guarantee
+• Cash on delivery nationwide across all 64 districts in Bangladesh`,
+    price: 2650,
+    salePrice: 1890,
     images: [
       "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=800&auto=format&fit=crop",
     ],
     category: "luxury-bedsheets",
     categoryName: "Luxury Bedsheets",
-    stock: 18,
+    stock: 28,
     rating: 4.9,
-    reviewCount: 48,
+    reviewCount: 94,
     badge: "Best Seller",
     featured: true,
     flashSale: true,
@@ -266,182 +93,587 @@ Package Details:
     variants: [
       {
         id: "v-bs-king",
-        name: "King Size (7.5ft x 8.5ft)",
-        price: 1850,
-        salePrice: 1350,
-        stock: 12,
-        color: "Emerald Green",
-        colorCode: "#047857",
-        material: "100% Egyptian Cotton",
+        name: "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers",
+        price: 2650,
+        salePrice: 1890,
+        stock: 16,
+        color: "Ivory Gold",
+        colorCode: "#b8873f",
+        material: "100% Egyptian Cotton (350 TC)",
       },
       {
         id: "v-bs-queen",
-        name: "Queen Size (7ft x 8ft)",
-        price: 1750,
-        salePrice: 1250,
-        stock: 6,
-        color: "Emerald Green",
-        colorCode: "#047857",
-        material: "100% Egyptian Cotton",
+        name: "Queen Size (7ft x 8ft / 84x96 in) + 2 Pillow Covers",
+        price: 2450,
+        salePrice: 1750,
+        stock: 8,
+        color: "Ivory Gold",
+        colorCode: "#b8873f",
+        material: "100% Egyptian Cotton (350 TC)",
+      },
+      {
+        id: "v-bs-single",
+        name: "Single Size (5ft x 7.5ft / 60x90 in) + 1 Pillow Cover",
+        price: 1850,
+        salePrice: 1350,
+        stock: 4,
+        color: "Ivory Gold",
+        colorCode: "#b8873f",
+        material: "100% Egyptian Cotton (350 TC)",
       },
     ],
     trustBadges: [
-      { icon: "award", title: "100% Pure Cotton", subtitle: "300 Thread Count" },
-      { icon: "truck", title: "Fast Delivery", subtitle: "Cash on Delivery" },
-      { icon: "refresh", title: "7 Days Return", subtitle: "Color Guarantee" },
+      { icon: "award", title: "100% Egyptian Cotton", subtitle: "Export Quality 350 TC" },
+      { icon: "truck", title: "Nationwide COD", subtitle: "Inspect Before Payment" },
+      { icon: "refresh", title: "7 Days Exchange", subtitle: "Hassle-Free Guarantee" },
     ],
     bundleOffers: [
-      {
-        id: "b-bed-2",
-        title: "Buy 2 Bedsheet Sets — Save ৳200 + Free Delivery",
-        quantity: 2,
-        discountPercentage: 10,
-        freeShipping: true,
-        tag: "Best Value",
-      },
+      { id: "b-bs-1", title: "Single Set (১টি বেডশিট সেট)", quantity: 1, discountPercentage: 0 },
+      { id: "b-bs-2", title: "2 Sets Master Combo (২টি সেট - অতিরিক্ত ১০% ছাড়)", quantity: 2, discountPercentage: 10 },
+      { id: "b-bs-3", title: "3 Sets Family Suite (৩টি সেট - অতিরিক্ত ১৫% ছাড় + ফ্রি ডেলিভারি)", quantity: 3, discountPercentage: 15 },
     ],
-    features: [
-      "300 Thread Count Long-Staple Pure Cotton",
-      "Pre-washed for Ultra-Soft Hand Feel",
-      "Vibrant Color Fastness Guarantee",
-      "Includes 1 King Bedsheet + 2 Matching Pillow Covers",
+    sizeGuide: [
+      { size: "King Size", chest: "90 in (7.5 ft)", length: "102 in (8.5 ft)", sleeve: "2x (18x28 in)" },
+      { size: "Queen Size", chest: "84 in (7.0 ft)", length: "96 in (8.0 ft)", sleeve: "2x (18x28 in)" },
+      { size: "Single Size", chest: "60 in (5.0 ft)", length: "90 in (7.5 ft)", sleeve: "1x (18x28 in)" },
     ],
-    specifications: {
-      "Fabric Material": "100% Egyptian Cotton",
-      "Thread Count": "300 TC Percale",
-      "Bedsheet Dimensions": '7.5ft x 8.5ft (90" x 100")',
-      "Pillow Cover Size": '18" x 28" (2 Pieces)',
-      "Care Instructions": "Machine wash cold, tumble dry low",
-    },
-    seoTitle: "Buy Royal Emerald Cotton King Bedsheet in BD | Hazen",
-    seoDescription: "Order 100% Egyptian cotton luxury king bedsheet online with Cash on Delivery in Bangladesh.",
     createdAt: new Date().toISOString(),
   },
 
-  // 4. Comforters & Quilts
+  // 2. Emerald Jacquard Blackout Window Curtain / Porda
   {
-    id: "prod-comforter-cloud",
-    slug: "cloud-comfort-microfiber-winter-comforter",
-    name: "Cloud Comfort Microfiber All-Season Comforter Set",
-    shortDescription: "Ultra-soft 350 GSM hollow microfiber comforter for cozy sleep in winter and air-conditioned rooms.",
-    description: `Sleep like on a cloud with our Cloud Comfort Microfiber Comforter. Crafted with hypoallergenic microfibers and box-stitching to ensure uniform warmth without clumping.
+    id: "prod-curtain-emerald-blackout",
+    slug: "emerald-jacquard-blackout-window-curtain-set",
+    name: "Emerald Grandeur 100% Blackout Window Curtain (জানালার পর্দা)",
+    shortDescription: "Triple-layer blackout fabric with antique brass eyelet rings. Blocks 100% sunlight, reduces room heat & street noise.",
+    description: `Transform your bedroom and living space with our Emerald Grandeur Blackout Window Curtain. Engineered with high-density triple-weave fabric to block 100% of harsh sunlight and UV rays, keeping your rooms significantly cooler.
 
-Package Includes:
-• 1 All-Season Comforter: 7.5ft x 8.5ft
-• Breathable anti-allergic microfiber casing`,
-    price: 2800,
-    salePrice: 2150,
+Key Highlights:
+• Function: 100% Room Darkening + Thermal Insulation + Noise Dampening
+• Top Heading: Heavy-duty Rust-Free Antique Brass Eyelet Rings (Inside diameter 1.6 inch)
+• Fabric: Heavyweight Jacquard Damask with subtle gold undertones
+• Easy Care: Machine washable in cold water, fade-resistant color fastness
+• Sold as ready-to-hang panels with smooth gliding rings
+• Inspect before payment with Cash on Delivery across Bangladesh`,
+    price: 2450,
+    salePrice: 1750,
+    images: [
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?q=80&w=800&auto=format&fit=crop",
+    ],
+    category: "window-curtains",
+    categoryName: "Window Curtains & Porda",
+    stock: 35,
+    rating: 4.95,
+    reviewCount: 112,
+    badge: "Hot Deal",
+    featured: true,
+    flashSale: true,
+    variantType: "dimension",
+    variants: [
+      {
+        id: "v-ct-win-5ft",
+        name: "Standard Window Size (4ft x 5ft / 48x60 in) - 1 Panel",
+        price: 1850,
+        salePrice: 1350,
+        stock: 12,
+        color: "Emerald Gold",
+        colorCode: "#047857",
+        material: "Triple-Weave Heavy Blackout",
+      },
+      {
+        id: "v-ct-door-7ft",
+        name: "Standard Door / Long Window (4ft x 7ft / 48x84 in) - 1 Panel",
+        price: 2450,
+        salePrice: 1750,
+        stock: 15,
+        color: "Emerald Gold",
+        colorCode: "#047857",
+        material: "Triple-Weave Heavy Blackout",
+      },
+      {
+        id: "v-ct-balcony-9ft",
+        name: "Balcony / French Window (4ft x 9ft / 48x108 in) - 1 Panel",
+        price: 2950,
+        salePrice: 2150,
+        stock: 8,
+        color: "Emerald Gold",
+        colorCode: "#047857",
+        material: "Triple-Weave Heavy Blackout",
+      },
+    ],
+    trustBadges: [
+      { icon: "shield", title: "100% Blackout Fabric", subtitle: "Heat & Light Block" },
+      { icon: "award", title: "Rust-Free Eyelets", subtitle: "Heavy Antique Rings" },
+      { icon: "truck", title: "Fast Delivery", subtitle: "Nationwide COD" },
+    ],
+    bundleOffers: [
+      { id: "b-ct-1", title: "1 Panel (১টি পর্দা)", quantity: 1, discountPercentage: 0 },
+      { id: "b-ct-2", title: "2 Panels Window Pair (২টি পর্দা - অতিরিক্ত ১০% ছাড়)", quantity: 2, discountPercentage: 10 },
+      { id: "b-ct-4", title: "4 Panels Full Room Set (৪টি পর্দা - অতিরিক্ত ১৫% ছাড় + ফ্রি ডেলিভারি)", quantity: 4, discountPercentage: 15 },
+    ],
+    sizeGuide: [
+      { size: "Window Size", chest: "48 in (4.0 ft)", length: "60 in (5.0 ft)", sleeve: "8 Rings" },
+      { size: "Door / Long Window", chest: "48 in (4.0 ft)", length: "84 in (7.0 ft)", sleeve: "8 Rings" },
+      { size: "Balcony / Ceiling Drop", chest: "48 in (4.0 ft)", length: "108 in (9.0 ft)", sleeve: "8 Rings" },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // 3. Cloud Microfiber Reversible AC Comforter
+  {
+    id: "prod-comforter-cloud-reversible",
+    slug: "cloud-microfiber-reversible-all-season-comforter",
+    name: "Cloud Microfiber Reversible AC Comforter & Bedding Set",
+    shortDescription: "Ultra-plush 350 GSM microfiber filling with box-stitch quilting. Lightweight, breathable, and warm for year-round AC comfort.",
+    description: `Experience the weightless embrace of our Cloud Microfiber Reversible AC Comforter. Engineered with siliconized microfiber fill that mimics pure goose down without clumping or shifting.
+
+Key Highlights:
+• Fill: 350 GSM Virgin Siliconized Microfiber (Feather-soft & Anti-allergic)
+• Outer Shell: 100% Breathable Micro-peach fabric for velvety touch
+• Dual Color Tone: Elegant Charcoal Slate on one side & Warm Sand on reverse
+• Box Stitching: Precision box quilting prevents filler shift after washes
+• Machine Washable: Gentle cycle friendly, dries quick and fluffy`,
+    price: 3850,
+    salePrice: 2750,
     images: [
       "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=800&auto=format&fit=crop",
     ],
     category: "comforters-quilts",
-    categoryName: "Comforters & Quilts",
-    stock: 14,
-    rating: 4.8,
-    reviewCount: 32,
+    categoryName: "Comforters & AC Quilts",
+    stock: 22,
+    rating: 4.9,
+    reviewCount: 78,
     badge: "Trending",
+    featured: true,
+    flashSale: true,
+    variantType: "dimension",
+    variants: [
+      {
+        id: "v-cf-king",
+        name: "Double King Size (7.5ft x 8.5ft / 90x102 in)",
+        price: 3850,
+        salePrice: 2750,
+        stock: 14,
+        color: "Charcoal & Sand",
+        colorCode: "#27272a",
+        material: "350 GSM Cloud Microfiber",
+      },
+      {
+        id: "v-cf-single",
+        name: "Single AC Quilt (5ft x 7.5ft / 60x90 in)",
+        price: 2950,
+        salePrice: 2150,
+        stock: 8,
+        color: "Charcoal & Sand",
+        colorCode: "#27272a",
+        material: "350 GSM Cloud Microfiber",
+      },
+    ],
+    trustBadges: [
+      { icon: "award", title: "350 GSM Fill", subtitle: "Virgin Cloud Fiber" },
+      { icon: "refresh", title: "Machine Washable", subtitle: "Box Quilted Durability" },
+      { icon: "truck", title: "Free Delivery", subtitle: "Over ৳2500 Order" },
+    ],
+    bundleOffers: [
+      { id: "b-cf-1", title: "1 Comforter (১টি কমফোর্টার)", quantity: 1, discountPercentage: 0 },
+      { id: "b-cf-2", title: "2 Comforters Couple Combo (২টি কমফোর্টার - অতিরিক্ত ১০% ছাড়)", quantity: 2, discountPercentage: 10 },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // 4. Champagne Velvet Luxury Room Curtain / Porda
+  {
+    id: "prod-curtain-champagne-velvet",
+    slug: "champagne-velvet-luxury-room-curtain",
+    name: "Champagne Gold Heavy Velvet Room & Window Curtain (ভেলভেট পর্দা)",
+    shortDescription: "Ultra-luxurious thick velvet drapery with rich light-reflecting sheen and metallic eyelets. Perfect for master bedrooms & drawing rooms.",
+    description: `Elevate your home aesthetics with our Champagne Gold Heavy Velvet Window Curtain. Crafted from thick 320 GSM matte velvet that drapes with graceful heavy folds.
+
+Key Highlights:
+• Fabric: 320 GSM Premium Crushed Velvet with elegant luster
+• Light Filtration: 85% Room Dimming + Privacy Protection
+• Hardware: Stainless steel silver grommets (1.6 inch inner diameter)
+• Drape: Heavyweight fabric creates graceful cascading European folds
+• Perfect for: Master bedrooms, formal drawing rooms, and executive spaces`,
+    price: 2850,
+    salePrice: 2150,
+    images: [
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?q=80&w=800&auto=format&fit=crop",
+    ],
+    category: "window-curtains",
+    categoryName: "Window Curtains & Porda",
+    stock: 25,
+    rating: 4.88,
+    reviewCount: 56,
+    badge: "Exclusive",
     featured: true,
     flashSale: false,
     variantType: "dimension",
     variants: [
       {
-        id: "v-comf-king",
-        name: "Double / King Size (7.5ft x 8.5ft)",
-        price: 2800,
-        salePrice: 2150,
+        id: "v-vl-win-5ft",
+        name: "Standard Window Size (4ft x 5ft / 48x60 in) - 1 Panel",
+        price: 2250,
+        salePrice: 1650,
         stock: 10,
-        color: "Silver Grey",
-        colorCode: "#64748B",
-        material: "350 GSM Microfiber",
+        color: "Champagne Gold",
+        colorCode: "#D4AF37",
+        material: "320 GSM Heavyweight Velvet",
       },
       {
-        id: "v-comf-single",
-        name: "Single Size (5ft x 7.5ft)",
-        price: 2200,
-        salePrice: 1750,
-        stock: 4,
-        color: "Silver Grey",
-        colorCode: "#64748B",
-        material: "350 GSM Microfiber",
+        id: "v-vl-door-7ft",
+        name: "Standard Door / Window (4ft x 7ft / 48x84 in) - 1 Panel",
+        price: 2850,
+        salePrice: 2150,
+        stock: 12,
+        color: "Champagne Gold",
+        colorCode: "#D4AF37",
+        material: "320 GSM Heavyweight Velvet",
+      },
+      {
+        id: "v-vl-balcony-9ft",
+        name: "Balcony / High Ceiling (4ft x 9ft / 48x108 in) - 1 Panel",
+        price: 3450,
+        salePrice: 2550,
+        stock: 3,
+        color: "Champagne Gold",
+        colorCode: "#D4AF37",
+        material: "320 GSM Heavyweight Velvet",
       },
     ],
     trustBadges: [
-      { icon: "award", title: "350 GSM Microfiber", subtitle: "Cloud-Like Warmth" },
-      { icon: "shield", title: "Hypoallergenic", subtitle: "Dust & Mite Free" },
-      { icon: "truck", title: "Free Delivery", subtitle: "Nationwide COD" },
+      { icon: "award", title: "320 GSM Velvet", subtitle: "Rich Heavy Drape" },
+      { icon: "truck", title: "Nationwide COD", subtitle: "Direct Delivery" },
+      { icon: "refresh", title: "7 Days Exchange", subtitle: "Customer First" },
     ],
-    features: [
-      "350 GSM Ultra-Warm Hollow Microfiber Fill",
-      "Box-Stitched to Prevent Filling Shift",
-      "Soft Touch Peach-Finish Microfiber Fabric",
-      "Machine Washable & Long Lasting",
+    bundleOffers: [
+      { id: "b-vl-1", title: "1 Panel (১টি পর্দা)", quantity: 1, discountPercentage: 0 },
+      { id: "b-vl-2", title: "2 Panels Window Pair (২টি পর্দা - অতিরিক্ত ১০% ছাড়)", quantity: 2, discountPercentage: 10 },
     ],
-    specifications: {
-      "Filling": "350 GSM Virgin Siliconized Microfiber",
-      "Shell Fabric": "Brushed Microfiber Peach Finish",
-      "Dimensions": '7.5ft x 8.5ft (Double/King)',
-      "Stitching": "End-to-End Box Quilted",
-    },
-    seoTitle: "Buy Cloud Comfort Microfiber Comforter in Bangladesh | Hazen",
-    seoDescription: "Order premium 350 GSM winter and AC comforter with Cash on Delivery across BD.",
+    createdAt: new Date().toISOString(),
+  },
+
+  // 5. Botanical Flora Pure Cotton Bedsheet Set
+  {
+    id: "prod-bedsheet-botanical-flora",
+    slug: "boho-botanical-pure-cotton-bedsheet-set",
+    name: "Botanical Flora 100% Organic Combed Cotton Bedsheet Set",
+    shortDescription: "Delicate botanical floral prints on pure unbleached cotton base. 300 Thread Count with 2 matching pillow covers.",
+    description: `Bring nature's tranquility into your bedroom with our Botanical Flora Pure Cotton Bedsheet Set. Printed with reactive eco-dyes that never fade, shrink, or lose their velvety texture.
+
+Key Highlights:
+• Fabric: 100% Organic Combed Cotton (300 TC Percal Weave)
+• Set Contents: 1 King/Queen Bedsheet + 2 Matching Pillow Covers
+• Skin Friendly: Non-toxic eco-reactive dye, zero harsh chemical odors
+• Wash Care: Easy machine wash, fast drying, stays softer with every wash`,
+    price: 2450,
+    salePrice: 1690,
+    images: [
+      "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
+    ],
+    category: "luxury-bedsheets",
+    categoryName: "Luxury Bedsheets",
+    stock: 20,
+    rating: 4.85,
+    reviewCount: 47,
+    badge: "Popular",
+    featured: true,
+    flashSale: false,
+    variantType: "dimension",
+    variants: [
+      {
+        id: "v-bt-king",
+        name: "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers",
+        price: 2450,
+        salePrice: 1690,
+        stock: 12,
+        color: "Botanical Sage",
+        colorCode: "#84a98c",
+        material: "100% Organic Combed Cotton",
+      },
+      {
+        id: "v-bt-queen",
+        name: "Queen Size (7ft x 8ft / 84x96 in) + 2 Pillow Covers",
+        price: 2250,
+        salePrice: 1550,
+        stock: 8,
+        color: "Botanical Sage",
+        colorCode: "#84a98c",
+        material: "100% Organic Combed Cotton",
+      },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // 6. Artisanal Linen Sheer Window Porda
+  {
+    id: "prod-curtain-sheer-linen",
+    slug: "linen-sheer-light-filtering-window-porda",
+    name: "Artisanal Off-White Linen Sheer Window Porda (শিয়ার পর্দা)",
+    shortDescription: "Airy light-filtering textured sheer curtains. Lets in soft natural light while providing daytime privacy.",
+    description: `Create an ethereal, breezy ambience with our Artisanal Linen Sheer Window Porda. Features subtle slub weave texture that gently diffuses harsh daylight into warm illumination.
+
+Key Highlights:
+• Fabric: Textured Linen-Blend Voile Sheer
+• Heading: Rust-free eyelet metal rings for effortless sliding
+• Daytime Privacy: Filters direct glare while allowing open airflow
+• Layering: Pairs gorgeously behind blackout curtains for a hotel-suite finish`,
+    price: 1650,
+    salePrice: 1190,
+    images: [
+      "https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop",
+    ],
+    category: "sheer-curtains",
+    categoryName: "Sheer & Net Curtains",
+    stock: 30,
+    rating: 4.8,
+    reviewCount: 38,
+    badge: "Eco Blend",
+    featured: true,
+    flashSale: false,
+    variantType: "dimension",
+    variants: [
+      {
+        id: "v-sh-win-5ft",
+        name: "Standard Window Size (4ft x 5ft / 48x60 in) - 1 Panel",
+        price: 1350,
+        salePrice: 950,
+        stock: 12,
+        color: "Off-White Cloud",
+        colorCode: "#FAF9F6",
+        material: "Textured Linen Voile",
+      },
+      {
+        id: "v-sh-door-7ft",
+        name: "Standard Door / Window (4ft x 7ft / 48x84 in) - 1 Panel",
+        price: 1650,
+        salePrice: 1190,
+        stock: 18,
+        color: "Off-White Cloud",
+        colorCode: "#FAF9F6",
+        material: "Textured Linen Voile",
+      },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // 7. Monochrome Charcoal Sateen Cotton Bedsheet
+  {
+    id: "prod-bedsheet-charcoal-sateen",
+    slug: "monochrome-charcoal-sateen-bedsheet-set",
+    name: "Monochrome Charcoal Grey 400 TC Sateen Bedsheet Set",
+    shortDescription: "Ultra-sleek modern solid charcoal sateen bedsheet. Wrinkle-resistant, silky smooth finish with 2 matching pillow covers.",
+    description: `For the minimalist modern interior: our Monochrome Charcoal Sateen Bedsheet Set offers understated sophistication. Crafted with a lustrous 400 Thread Count sateen weave.
+
+Key Highlights:
+• Fabric: 100% Combed Long-Staple Cotton (400 TC Sateen)
+• Deep Color Fastness: Vat-dyed deep charcoal that never fades after multiple washes
+• Set Contents: 1 King Bedsheet (7.5ft x 8.5ft) + 2 Envelope Closure Pillow Covers
+• Breathable & Cool: Ideal for tropical climates and AC comfort`,
+    price: 2850,
+    salePrice: 1990,
+    images: [
+      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=800&auto=format&fit=crop",
+    ],
+    category: "luxury-bedsheets",
+    categoryName: "Luxury Bedsheets",
+    stock: 18,
+    rating: 4.92,
+    reviewCount: 61,
+    badge: "Limited Edition",
+    featured: true,
+    flashSale: true,
+    variantType: "dimension",
+    variants: [
+      {
+        id: "v-mc-king",
+        name: "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers",
+        price: 2850,
+        salePrice: 1990,
+        stock: 12,
+        color: "Charcoal Grey",
+        colorCode: "#333333",
+        material: "100% Combed Cotton (400 TC)",
+      },
+      {
+        id: "v-mc-queen",
+        name: "Queen Size (7ft x 8ft / 84x96 in) + 2 Pillow Covers",
+        price: 2550,
+        salePrice: 1790,
+        stock: 6,
+        color: "Charcoal Grey",
+        colorCode: "#333333",
+        material: "100% Combed Cotton (400 TC)",
+      },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+
+  // 8. 360-Degree Deep Pocket Fitted Elastic Bedsheet
+  {
+    id: "prod-bedsheet-fitted-elastic",
+    slug: "deep-pocket-fitted-elastic-bedsheet-set",
+    name: "360° All-Around Deep Pocket Fitted Elastic Bedsheet Set",
+    shortDescription: "Heavy-duty elastic border hugs up to 12-inch mattresses firmly. Never slips or comes untucked during sleep.",
+    description: `Say goodbye to messy, untucked morning sheets with our 360-Degree Deep Pocket Fitted Elastic Bedsheet. Features reinforced continuous elastic all around the perimeter to ensure a snug, wrinkle-free fit.
+
+Key Highlights:
+• Elastic: Continuous 360-degree reinforced elastic band
+• Pocket Depth: Fits mattresses up to 12 inches thick
+• Fabric: 100% Breathable Egyptian Cotton (300 TC)
+• Set Contents: 1 Fitted Bedsheet + 2 Matching Pillow Covers`,
+    price: 2550,
+    salePrice: 1790,
+    images: [
+      "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?q=80&w=800&auto=format&fit=crop",
+    ],
+    category: "fitted-bedsheets",
+    categoryName: "Fitted Elastic Bedsheets",
+    stock: 24,
+    rating: 4.94,
+    reviewCount: 83,
+    badge: "Smart Fitted",
+    featured: true,
+    flashSale: false,
+    variantType: "dimension",
+    variants: [
+      {
+        id: "v-ft-king",
+        name: "King Fitted (6ft x 7ft x 12in / 72x84x12 in) + 2 Pillow Covers",
+        price: 2550,
+        salePrice: 1790,
+        stock: 15,
+        color: "Ivory Pearl",
+        colorCode: "#FDFBF7",
+        material: "100% Combed Cotton Fitted",
+      },
+      {
+        id: "v-ft-queen",
+        name: "Queen Fitted (5ft x 7ft x 12in / 60x84x12 in) + 2 Pillow Covers",
+        price: 2350,
+        salePrice: 1650,
+        stock: 9,
+        color: "Ivory Pearl",
+        colorCode: "#FDFBF7",
+        material: "100% Combed Cotton Fitted",
+      },
+    ],
     createdAt: new Date().toISOString(),
   },
 ];
 
 export const initialSiteSettings: SiteSettings = {
-  siteName: "Hazen",
-  hotline: "+880 1788-990011",
-  whatsappNumber: "01788990011",
+  siteName: "HAZEN Luxury Home Living",
+  tagline: "Artisanal Bedsheets & Designer Window Curtains",
+  hotline: "+880 1700-000000",
+  whatsappNumber: "8801700000000",
   supportEmail: "support@hazenbd.com",
   dhakaDeliveryFee: 60,
   outsideDhakaDeliveryFee: 120,
   suburbsDeliveryFee: 100,
-  freeShippingThreshold: 2000,
+  freeShippingThreshold: 2500,
   announcementBarActive: true,
-  announcementBarText: "🎉 Special Promo: Free Cash on Delivery Nationwide on orders over ৳2,000!",
-  seoTitle: "Hazen | Buy Premium Bedsheets, Panjabi, Organic Agro & Lifestyle in Bangladesh",
-  seoDescription: "Order authentic Egyptian cotton bedsheets, designer Panjabi & 100% organic agro products with Cash on Delivery in Bangladesh.",
+  announcementBarText: "✨ Seasonal Home Makeover: Special discounts on Bedsheets & Window Porda sets • Cash on Delivery across all 64 districts!",
+  seoTitle: "HAZEN — Luxury Bedsheets (বিছানার চাদর) & Window Curtains (জানালার পর্দা) in Bangladesh",
+  seoDescription: "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online in Bangladesh with Cash on Delivery nationwide.",
   seoKeywords: [
-    "Hazen",
-    "bedsheet bd",
-    "panjabi online shopping bd",
-    "sundarban raw honey bd",
-    "pure cow ghee bd",
-    "cash on delivery bangladesh",
+    "bedsheets bangladesh",
+    "badsheet",
+    "bichanar chador",
+    "window porda",
+    "curtains bd",
+    "blackout curtains dhaka",
     "egyptian cotton bedsheet",
+    "comforter sets",
+    "luxury bedding"
   ],
+  heroBanners: [
+    {
+      id: "hero-1",
+      title: "Luxury Bedsheets & Designer Window Curtains",
+      subtitle: "Export-grade 100% Egyptian cotton bedsheet sets, 100% blackout window drapes, and cloud comforters delivered with Cash on Delivery nationwide across Bangladesh.",
+      buttonText: "Explore Collections",
+      buttonLink: "/products",
+      image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
+      badge: "Seasonal Home Living Edition",
+    }
+  ]
 };
 
-export const initialOrders: import("@/lib/types").Order[] = [
+
+export const initialOrders: Order[] = [
+
   {
-    id: "HZ-82914",
-    customerName: "Kazi Tanjil",
-    customerPhone: "01711223344",
-    customerAddress: "House 42, Road 11, Sector 4, Uttara, Dhaka",
+    id: "HZ-44931",
+    customerName: "Rakib Hassan",
+    customerPhone: "01788990011",
+    customerAddress: "Mirpur 10, Block C, Road 5, Dhaka",
     deliveryZone: "dhaka",
     deliveryFee: 60,
-    subtotal: 1750,
+    subtotal: 1890,
     discount: 0,
-    totalAmount: 1810,
+    totalAmount: 1950,
     paymentMethod: "COD",
-    status: "shipped",
+    status: "pending",
+    items: [
+      {
+        productId: "prod-bedsheet-royal-cotton",
+        productName: "Royal Heritage 100% Egyptian Cotton Bedsheet Set",
+        productSlug: "royal-heritage-egyptian-cotton-bedsheet-set",
+        productImage: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
+        variantId: "v-bs-king",
+        variantName: "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers",
+        quantity: 1,
+        price: 1890,
+        total: 1890,
+      },
+    ],
+    createdAt: "2026-08-27T17:38:18.455Z",
+    updatedAt: "2026-08-27T17:38:18.455Z",
+  },
+  {
+    id: "HZ-82914",
+    customerName: "Tanvir Ahmed",
+    customerPhone: "01712345678",
+    customerAddress: "House 42, Road 7, Sector 3, Uttara, Dhaka",
+    deliveryZone: "dhaka",
+    deliveryFee: 60,
+    subtotal: 3500,
+    discount: 0,
+    totalAmount: 3560,
+    paymentMethod: "COD",
+    status: "delivered",
     courierName: "Steadfast Courier",
     trackingCode: "ST-BD-99881",
     items: [
       {
-        productId: "prod-panjabi-maroon",
-        productName: "Royal Maroon Embroidered Semi-Fit Cotton Panjabi",
-        productSlug: "royal-maroon-embroidered-cotton-panjabi",
-        productImage: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop",
-        variantId: "v-pj-40",
-        variantName: "Size 40 (M)",
-        quantity: 1,
+        productId: "prod-curtain-emerald-blackout",
+        productName: "Emerald Grandeur 100% Blackout Window Curtain (জানালার পর্দা)",
+        productSlug: "emerald-jacquard-blackout-window-curtain-set",
+        productImage: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+        variantId: "v-ct-door-7ft",
+        variantName: "Standard Door / Long Window (4ft x 7ft / 48x84 in) - 1 Panel",
+        quantity: 2,
         price: 1750,
-        total: 1750,
+        total: 3500,
       },
     ],
-    createdAt: new Date(Date.now() - 86400000).toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: "2026-08-26T17:16:35.279Z",
+    updatedAt: "2026-08-27T17:23:51.053Z",
   },
 ];
+

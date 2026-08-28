@@ -16,9 +16,10 @@ export type BundleOffer = {
   title: string; // e.g. "Buy 2 Save ৳200 + Free Delivery"
   quantity: number;
   discountPercentage?: number;
-  freeShipping: boolean;
+  freeShipping?: boolean;
   tag?: string; // "Most Popular", "Best Value"
 };
+
 
 export type SizeGuideItem = {
   size: string;
@@ -47,7 +48,7 @@ export type Product = {
   stock: number;
   rating: number;
   reviewCount: number;
-  badge?: "Hot Deal" | "Best Seller" | "Trending" | "New Arrival" | "Flash Sale" | "Limited Stock";
+  badge?: "Hot Deal" | "Best Seller" | "Trending" | "New Arrival" | "Flash Sale" | "Limited Stock" | "Exclusive" | "Popular" | "Eco Blend" | "Limited Edition" | "Smart Fitted" | string;
   featured?: boolean;
   flashSale?: boolean;
   variantType?: "size" | "weight" | "dimension" | "custom";

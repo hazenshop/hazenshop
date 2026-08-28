@@ -31,19 +31,20 @@ export default function Footer({
                   HAZEN<span className="text-brand-400">.</span>
                 </span>
                 <span className="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
-                  Luxury Home & Bed Linens
+                  Luxury Bedsheets & Window Curtains
                 </span>
               </div>
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed font-normal">
-              Curating combed cotton bedding, breathable quilts, and artisanal home essentials delivered directly across Bangladesh with seamless Cash on Delivery.
+              Curating export-quality Egyptian cotton bedsheet sets, blackout window curtains (পর্দা), and cloud comforters delivered directly across Bangladesh with seamless Cash on Delivery.
             </p>
             <div className="pt-1">
               <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-300 bg-white/5 px-3 py-1 rounded-full border border-white/10">
                 <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
-                <span>100% Authenticity Guarantee</span>
+                <span>100% Quality & Fabric Guarantee</span>
               </div>
             </div>
+
           </div>
 
           {/* Quick Links */}

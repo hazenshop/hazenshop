@@ -481,12 +481,13 @@ export default function ProductDetailClient({
               <table className="w-full text-left">
                 <thead className="bg-slate-50 text-slate-500 font-semibold border-b">
                   <tr>
-                    <th className="p-3">Size</th>
-                    <th className="p-3">Chest / Width</th>
-                    <th className="p-3">Length</th>
-                    {product.sizeGuide.some((g) => g.sleeve) && <th className="p-3">Sleeve</th>}
+                    <th className="p-3">Option / Dimension</th>
+                    <th className="p-3">Width / Measurement</th>
+                    <th className="p-3">Length / Drop</th>
+                    {product.sizeGuide.some((g) => g.sleeve) && <th className="p-3">Inclusions / Hardware</th>}
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-slate-100 text-slate-700">
                   {product.sizeGuide.map((row, idx) => (
                     <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}>

@@ -1,38 +1,56 @@
 [
   {
-    "id": "cat-panjabi",
-    "slug": "mens-panjabi-fashion",
-    "name": "Men's Panjabi & Fashion",
-    "description": "Premium embroidered & solid combed cotton designer Panjabis for Eid & festivities",
-    "image": "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop",
-    "productCount": 1,
-    "createdAt": "2026-08-23T00:00:00.000Z"
-  },
-  {
-    "id": "cat-agro",
-    "slug": "organic-agro-food",
-    "name": "Organic Agro & Pure Food",
-    "description": "100% pure Sundarban raw honey, wood-pressed mustard oil & traditional cow ghee",
-    "image": "https://images.unsplash.com/photo-1587049352846-4a222e784d38?q=80&w=800&auto=format&fit=crop",
-    "productCount": 2,
-    "createdAt": "2026-08-23T00:00:00.000Z"
-  },
-  {
     "id": "cat-bedsheets",
     "slug": "luxury-bedsheets",
-    "name": "Luxury Bedsheets",
-    "description": "100% Egyptian & Organic Cotton 300+ TC bedsheet sets with pillow covers",
+    "name": "Luxury Bedsheets (বিছানার চাদর)",
+    "description": "100% Egyptian & Organic Combed Cotton 300+ TC bedsheet sets with matching pillow & bolster covers",
     "image": "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
+    "productCount": 4,
+    "createdAt": "2026-08-28T00:00:00.000Z"
+  },
+  {
+    "id": "cat-window-curtains",
+    "slug": "window-curtains",
+    "name": "Window Curtains & Porda (জানালার পর্দা)",
+    "description": "Premium Jacquard, textured window drapery and sheer panels with anti-rust brass eyelet rings",
+    "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
+    "productCount": 3,
+    "createdAt": "2026-08-28T00:00:00.000Z"
+  },
+  {
+    "id": "cat-blackout-curtains",
+    "slug": "blackout-curtains",
+    "name": "100% Blackout Curtains (ব্ল্যাকআউট পর্দা)",
+    "description": "Triple-weave thermal insulated room-darkening curtains for serene sleep and sound reduction",
+    "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop",
     "productCount": 2,
-    "createdAt": "2026-08-23T00:00:00.000Z"
+    "createdAt": "2026-08-28T00:00:00.000Z"
   },
   {
     "id": "cat-comforters",
     "slug": "comforters-quilts",
-    "name": "Comforters & Quilts",
-    "description": "All-season microfiber cloud comforters and lightweight AC quilts",
+    "name": "Comforters & AC Quilts (কমফোর্টার ও এসি কুইল্ট)",
+    "description": "All-season 350 GSM cloud microfiber quilts and reversible luxury duvet bedding sets",
     "image": "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=800&auto=format&fit=crop",
+    "productCount": 2,
+    "createdAt": "2026-08-28T00:00:00.000Z"
+  },
+  {
+    "id": "cat-sheer-curtains",
+    "slug": "sheer-curtains",
+    "name": "Sheer & Net Curtains (শিয়ার ও শিফন পর্দা)",
+    "description": "Light-filtering airy sheer window panels with elegant drape for living and dining spaces",
+    "image": "https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?q=80&w=800&auto=format&fit=crop",
     "productCount": 1,
-    "createdAt": "2026-08-23T00:00:00.000Z"
+    "createdAt": "2026-08-28T00:00:00.000Z"
+  },
+  {
+    "id": "cat-fitted-bedsheets",
+    "slug": "fitted-bedsheets",
+    "name": "Fitted Elastic Bedsheets (ফিটেড চাদর)",
+    "description": "360-degree all-around elastic grip bedsheets that stay wrinkle-free on any mattress",
+    "image": "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
+    "productCount": 1,
+    "createdAt": "2026-08-28T00:00:00.000Z"
   }
 ]

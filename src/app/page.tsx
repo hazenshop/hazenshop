@@ -21,18 +21,18 @@ export default async function HomePage() {
   const allProducts = await db.getProducts();
 
   const flashSaleProducts = allProducts.filter((p) => p.flashSale);
-  const featuredProducts = allProducts.filter((p) => p.featured);
-  const luxuryBedsheets = allProducts.filter((p) => p.category === "luxury-bedsheets");
-  const comforters = allProducts.filter((p) => p.category === "comforter-sets");
+  const luxuryBedsheets = allProducts.filter((p) => p.category === "luxury-bedsheets" || p.category === "fitted-bedsheets");
+  const windowCurtains = allProducts.filter((p) => p.category === "window-curtains" || p.category === "blackout-curtains" || p.category === "sheer-curtains");
+  const comforters = allProducts.filter((p) => p.category === "comforters-quilts");
 
   const hero = settings.heroBanners?.[0] || {
     id: "hero-default",
-    title: "Timeless Textiles for Pure Living",
-    subtitle: "Artisanal bed linens, breathable combed cotton, and luxury quilts delivered directly across all 64 districts in Bangladesh.",
-    buttonText: "Explore Collection",
+    title: "Luxury Bedsheets & Designer Window Curtains",
+    subtitle: "Export-grade 100% Egyptian cotton bedsheet sets, 100% blackout window drapes, and cloud comforters delivered with Cash on Delivery nationwide across Bangladesh.",
+    buttonText: "Explore Collections",
     buttonLink: "/products",
     image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
-    badge: "Autumn / Winter Edition",
+    badge: "Seasonal Home Living Edition",
   };
 
   return (
@@ -92,7 +92,11 @@ export default async function HomePage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-                <span>7-Day Easy Exchange</span>
+                <span>Inspect Before Payment</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5 text-brand-400 shrink-0" />
+                <span>7-Day Size & Color Exchange</span>
               </div>
             </div>
           </div>
@@ -107,7 +111,7 @@ export default async function HomePage() {
               Curated Departments
             </span>
             <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Signature Collections
+              Bedsheets & Window Curtains (পর্দা)
             </h2>
           </div>
           <Link
@@ -156,14 +160,14 @@ export default async function HomePage() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="bg-brand-dark text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                    Limited Time
+                    Limited Time Deals
                   </span>
                   <span className="text-xs text-brand-600 font-medium">
-                    Complimentary Nationwide Delivery
+                    Complimentary Nationwide Delivery on Bundles
                   </span>
                 </div>
                 <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Seasonal Flash Specials
+                  Seasonal Home Flash Deals
                 </h2>
               </div>
 
@@ -192,14 +196,14 @@ export default async function HomePage() {
               Master Craftsmanship
             </span>
             <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              100% Combed Cotton Linens
+              100% Egyptian Cotton Bedsheets (বিছানার চাদর)
             </h2>
           </div>
           <Link
             href="/category/luxury-bedsheets"
             className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
           >
-            <span>Explore</span>
+            <span>Explore Bedsheets</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
@@ -211,34 +215,67 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* EDITORIAL PROMO FEATURE: COMFORTERS */}
+      {/* WINDOW CURTAINS / PORDA SHOWCASE */}
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-end justify-between mb-5 sm:mb-8 pb-3 sm:pb-4 border-b border-black/[0.05]">
+          <div>
+            <span className="text-[10px] font-bold uppercase text-brand-600 tracking-widest block mb-1">
+              Window & Door Drapery
+            </span>
+            <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              Designer Window Curtains & Porda (জানালার পর্দা)
+            </h2>
+          </div>
+          <Link
+            href="/category/window-curtains"
+            className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
+          >
+            <span>Explore Curtains</span>
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+          {windowCurtains.slice(0, 4).map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </section>
+
+      {/* EDITORIAL PROMO FEATURE: BLACKOUT CURTAINS & COMFORTERS */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="relative rounded-3xl overflow-hidden bg-brand-dark text-white p-6 sm:p-12 shadow-card border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
           <div className="max-w-xl space-y-3 sm:space-y-4">
             <span className="bg-white/10 text-brand-300 text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
-              Winter Essential
+              Complete Room Living
             </span>
             <h3 className="font-heading text-xl sm:text-4xl font-extrabold leading-tight text-white">
-              Cloud Microfiber Luxury Quilts
+              100% Blackout Drapes & Cloud Microfiber Quilts
             </h3>
             <p className="text-slate-300 text-xs sm:text-sm font-normal leading-relaxed">
-              350 GSM siliconized microfiber filling that delivers weightless thermal comfort. Breathable hypoallergenic casing crafted for peaceful slumber.
+              Block 100% harsh sunlight, lower room temperatures, and envelop in weightless 350 GSM cloud comforters. Designed for hotel-suite elegance in Bangladeshi homes.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap gap-3">
               <Link
-                href="/category/comforter-sets"
+                href="/category/blackout-curtains"
                 className="bg-white hover:bg-slate-100 text-brand-dark font-semibold px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-subtle min-h-[44px]"
               >
-                <span>Discover Quilts</span>
+                <span>Explore Blackout Curtains</span>
                 <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/category/comforters-quilts"
+                className="bg-white/10 hover:bg-white/15 text-white font-medium px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm border border-white/15 min-h-[44px]"
+              >
+                <span>Discover AC Quilts</span>
               </Link>
             </div>
           </div>
 
           <div className="relative w-full md:w-80 aspect-[4/3] rounded-2xl overflow-hidden shadow-card border border-white/10 shrink-0">
             <Image
-              src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop"
-              alt="Luxury Comforter"
+              src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop"
+              alt="Luxury Window Curtain & Bedding"
               fill
               className="object-cover hover:scale-105 transition-transform duration-700"
             />
@@ -254,14 +291,14 @@ export default async function HomePage() {
               Curated Selection
             </span>
             <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Trending Editions
+              All Bedsheet & Window Curtain Collections
             </h2>
           </div>
           <Link
             href="/products"
             className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
           >
-            <span>Explore All</span>
+            <span>Explore All ({allProducts.length})</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
@@ -280,5 +317,6 @@ export default async function HomePage() {
     </div>
   );
 }
+
 
 
