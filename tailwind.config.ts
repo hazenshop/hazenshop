@@ -23,8 +23,32 @@ const config: Config = {
           dark: "#0f1115",
           charcoal: "#181a20",
           surface: "#fcfbf9",
+          maroon: {
+            50: "#fdf2f4",
+            100: "#fce7ea",
+            200: "#f8cfd6",
+            300: "#f2aab7",
+            400: "#e8788f",
+            500: "#d84969",
+            600: "#c12c4f",
+            700: "#7A1C2C", // Royal Maroon Primary
+            800: "#5A121E",
+            900: "#3d0b13",
+            dark: "#2A060C",
+          },
+          gold: {
+            50: "#fbf8f1",
+            100: "#f6efdd",
+            200: "#ecdcba",
+            300: "#dfc48e",
+            400: "#cea65f",
+            500: "#b8873f",
+            600: "#9e6f31",
+            700: "#7e5327",
+          },
         },
       },
+
       fontFamily: {
         sans: ["var(--font-outfit)", "system-ui", "sans-serif"],
         heading: ["var(--font-plus-jakarta)", "system-ui", "sans-serif"],

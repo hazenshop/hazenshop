@@ -260,6 +260,12 @@ export const db = {
     return cachedCategories;
   },
 
+  async getCategoryById(id: string): Promise<Category | null> {
+    cachedCategories = readJsonFile("categories.json", cachedCategories);
+    const item = cachedCategories.find((c) => c.id === id || c.slug === id);
+    return item || null;
+  },
+
   async createCategory(category: Omit<Category, "id">): Promise<Category> {
     const newCategory: Category = {
       ...category,
@@ -281,6 +287,44 @@ export const db = {
     writeJsonFile("categories.json", cachedCategories);
     return newCategory;
   },
+
+  async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+    cachedCategories = readJsonFile("categories.json", cachedCategories);
+    const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
+    if (idx === -1) return null;
+
+    cachedCategories[idx] = { ...cachedCategories[idx], ...updates };
+    writeJsonFile("categories.json", cachedCategories);
+
+    if (isSupabaseConfigured && supabase) {
+      await supabase
+        .from("categories")
+        .update({
+          name: updates.name,
+          slug: updates.slug,
+          description: updates.description,
+          image: updates.image,
+          featured: updates.featured,
+        })
+        .eq("id", id);
+    }
+    return cachedCategories[idx];
+  },
+
+  async deleteCategory(id: string): Promise<boolean> {
+    cachedCategories = readJsonFile("categories.json", cachedCategories);
+    const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
+    if (idx === -1) return false;
+
+    cachedCategories.splice(idx, 1);
+    writeJsonFile("categories.json", cachedCategories);
+
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from("categories").delete().eq("id", id);
+    }
+    return true;
+  },
+
 
   // ORDERS
   async getOrders(options?: { status?: OrderStatus; search?: string }): Promise<Order[]> {
