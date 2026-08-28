@@ -25,6 +25,8 @@ import {
 import { Category, Product, ProductVariant } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
 import { formatPrice } from "@/lib/utils";
+import ImageUploader from "@/components/admin/ImageUploader";
+
 
 export default function ProductForm({
   categories,
@@ -392,82 +394,27 @@ export default function ProductForm({
             </div>
           </div>
 
-          {/* Card 2: Media Gallery */}
+          {/* Card 2: Media Gallery & WebP Compressor */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2 text-white font-bold text-sm">
                 <ImageIcon className="w-4 h-4 text-brand-400" />
-                <span>Product Image Gallery ({images.length})</span>
+                <span>Product Image Gallery & WebP Compressor</span>
               </div>
-              <span className="text-[11px] text-slate-400">Click any image to make it Cover photo</span>
+              <span className="text-[11px] text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-0.5 rounded-full">
+                Auto WebP Compression Active
+              </span>
             </div>
 
-            {/* Existing Images Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`relative aspect-square rounded-2xl overflow-hidden border-2 bg-slate-950 group ${
-                    idx === 0 ? "border-brand-500 ring-2 ring-brand-500/20" : "border-slate-800"
-                  }`}
-                >
-                  <Image src={img} alt={`Product ${idx + 1}`} fill className="object-cover" />
-
-                  {idx === 0 && (
-                    <span className="absolute top-2 left-2 bg-brand-500 text-brand-dark text-[9px] font-black uppercase px-2 py-0.5 rounded shadow">
-                      Cover
-                    </span>
-                  )}
-
-                  {/* Hover Actions */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    {idx !== 0 && (
-                      <button
-                        type="button"
-                        onClick={() => handleSetMainImage(idx)}
-                        className="p-1.5 bg-brand-500 text-brand-dark rounded-lg text-[10px] font-bold"
-                        title="Set as Main Cover"
-                      >
-                        Set Main
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(idx)}
-                      className="p-1.5 bg-rose-600 text-white rounded-lg"
-                      title="Remove image"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Add Image Input */}
-            <div className="pt-2">
-              <label className="block font-bold text-slate-300 text-xs mb-1.5">
-                Add Image via URL:
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/..."
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  className="flex-1 bg-slate-950 text-white text-xs rounded-xl p-3 border border-slate-800 focus:outline-none focus:border-brand-500"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddImage}
-                  className="bg-slate-800 hover:bg-slate-700 text-brand-400 font-bold text-xs px-4 py-3 rounded-xl border border-slate-700 transition-colors shrink-0 flex items-center gap-1.5"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Image</span>
-                </button>
-              </div>
-            </div>
+            <ImageUploader
+              images={images}
+              onChange={setImages}
+              productId={initialProduct?.id}
+              productName={name}
+              categorySlug={category}
+            />
           </div>
+
 
           {/* Card 3: Variants & Quick Presets */}
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-xl">

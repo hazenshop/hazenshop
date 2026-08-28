@@ -147,3 +147,19 @@ export type SiteSettings = {
     badge?: string;
   }[];
 };
+
+export type MediaItem = {
+  id: string;
+  name: string;
+  url: string;
+  sizeBytes: number;
+  originalSizeBytes?: number;
+  format: string;
+  width?: number;
+  height?: number;
+  productId?: string;
+  productName?: string;
+  categorySlug?: string;
+  createdAt: string;
+};
+

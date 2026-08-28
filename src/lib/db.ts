@@ -1,13 +1,14 @@
 import fs from "fs";
 import path from "path";
 import { isSupabaseConfigured, supabase } from "./supabase";
-import { Category, Order, Product, SiteSettings, OrderStatus } from "./types";
+import { Category, Order, Product, SiteSettings, OrderStatus, MediaItem } from "./types";
 import {
   initialCategories,
   initialOrders,
   initialProducts,
   initialSiteSettings,
 } from "../data/initialData";
+
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 
@@ -45,13 +46,28 @@ function writeJsonFile<T>(filename: string, data: T) {
   }
 }
 
+function deleteFileFromDisk(fileUrl: string) {
+  if (!fileUrl || !fileUrl.startsWith("/uploads/")) return;
+  try {
+    const filename = path.basename(fileUrl);
+    const diskPath = path.join(process.cwd(), "public", "uploads", filename);
+    if (fs.existsSync(diskPath)) {
+      fs.unlinkSync(diskPath);
+    }
+  } catch (err) {
+    console.error("Error deleting file from disk:", fileUrl, err);
+  }
+}
+
 // In-memory + disk persistence store
 let cachedProducts: Product[] = readJsonFile("products.json", initialProducts);
 let cachedCategories: Category[] = readJsonFile("categories.json", initialCategories);
 let cachedOrders: Order[] = readJsonFile("orders.json", initialOrders);
 let cachedSettings: SiteSettings = readJsonFile("settings.json", initialSiteSettings);
+let cachedMedia: MediaItem[] = readJsonFile("media.json", []);
 
 export const db = {
+
   // PRODUCTS
   async getProducts(options?: { category?: string; featured?: boolean; flashSale?: boolean; search?: string }): Promise<Product[]> {
     if (isSupabaseConfigured && supabase) {
@@ -231,6 +247,36 @@ export const db = {
 
   async deleteProduct(id: string): Promise<boolean> {
     cachedProducts = readJsonFile("products.json", cachedProducts);
+    const prodToDelete = cachedProducts.find((p) => p.id === id);
+
+    if (prodToDelete) {
+      // Cascade delete local uploaded images from disk & media tracking
+      const imagesToDelete = new Set<string>();
+      if (prodToDelete.images && Array.isArray(prodToDelete.images)) {
+        prodToDelete.images.forEach((img) => {
+          if (img && typeof img === "string" && img.startsWith("/uploads/")) {
+            imagesToDelete.add(img);
+          }
+        });
+      }
+      if (prodToDelete.variants && Array.isArray(prodToDelete.variants)) {
+        prodToDelete.variants.forEach((v) => {
+          if (v.image && typeof v.image === "string" && v.image.startsWith("/uploads/")) {
+            imagesToDelete.add(v.image);
+          }
+        });
+      }
+
+      if (imagesToDelete.size > 0) {
+        cachedMedia = readJsonFile("media.json", cachedMedia);
+        imagesToDelete.forEach((url) => {
+          deleteFileFromDisk(url);
+          cachedMedia = cachedMedia.filter((m) => m.url !== url && m.productId !== id);
+        });
+        writeJsonFile("media.json", cachedMedia);
+      }
+    }
+
     cachedProducts = cachedProducts.filter((p) => p.id !== id);
     writeJsonFile("products.json", cachedProducts);
     if (isSupabaseConfigured && supabase) {
@@ -316,6 +362,14 @@ export const db = {
     const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
     if (idx === -1) return false;
 
+    const cat = cachedCategories[idx];
+    if (cat.image && typeof cat.image === "string" && cat.image.startsWith("/uploads/")) {
+      deleteFileFromDisk(cat.image);
+      cachedMedia = readJsonFile("media.json", cachedMedia);
+      cachedMedia = cachedMedia.filter((m) => m.url !== cat.image && m.categorySlug !== cat.slug);
+      writeJsonFile("media.json", cachedMedia);
+    }
+
     cachedCategories.splice(idx, 1);
     writeJsonFile("categories.json", cachedCategories);
 
@@ -324,6 +378,7 @@ export const db = {
     }
     return true;
   },
+
 
 
   // ORDERS
@@ -597,4 +652,38 @@ export const db = {
 
     return cachedSettings;
   },
+
+  // MEDIA STORAGE CRUD
+  async getMediaItems(): Promise<MediaItem[]> {
+    cachedMedia = readJsonFile("media.json", cachedMedia);
+    return cachedMedia;
+  },
+
+  async createMediaItem(item: MediaItem): Promise<MediaItem> {
+    cachedMedia = readJsonFile("media.json", cachedMedia);
+    cachedMedia.unshift(item);
+    writeJsonFile("media.json", cachedMedia);
+    return item;
+  },
+
+  async deleteMediaItem(id: string): Promise<boolean> {
+    cachedMedia = readJsonFile("media.json", cachedMedia);
+    const item = cachedMedia.find((m) => m.id === id || m.url === id);
+    if (item) {
+      deleteFileFromDisk(item.url);
+      cachedMedia = cachedMedia.filter((m) => m.id !== id && m.url !== id && m.url !== item.url);
+      writeJsonFile("media.json", cachedMedia);
+      return true;
+    }
+    return false;
+  },
+
+  async deleteFileByUrl(url: string): Promise<boolean> {
+    deleteFileFromDisk(url);
+    cachedMedia = readJsonFile("media.json", cachedMedia);
+    cachedMedia = cachedMedia.filter((m) => m.url !== url);
+    writeJsonFile("media.json", cachedMedia);
+    return true;
+  },
 };
+

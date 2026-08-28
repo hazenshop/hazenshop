@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Sparkles, Image as ImageIcon, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import ImageUploader from "@/components/admin/ImageUploader";
+
 
 export default function NewCategoryPage() {
   const router = useRouter();
@@ -206,17 +208,17 @@ export default function NewCategoryPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-              Cover Image URL (কভার ছবি)
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Category Cover Image & WebP Compressor (কভার ছবি)
             </label>
-            <input
-              type="url"
-              placeholder="https://images.unsplash.com/..."
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 focus:border-brand-500 focus:outline-none text-xs font-mono"
+            <ImageUploader
+              images={image ? [image] : []}
+              onChange={(imgs) => setImage(imgs[0] || "/logo.jpg")}
+              categorySlug={slug}
+              maxImages={1}
             />
           </div>
+
 
           <div className="pt-2 border-t border-slate-800">
             <label className="flex items-center gap-3 cursor-pointer">

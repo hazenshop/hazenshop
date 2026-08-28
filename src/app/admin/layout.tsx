@@ -15,6 +15,7 @@ import {
   X,
   Truck,
   ShieldCheck,
+  HardDrive,
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -26,8 +27,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Orders Management", href: "/admin/orders", icon: ShoppingBag },
     { name: "Products & Stock", href: "/admin/products", icon: Package },
     { name: "Categories", href: "/admin/categories", icon: FolderTree },
+    { name: "Media & Storage", href: "/admin/storage", icon: HardDrive },
     { name: "Site Settings & SEO", href: "/admin/settings", icon: Settings },
   ];
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
