@@ -15,11 +15,11 @@ import { Order, OrderStatus } from "@/lib/types";
 import { formatPrice, getStatusColor } from "@/lib/utils";
 
 const timelineSteps: { status: OrderStatus; label: string; desc: string }[] = [
-  { status: "pending", label: "Order Placed", desc: "Received and awaiting confirmation" },
-  { status: "confirmed", label: "Order Confirmed", desc: "Verified with customer" },
-  { status: "packaging", label: "Packaging & QC", desc: "Quality checked and safely packed" },
-  { status: "shipped", label: "In Transit", desc: "Handed over to courier partner" },
-  { status: "delivered", label: "Delivered", desc: "Successfully delivered to customer" },
+  { status: "pending", label: "অর্ডার গৃহীত (Order Placed)", desc: "অর্ডারটি গ্রহণ করা হয়েছে এবং কনফার্মেশনের অপেক্ষায় আছে" },
+  { status: "confirmed", label: "অর্ডার নিশ্চিত (Confirmed)", desc: "ফোন কলের মাধ্যমে অর্ডার তথ্য যাচাই করা হয়েছে" },
+  { status: "packaging", label: "প্যাকেজিং (Packaging & QC)", desc: "পণ্য কোয়ালিটি চেক করে নিরাপদে প্যাকিং করা হচ্ছে" },
+  { status: "shipped", label: "কুরিয়ারে হস্তান্তর (In Transit)", desc: "ডেলিভারি পার্টনারের মাধ্যমে আপনার ঠিকানায় পাঠানো হচ্ছে" },
+  { status: "delivered", label: "ডেলিভার্ড (Delivered)", desc: "পণ্য সফলভাবে আপনার ঠিকানায় পৌঁছে দেওয়া হয়েছে" },
 ];
 
 function TrackOrderContent() {
@@ -93,56 +93,56 @@ function TrackOrderContent() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 pb-20">
+    <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12 space-y-6 sm:space-y-8 pb-20">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="inline-flex p-3 rounded-full bg-slate-100 text-brand-dark border border-slate-200/60 mb-1">
-          <Truck className="w-6 h-6 stroke-[1.75]" />
+        <div className="inline-flex p-3 rounded-full bg-brand-maroon-50 text-brand-maroon-700 border border-brand-maroon-200 mb-1">
+          <Truck className="w-6 h-6 stroke-[2]" />
         </div>
         <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
-          Track Your Parcel (অর্ডার ট্র্যাক করুন)
+          পার্সেল ট্র্যাক করুন (Track Your Parcel)
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto font-normal">
-          Enter your 11-digit Mobile Number or Order ID (e.g. HZ-82914) to view live status updates.
+          আপনার ১১ ডিজিটের মোবাইল নাম্বার অথবা অর্ডার আইডি (যেমন HZ-44931) দিয়ে বর্তমান স্ট্যাটাস দেখুন।
         </p>
       </div>
 
       {/* Search Input Box */}
       <form
         onSubmit={handleSearch}
-        className="max-w-xl mx-auto relative flex items-center shadow-subtle rounded-full overflow-hidden border border-black/[0.08] bg-white"
+        className="max-w-xl mx-auto relative flex items-center shadow-card rounded-full overflow-hidden border border-brand-maroon-700/20 bg-white p-1"
       >
         <input
           type="text"
           required
           inputMode="text"
-          placeholder="Enter Mobile Number or Order ID..."
+          placeholder="মোবাইল নাম্বার বা অর্ডার আইডি লিখুন..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full text-xs sm:text-sm py-3.5 sm:py-4 pl-5 pr-28 focus:outline-none text-slate-900 font-medium placeholder:text-slate-400"
+          className="w-full text-xs sm:text-sm py-3 sm:py-3.5 pl-5 pr-28 focus:outline-none text-slate-900 font-medium placeholder:text-slate-400"
         />
         <button
           type="submit"
           disabled={loading}
-          className="absolute right-1.5 bg-brand-dark hover:bg-brand-charcoal text-white font-medium px-5 py-2 sm:py-2.5 rounded-full transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-subtle"
+          className="bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold px-6 py-3 rounded-full transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-subtle min-h-[42px]"
         >
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
-          <span>Track</span>
+          <span>ট্র্যাক</span>
         </button>
       </form>
 
       {/* Results */}
       {loading ? (
         <div className="py-12 text-center text-slate-500 space-y-2">
-          <Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-dark" />
-          <p className="text-xs font-medium">Looking up order status...</p>
+          <Loader2 className="w-6 h-6 animate-spin mx-auto text-brand-maroon-700" />
+          <p className="text-xs font-medium">অর্ডার স্ট্যাটাস খোঁজা হচ্ছে...</p>
         </div>
       ) : searched && orders.length === 0 ? (
         <div className="bg-white rounded-3xl p-8 text-center border border-black/[0.06] shadow-subtle space-y-3">
           <AlertCircle className="w-10 h-10 text-slate-400 mx-auto" />
-          <h3 className="font-heading font-semibold text-base text-slate-800">No Orders Found</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto font-normal">
-            We could not find any order with &quot;{query}&quot;. Please verify your mobile number or Order ID.
+          <h3 className="font-heading font-bold text-base text-slate-800">কোনো অর্ডার পাওয়া যায়নি</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto font-normal">
+            &quot;{query}&quot; দিয়ে কোনো রেকর্ড পাওয়া যায়নি। দয়া করে আপনার মোবাইল নাম্বার বা অর্ডার আইডি সঠিক কিনা যাচাই করুন।
           </p>
         </div>
       ) : (
@@ -152,34 +152,34 @@ function TrackOrderContent() {
           return (
             <div
               key={order.id}
-              className="bg-white rounded-3xl p-6 sm:p-8 border border-black/[0.06] shadow-subtle space-y-6 sm:space-y-8"
+              className="bg-white rounded-3xl p-5 sm:p-8 border border-brand-maroon-700/10 shadow-card space-y-6"
             >
               {/* Order Header */}
               <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-slate-100">
                 <div>
                   <div className="flex items-center gap-2.5">
                     <h2 className="font-heading text-lg sm:text-xl font-extrabold text-slate-900">
-                      Order #{order.id}
+                      অর্ডার #{order.id}
                     </h2>
                     <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
+                      className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
                     >
                       {order.status.replace("_", " ")}
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 mt-1 font-normal">
-                    Placed on {new Date(order.createdAt).toLocaleDateString("en-US", { dateStyle: "long" })}
+                    তারিখ: {new Date(order.createdAt).toLocaleDateString("en-US", { dateStyle: "long" })}
                   </p>
                 </div>
 
                 {/* Courier info */}
                 {order.courierName && (
-                  <div className="p-3 bg-slate-50/70 rounded-2xl border border-slate-200/60 text-xs w-full sm:w-auto">
-                    <span className="text-slate-400 block font-normal text-[10px]">Courier Partner:</span>
-                    <span className="font-semibold text-slate-800">{order.courierName}</span>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs w-full sm:w-auto">
+                    <span className="text-slate-400 block font-normal text-[10px]">ডেলিভারি পার্টনার:</span>
+                    <span className="font-bold text-slate-800">{order.courierName}</span>
                     {order.trackingCode && (
-                      <span className="block font-mono text-brand-dark font-bold mt-0.5 text-[11px]">
-                        ID: {order.trackingCode}
+                      <span className="block font-mono text-brand-maroon-700 font-bold mt-0.5 text-[11px]">
+                        ট্র্যাকিং কোড: {order.trackingCode}
                       </span>
                     )}
                   </div>
@@ -188,8 +188,8 @@ function TrackOrderContent() {
 
               {/* Progress Timeline */}
               <div className="space-y-4">
-                <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                  Live Dispatch Timeline
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  লাইভ ডেলিভারি প্রগ্রেস (Dispatch Timeline)
                 </h3>
 
                 {/* Mobile Vertical Timeline */}
@@ -201,23 +201,24 @@ function TrackOrderContent() {
                     return (
                       <div
                         key={idx}
-                        className={`flex items-start gap-3 p-3 rounded-2xl border transition-all ${
+                        className={`flex items-start gap-3 p-3.5 rounded-2xl border transition-all ${
                           isCompleted
-                            ? "bg-slate-50 border-brand-dark text-slate-900"
+                            ? "bg-brand-maroon-50/50 border-brand-maroon-700/30 text-slate-900"
                             : "bg-white border-slate-100 text-slate-400"
                         }`}
                       >
                         <div className="pt-0.5">
                           {isCompleted ? (
-                            <CheckCircle2 className="w-4 h-4 text-brand-600 shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                           ) : (
                             <Clock className="w-4 h-4 text-slate-300 shrink-0" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <h4 className={`text-xs font-semibold ${isCompleted ? "text-slate-900" : "text-slate-500"}`}>
+                            <h4 className={`text-xs font-bold ${isCompleted ? "text-slate-900" : "text-slate-500"}`}>
                               {step.label}
+
                             </h4>
                             <span className="text-[10px] font-mono text-slate-400">0{idx + 1}</span>
                           </div>

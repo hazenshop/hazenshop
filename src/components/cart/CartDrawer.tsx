@@ -159,17 +159,18 @@ export default function CartDrawer({ freeShippingThreshold = 2500 }: { freeShipp
                 <Link
                   href="/checkout"
                   onClick={closeCart}
-                  className="w-full bg-brand-dark hover:bg-brand-charcoal text-white font-medium py-3.5 px-4 rounded-full shadow-subtle hover:shadow-card transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider min-h-[44px]"
+                  className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-extrabold py-3.5 px-4 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 group text-xs uppercase tracking-wider min-h-[46px]"
                 >
-                  <span>Proceed to COD Checkout</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-300 group-hover:translate-x-0.5 transition-transform" />
+                  <span>চেকআউট করুন (Cash on Delivery)</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-brand-gold-300 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
                 
-                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 pt-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Cash on Delivery across Bangladesh</span>
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 pt-1 text-center">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>সারা দেশে ক্যাশ অন ডেলিভারি সুবিধা</span>
                 </div>
               </div>
+
             </div>
           )}
         </div>

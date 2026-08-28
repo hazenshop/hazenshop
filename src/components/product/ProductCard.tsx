@@ -91,7 +91,7 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* Price & Action Buttons */}
         <div className="pt-2 sm:pt-3 border-t border-slate-100 mt-1 sm:mt-2">
           <div className="flex items-baseline gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
-            <span className="text-sm sm:text-lg font-extrabold text-brand-dark tracking-tight">
+            <span className="text-sm sm:text-lg font-extrabold text-brand-maroon-700 tracking-tight">
               {formatPrice(effectivePrice)}
             </span>
             {product.salePrice && (
@@ -105,23 +105,24 @@ export default function ProductCard({ product }: { product: Product }) {
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             <button
               onClick={handleQuickAdd}
-              className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium text-[10px] sm:text-xs py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full transition-all flex items-center justify-center gap-1 border border-slate-200/80 active:scale-95 min-h-[36px]"
+              className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[10px] sm:text-xs py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full transition-all flex items-center justify-center gap-1 border border-slate-200 active:scale-95 min-h-[38px]"
               aria-label={`Add ${product.name} to bag`}
             >
               <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              <span>Add</span>
+              <span>ব্যাগে যোগ</span>
             </button>
 
             <button
               onClick={handleQuickOrder}
-              className="w-full bg-brand-dark hover:bg-brand-charcoal text-white font-medium text-[10px] sm:text-xs py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full transition-all shadow-subtle hover:shadow-sm flex items-center justify-center gap-1 active:scale-95 min-h-[36px]"
+              className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold text-[10px] sm:text-xs py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full transition-all shadow-subtle hover:shadow-card flex items-center justify-center gap-1 active:scale-95 min-h-[38px]"
               aria-label={`Order ${product.name} now`}
             >
-              <span>Order</span>
-              <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-300" />
+              <span>অর্ডার</span>
+              <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-gold-300" />
             </button>
           </div>
         </div>
+
       </div>
     </div>
   );

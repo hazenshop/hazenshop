@@ -50,22 +50,22 @@ export default async function ProductsPage({
         <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full scrollbar-none snap-x shrink-0">
           <Link
             href="/products"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 snap-start min-h-[34px] flex items-center ${
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 snap-start min-h-[38px] flex items-center ${
               !searchParams.category
-                ? "bg-brand-dark text-white shadow-subtle"
-                : "bg-slate-100/80 hover:bg-slate-200/70 text-slate-700"
+                ? "bg-brand-maroon-700 text-white shadow-card"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
             }`}
           >
-            All
+            সকল কালেকশন
           </Link>
           {categories.map((c) => (
             <Link
               key={c.id}
               href={`/products?category=${c.slug}`}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 snap-start min-h-[34px] flex items-center ${
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 snap-start min-h-[38px] flex items-center ${
                 searchParams.category === c.slug
-                  ? "bg-brand-dark text-white shadow-subtle"
-                  : "bg-slate-100/80 hover:bg-slate-200/70 text-slate-700"
+                  ? "bg-brand-maroon-700 text-white shadow-card"
+                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
               }`}
             >
               {c.name}
@@ -77,12 +77,12 @@ export default async function ProductsPage({
       {/* Grid */}
       {products.length === 0 ? (
         <div className="bg-white rounded-3xl p-8 sm:p-12 text-center border border-black/[0.06] shadow-subtle space-y-4">
-          <p className="text-xs sm:text-sm font-semibold text-slate-700">No pieces found matching your current filter.</p>
+          <p className="text-xs sm:text-sm font-bold text-slate-700">এই ক্যাটাগরিতে বর্তমানে কোনো পণ্য পাওয়া যায়নি।</p>
           <Link
             href="/products"
-            className="inline-block bg-brand-dark text-white font-medium text-xs px-6 py-2.5 rounded-full shadow-subtle min-h-[44px] leading-[44px]"
+            className="inline-block bg-brand-maroon-700 text-white font-bold text-xs px-6 py-3 rounded-full shadow-card min-h-[44px]"
           >
-            View All Collections
+            সব কালেকশন দেখুন
           </Link>
         </div>
       ) : (

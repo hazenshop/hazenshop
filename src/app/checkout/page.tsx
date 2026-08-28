@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   Loader2,
   Lock,
+  MessageCircle,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
@@ -59,23 +60,23 @@ export default function CheckoutPage() {
     e.preventDefault();
 
     if (cart.length === 0) {
-      showToast("Your bag is empty", "error");
+      showToast("আপনার ব্যাগ খালি। পণ্য বাছাই করুন।", "error");
       return;
     }
 
     if (!customerName.trim()) {
-      showToast("Please enter your full name", "error");
+      showToast("দয়া করে আপনার পূর্ণ নাম লিখুন", "error");
       return;
     }
 
     const cleanPhone = customerPhone.replace(/[^0-9]/g, "");
     if (cleanPhone.length < 11) {
-      showToast("Please enter a valid 11-digit mobile number", "error");
+      showToast("দয়া করে সঠিক ১১ ডিজিটের মোবাইল নাম্বার দিন", "error");
       return;
     }
 
     if (!customerAddress.trim()) {
-      showToast("Please enter your full delivery address", "error");
+      showToast("দয়া করে সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন", "error");
       return;
     }
 
@@ -110,11 +111,11 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      showToast("Order placed successfully. Cash on Delivery.", "success");
+      showToast("অর্ডার সফল হয়েছে! ক্যাশ অন ডেলিভারিতে পাঠানো হচ্ছে।", "success");
       router.push(`/order-success/${orderId}`);
     } catch (err) {
       console.error(err);
-      showToast("Failed to place order. Please try again.", "error");
+      showToast("অর্ডার প্রসেস করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -123,76 +124,75 @@ export default function CheckoutPage() {
   if (cart.length === 0) {
     return (
       <div className="max-w-md mx-auto py-20 px-4 text-center space-y-4">
-        <h2 className="font-heading font-extrabold text-xl text-slate-900">Your bag is currently empty</h2>
+        <h2 className="font-heading font-extrabold text-xl text-slate-900">আপনার ব্যাগ বর্তমানে খালি</h2>
         <p className="text-xs text-slate-500 font-normal">
-          Select pieces from our luxury bed linen collections to proceed.
+          আমাদের প্রিমিয়াম বেডশিট ও জানালার পর্দা কালেকশন থেকে পছন্দসই পণ্য বাছাই করুন।
         </p>
         <Link
           href="/products"
-          className="inline-flex items-center gap-2 bg-brand-dark hover:bg-brand-charcoal text-white font-medium text-xs px-6 py-3 rounded-full shadow-subtle transition-all"
+          className="inline-flex items-center gap-2 bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-card transition-all min-h-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Browse All Collections</span>
+          <span>কালেকশন দেখুন (Browse Collections)</span>
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-10 space-y-6 sm:space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8 pb-20">
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-brand-dark transition-colors min-h-[36px] py-1"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 transition-colors min-h-[36px] py-1"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Return to Collections</span>
+          <span>কালেকশনে ফিরে যান</span>
         </Link>
-        <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-700 font-medium bg-slate-100/80 px-2.5 sm:px-3 py-1.5 rounded-full border border-slate-200/60">
-          <Lock className="w-3 h-3 text-slate-500" />
-          <span>Cash on Delivery Guaranteed</span>
+        <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-emerald-800 font-bold bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <span>১০০% ক্যাশ অন ডেলিভারি</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
         {/* Customer Information Form (7 cols) */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-3xl p-4 sm:p-8 border border-black/[0.06] shadow-subtle space-y-5 sm:space-y-6">
-            <div className="space-y-1 pb-3 border-b border-slate-100">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-brand-600">
-                Step 1 of 2
+          <div className="bg-white rounded-3xl p-5 sm:p-8 border border-brand-maroon-700/10 shadow-card space-y-5 sm:space-y-6">
+            <div className="space-y-1 pb-3.5 border-b border-slate-100 bg-brand-maroon-50/50 -mx-5 sm:-mx-8 -mt-5 sm:-mt-8 p-5 sm:p-7 rounded-t-3xl border-b border-brand-maroon-100">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-maroon-700 bg-white px-2.5 py-0.5 rounded-full border border-brand-maroon-200">
+                নিরাপদ চেকআউট
               </span>
-              <h2 className="font-heading font-extrabold text-lg sm:text-2xl text-slate-900 tracking-tight">
-                Delivery Details (অর্ডার তথ্য)
+              <h2 className="font-heading font-extrabold text-lg sm:text-2xl text-slate-900 tracking-tight pt-1">
+                ডেলিভারি ঠিকানা ও তথ্য (Cash on Delivery)
               </h2>
-              <p className="text-xs text-slate-500 font-normal">
-                No advance payment or card needed. Inspect your package upon arrival.
+              <p className="text-xs text-slate-600 font-normal">
+                কোন অগ্রিম পেমেন্ট লাগবে না। পণ্য হাতে পেয়ে চেক করে টাকা পরিশোধ করবেন।
               </p>
             </div>
 
-
             <form id="checkout-form" onSubmit={handlePlaceOrder} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Full Name (আপনার নাম) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                  আপনার নাম (Full Name) <span className="text-rose-600 font-black">*</span>
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <input
                     type="text"
                     required
-                    placeholder="Enter your name"
+                    placeholder="আপনার পূর্ণ নাম লিখুন"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200/80 focus:border-brand-dark focus:outline-none transition-all placeholder:text-slate-400"
+                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 min-h-[44px]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Mobile Number (১১ ডিজিট মোবাইল নাম্বার) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                  মোবাইল নাম্বার (Mobile Number) <span className="text-rose-600 font-black">*</span>
                 </label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -200,52 +200,64 @@ export default function CheckoutPage() {
                     type="tel"
                     inputMode="tel"
                     required
-                    placeholder="017XXXXXXXX"
+                    placeholder="01XXXXXXXXX (১১ ডিজিট)"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200/80 focus:border-brand-dark focus:outline-none transition-all placeholder:text-slate-400 font-mono"
+                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 font-mono min-h-[44px]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Delivery Address (সম্পূর্ণ ঠিকানা) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">
+                  সম্পূর্ণ ঠিকানা (Full Delivery Address) <span className="text-rose-600 font-black">*</span>
                 </label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                   <textarea
                     required
                     rows={2}
-                    placeholder="House, Road, Area, Thana & District (বাসা নং, রোড নং, এলাকা, থানা ও জেলা)"
+                    placeholder="বাসা নং, রোড নং, এলাকা, থানা ও জেলা"
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
-                    className="w-full bg-slate-50/70 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-2.5 border border-slate-200/80 focus:border-brand-dark focus:outline-none transition-all resize-none placeholder:text-slate-400"
+                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all resize-none placeholder:text-slate-400 min-h-[56px]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                  Delivery Zone (ডেলিভারি এরিয়া)
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  ডেলিভারি এরিয়া (Delivery Zone)
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
-                    { id: "dhaka" as const, label: "Inside Dhaka", fee: settings?.dhakaDeliveryFee || 60 },
-                    { id: "outside_dhaka" as const, label: "Outside Dhaka", fee: settings?.outsideDhakaDeliveryFee || 120 },
-                    { id: "suburbs" as const, label: "Suburbs / Gazipur", fee: settings?.suburbsDeliveryFee || 100 },
+                    { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: settings?.dhakaDeliveryFee || 60 },
+                    { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: settings?.outsideDhakaDeliveryFee || 120 },
+                    { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: settings?.suburbsDeliveryFee || 100 },
                   ].map((zone) => (
                     <label
                       key={zone.id}
                       onClick={() => setDeliveryZone(zone.id)}
-                      className={`p-3 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all ${
+                      className={`p-3 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all min-h-[64px] ${
                         deliveryZone === zone.id
-                          ? "border-brand-dark bg-slate-50 shadow-subtle ring-1 ring-brand-dark"
-                          : "border-slate-200/80 hover:border-slate-300 bg-white"
+                          ? "border-brand-maroon-700 bg-brand-maroon-50/50 shadow-subtle ring-1 ring-brand-maroon-700"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
                       }`}
                     >
-                      <span className="text-xs font-semibold text-slate-900">{zone.label}</span>
-                      <span className="text-xs font-bold text-slate-900 mt-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-xs font-bold text-slate-900 block leading-tight">{zone.label}</span>
+                          <span className="text-[10px] text-slate-400">{zone.sub}</span>
+                        </div>
+                        <div
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                            deliveryZone === zone.id ? "border-brand-maroon-700 bg-brand-maroon-700" : "border-slate-300"
+                          }`}
+                        >
+                          {deliveryZone === zone.id && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                      </div>
+                      <span className="text-xs font-extrabold text-brand-maroon-700 mt-1">
                         {isFreeDelivery ? "FREE" : formatPrice(zone.fee)}
                       </span>
                     </label>
@@ -256,12 +268,30 @@ export default function CheckoutPage() {
               <div>
                 <input
                   type="text"
-                  placeholder="Special instructions / notes (Optional)"
+                  placeholder="বিশেষ কোনো নির্দেশনা থাকলে লিখুন (Optional)"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full bg-slate-50/70 text-xs rounded-xl px-4 py-2.5 border border-slate-200/80 focus:bg-white focus:border-brand-dark focus:outline-none"
+                  className="w-full bg-slate-50 text-xs rounded-xl px-4 py-3 border border-slate-200 focus:bg-white focus:border-brand-maroon-700 focus:outline-none min-h-[44px]"
                 />
               </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider group disabled:opacity-75 min-h-[50px]"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>অর্ডার প্রসেস হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-5 h-5 text-brand-gold-300 group-hover:scale-110 transition-transform shrink-0" />
+                    <span>অর্ডার নিশ্চিত করুন ({formatPrice(grandTotal)})</span>
+                  </>
+                )}
+              </button>
             </form>
           </div>
         </div>
@@ -319,9 +349,9 @@ export default function CheckoutPage() {
                   )}
                 </span>
               </div>
-              <div className="border-t border-slate-200/80 pt-3 flex justify-between items-center text-sm font-extrabold text-brand-dark">
-                <span>Total Payable (ক্যাশ অন ডেলিভারি):</span>
-                <span className="text-xl font-heading font-extrabold text-brand-dark">{formatPrice(grandTotal)}</span>
+              <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-sm font-extrabold text-slate-900">
+                <span>সর্বমোট পরিশোধযোগ্য:</span>
+                <span className="text-xl font-heading font-extrabold text-brand-maroon-700">{formatPrice(grandTotal)}</span>
               </div>
             </div>
 
@@ -330,27 +360,28 @@ export default function CheckoutPage() {
               form="checkout-form"
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-brand-dark hover:bg-brand-charcoal active:scale-[0.99] text-white font-medium py-3.5 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider group disabled:opacity-75"
+              className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider group disabled:opacity-75 min-h-[48px]"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing Order...</span>
+                  <span>অর্ডার প্রসেস হচ্ছে...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-brand-400" />
-                  <span>Confirm Cash on Delivery Order</span>
+                  <CheckCircle2 className="w-5 h-5 text-brand-gold-300" />
+                  <span>অর্ডার নিশ্চিত করুন (Cash on Delivery)</span>
                 </>
               )}
             </button>
 
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 pt-1">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Inspect package before giving cash</span>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 pt-1 text-center">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>ডেলিভারির সময় প্যাকেট খুলে দেখে পেমেন্ট করুন</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
