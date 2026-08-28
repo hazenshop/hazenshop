@@ -11,8 +11,11 @@ export default function MobileNav({ whatsappNumber }: { whatsappNumber: string }
   const { totalItems, openCart } = useCart();
   const cleanPhone = whatsappNumber.replace(/[^0-9]/g, "");
 
-  // Don't show inside admin
-  if (pathname.startsWith("/admin")) return null;
+  // Don't show inside admin or on single product detail page where contextual sticky bar is active
+  if (pathname.startsWith("/admin") || (pathname.startsWith("/products/") && pathname !== "/products")) {
+    return null;
+  }
+
 
   const isHome = pathname === "/";
   const isCollections = pathname.startsWith("/products") || pathname.startsWith("/category");

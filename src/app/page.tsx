@@ -39,7 +39,7 @@ export default async function HomePage() {
     <div className="space-y-12 sm:space-y-20 pb-16">
       {/* EDITORIAL HERO BANNER */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-6">
-        <div className="relative rounded-3xl overflow-hidden bg-brand-dark text-white min-h-[400px] sm:min-h-[480px] md:min-h-[520px] flex items-center shadow-card border border-black/10">
+        <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white min-h-[400px] sm:min-h-[480px] md:min-h-[520px] flex items-center shadow-card border border-white/10">
           {/* Background Image with Gradient Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -47,15 +47,15 @@ export default async function HomePage() {
               alt={hero.title}
               fill
               priority
-              className="object-cover object-center opacity-40 scale-100 transition-transform duration-1000"
+              className="object-cover object-center opacity-35 scale-100 transition-transform duration-1000"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-dark/95 via-brand-dark/80 sm:via-brand-dark/75 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-maroon-800/95 via-brand-maroon-700/85 sm:via-brand-maroon-700/80 to-transparent" />
           </div>
 
           {/* Hero Content */}
           <div className="relative z-10 p-5 sm:p-12 lg:p-16 max-w-2xl space-y-4 sm:space-y-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-brand-300 text-[10px] font-semibold tracking-widest uppercase backdrop-blur-md">
-              <Sparkles className="w-3 h-3 text-brand-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-brand-gold-300 text-[10px] font-bold tracking-widest uppercase backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-brand-gold-300" />
               <span>{hero.badge || "Special Edition"}</span>
             </div>
 
@@ -63,18 +63,19 @@ export default async function HomePage() {
               {hero.title}
             </h1>
 
-            <p className="text-xs sm:text-base text-slate-300 font-normal leading-relaxed max-w-xl">
+            <p className="text-xs sm:text-base text-slate-100 font-normal leading-relaxed max-w-xl">
               {hero.subtitle}
             </p>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
               <Link
                 href={hero.buttonLink || "/products"}
-                className="bg-white hover:bg-slate-100 active:scale-95 text-brand-dark font-semibold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-full shadow-subtle hover:shadow-card transition-all text-center flex items-center justify-center gap-2 group min-h-[44px]"
+                className="bg-white hover:bg-slate-100 active:scale-95 text-brand-maroon-700 font-extrabold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-full shadow-card transition-all text-center flex items-center justify-center gap-2 group min-h-[44px]"
               >
                 <span>{hero.buttonText}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-brand-maroon-700 group-hover:translate-x-0.5 transition-transform" />
               </Link>
+
 
               <Link
                 href="/track-order"
@@ -244,33 +245,34 @@ export default async function HomePage() {
 
       {/* EDITORIAL PROMO FEATURE: BLACKOUT CURTAINS & COMFORTERS */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden bg-brand-dark text-white p-6 sm:p-12 shadow-card border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
+        <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white p-6 sm:p-12 shadow-card border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
           <div className="max-w-xl space-y-3 sm:space-y-4">
-            <span className="bg-white/10 text-brand-300 text-[10px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
-              Complete Room Living
+            <span className="bg-white/15 text-brand-gold-300 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md border border-white/20">
+              কমপ্লিট হোম ডেকোর কালেকশন
             </span>
             <h3 className="font-heading text-xl sm:text-4xl font-extrabold leading-tight text-white">
-              100% Blackout Drapes & Cloud Microfiber Quilts
+              ১০০% ব্ল্যাকআউট পর্দা ও প্রিমিয়াম এসি কম্ফোটার
             </h3>
-            <p className="text-slate-300 text-xs sm:text-sm font-normal leading-relaxed">
-              Block 100% harsh sunlight, lower room temperatures, and envelop in weightless 350 GSM cloud comforters. Designed for hotel-suite elegance in Bangladeshi homes.
+            <p className="text-slate-100 text-xs sm:text-sm font-normal leading-relaxed">
+              সূর্যের কড়া আলো ও তাপ প্রতিরোধক ১০০% ব্ল্যাকআউট জানালার পর্দা এবং প্রিমিয়াম ৩৫০ জিএসএম ক্লাউড কম্ফোটার। পুরো বাংলাদেশে ক্যাশ অন ডেলিভারিতে হোম ডেলিভারি।
             </p>
             <div className="pt-2 flex flex-wrap gap-3">
               <Link
                 href="/category/blackout-curtains"
-                className="bg-white hover:bg-slate-100 text-brand-dark font-semibold px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-subtle min-h-[44px]"
+                className="bg-white hover:bg-slate-100 text-brand-maroon-700 font-bold px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-card min-h-[44px]"
               >
-                <span>Explore Blackout Curtains</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>ব্ল্যাকআউট পর্দা কালেকশন</span>
+                <ArrowRight className="w-4 h-4 text-brand-maroon-700" />
               </Link>
               <Link
                 href="/category/comforters-quilts"
-                className="bg-white/10 hover:bg-white/15 text-white font-medium px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm border border-white/15 min-h-[44px]"
+                className="bg-white/15 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm border border-white/20 min-h-[44px]"
               >
-                <span>Discover AC Quilts</span>
+                <span>এসি কম্ফোটার দেখুন</span>
               </Link>
             </div>
           </div>
+
 
           <div className="relative w-full md:w-80 aspect-[4/3] rounded-2xl overflow-hidden shadow-card border border-white/10 shrink-0">
             <Image
