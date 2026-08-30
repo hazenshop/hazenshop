@@ -105,20 +105,20 @@ export default function ProductCard({ product }: { product: Product }) {
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
             <button
               onClick={handleQuickAdd}
-              className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[10px] sm:text-xs py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full transition-all flex items-center justify-center gap-1 border border-slate-200 active:scale-95 min-h-[38px]"
+              className="w-full bg-slate-50 hover:bg-slate-100 text-slate-800 font-bold text-[10px] sm:text-xs py-2 px-2 rounded-full transition-all flex items-center justify-center gap-1 border border-slate-200 active:scale-95 min-h-[40px]"
               aria-label={`Add ${product.name} to bag`}
             >
-              <ShoppingBag className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <ShoppingBag className="w-3.5 h-3.5" />
               <span>ব্যাগে যোগ</span>
             </button>
 
             <button
               onClick={handleQuickOrder}
-              className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold text-[10px] sm:text-xs py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full transition-all shadow-subtle hover:shadow-card flex items-center justify-center gap-1 active:scale-95 min-h-[38px]"
+              className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold text-[10px] sm:text-xs py-2 px-2 rounded-full transition-all shadow-subtle hover:shadow-card flex items-center justify-center gap-1 active:scale-95 min-h-[40px]"
               aria-label={`Order ${product.name} now`}
             >
               <span>অর্ডার</span>
-              <ArrowRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-gold-300" />
+              <ArrowRight className="w-3 h-3 text-brand-gold-300" />
             </button>
           </div>
         </div>

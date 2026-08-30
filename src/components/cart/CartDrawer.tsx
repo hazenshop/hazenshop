@@ -153,10 +153,10 @@ export default function CartDrawer({
                         </h4>
                         <button
                           onClick={() => removeFromCart(item.productId, item.variantId)}
-                          className="text-slate-400 hover:text-rose-600 p-1 transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                          className="text-slate-400 hover:text-rose-600 p-2 transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center rounded-lg hover:bg-rose-50"
                           aria-label="Remove Item"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
 
@@ -173,27 +173,27 @@ export default function CartDrawer({
                       </span>
 
                       {/* Touch Stepper */}
-                      <div className="flex items-center gap-2 bg-white rounded-full border border-slate-200 p-0.5 shadow-subtle">
+                      <div className="flex items-center gap-1.5 bg-white rounded-full border border-slate-200 p-1 shadow-subtle">
                         <button
                           onClick={() =>
                             updateQuantity(item.productId, item.quantity - 1, item.variantId)
                           }
-                          className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors min-h-[28px] min-w-[28px]"
+                          className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 flex items-center justify-center transition-colors min-h-[32px] min-w-[32px]"
                           aria-label="Decrease quantity"
                         >
-                          <Minus className="w-3 h-3" />
+                          <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="text-xs font-bold text-slate-900 w-5 text-center">
+                        <span className="text-xs font-bold text-slate-900 w-6 text-center">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() =>
                             updateQuantity(item.productId, item.quantity + 1, item.variantId)
                           }
-                          className="w-7 h-7 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white flex items-center justify-center transition-colors min-h-[28px] min-w-[28px]"
+                          className="w-8 h-8 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-95 text-white flex items-center justify-center transition-colors min-h-[32px] min-w-[32px]"
                           aria-label="Increase quantity"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>

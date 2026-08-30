@@ -124,7 +124,7 @@ function TrackOrderContent() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold px-6 py-3 rounded-full transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-subtle min-h-[42px]"
+          className="bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold px-6 py-3 rounded-full transition-all flex items-center gap-1.5 disabled:opacity-50 text-xs shadow-subtle min-h-[44px]"
         >
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
           <span>ট্র্যাক</span>

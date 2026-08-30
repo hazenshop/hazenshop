@@ -210,7 +210,7 @@ export default function Navbar({
             {/* Bag Button */}
             <button
               onClick={openCart}
-              className="relative p-2.5 sm:px-4 sm:py-2.5 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white transition-all shadow-subtle hover:shadow-card flex items-center gap-2 font-bold min-h-[40px]"
+              className="relative p-2.5 sm:px-4 sm:py-2.5 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white transition-all shadow-subtle hover:shadow-card flex items-center gap-2 font-bold min-h-[44px]"
               aria-label="Open Cart"
             >
               <ShoppingBag className="w-4 h-4 text-brand-gold-300" />
@@ -227,7 +227,7 @@ export default function Navbar({
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-full text-slate-700 hover:bg-slate-100 md:hidden transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
+              className="p-2 rounded-full text-slate-700 hover:bg-slate-100 md:hidden transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Toggle Menu"
             >
               {isMobileMenuOpen ? (
