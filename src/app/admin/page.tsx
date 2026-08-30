@@ -14,6 +14,10 @@ import {
   Eye,
   Printer,
   AlertTriangle,
+  Database,
+  Activity,
+  RefreshCw,
+  Zap,
 } from "lucide-react";
 import { Order, OrderStatus, Product, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor } from "@/lib/utils";
@@ -26,23 +30,41 @@ export default function AdminDashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
+  const [healthData, setHealthData] = useState<any>(null);
+  const [pinging, setPinging] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
-      const [orderRes, setRes, prodRes] = await Promise.all([
+      const [orderRes, setRes, prodRes, healthRes] = await Promise.all([
         fetch("/api/orders").then((r) => r.json()),
         fetch("/api/settings").then((r) => r.json()),
         fetch("/api/products").then((r) => r.json()),
+        fetch("/api/health").then((r) => r.json()).catch(() => null),
       ]);
 
       if (orderRes.orders) setOrders(orderRes.orders);
       if (setRes.settings) setSettings(setRes.settings);
       if (prodRes.products) setProducts(prodRes.products);
+      if (healthRes) setHealthData(healthRes);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const pingHealth = async () => {
+    setPinging(true);
+    try {
+      const res = await fetch("/api/health");
+      const data = await res.json();
+      setHealthData(data);
+      showToast(`Health check OK (${data.totalLatencyMs}ms latency)`);
+    } catch {
+      showToast("Health check failed", "error");
+    } finally {
+      setPinging(false);
     }
   };
 
@@ -89,6 +111,17 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={pingHealth}
+            disabled={pinging}
+            className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition-all flex items-center gap-1.5"
+            title="Check real-time database connection & latency"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-brand-400 ${pinging ? "animate-spin" : ""}`} />
+            <span>Ping DB Health</span>
+          </button>
+
           <Link
             href="/admin/products/new"
             className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5"
@@ -98,6 +131,47 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Database & Cloud Connection Health Card */}
+      {healthData && (
+        <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${healthData.status === "healthy" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
+              <Database className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-white">Database Status:</span>
+                <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${healthData.status === "healthy" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/20 text-amber-400"}`}>
+                  {healthData.status === "healthy" ? "● Connected & Active" : "● Degraded"}
+                </span>
+                <span className="text-slate-400 text-[11px]">
+                  Driver: <strong className="text-slate-200">{healthData.database?.activeDriver}</strong>
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {healthData.database?.supabase?.configured ? (
+                  <>Supabase Cloud PostgreSQL ({healthData.database?.supabase?.latencyMs ?? healthData.totalLatencyMs}ms ping) • Local dual-mode synchronized</>
+                ) : (
+                  <>Local disk persistence active (.data/*.json)</>
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto text-[11px] text-slate-400">
+            <span>Health Route:</span>
+            <a
+              href="/api/health"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono bg-slate-950 px-2 py-1 rounded text-brand-400 border border-slate-800 hover:border-brand-500/50 transition-colors"
+            >
+              /api/health ↗
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Low Stock Alert (if any) */}
       {lowStockProducts.length > 0 && (
