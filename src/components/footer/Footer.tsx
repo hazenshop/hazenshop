@@ -139,9 +139,21 @@ export default function Footer({
 
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} HAZEN Luxury Living. সর্বস্বত্ব সংরক্ষিত।</p>
-          <p className="text-slate-400">
-            ১০০% অথেনটিক কোয়ালিটি ও ক্যাশ অন ডেলিভারি সুবিধা
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-slate-400 text-center sm:text-right">
+            <span>১০০% অথেনটিক কোয়ালিটি ও ক্যাশ অন ডেলিভারি</span>
+            <span className="hidden sm:inline text-slate-700">•</span>
+            <span>
+              Developed by{" "}
+              <a
+                href="https://khorshed-alam.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-gold-400 hover:text-brand-gold-300 font-semibold hover:underline underline-offset-2 transition-colors"
+              >
+                Khorshed Alam
+              </a>
+            </span>
+          </div>
         </div>
       </div>
     </footer>
