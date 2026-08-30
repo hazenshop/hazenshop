@@ -14,8 +14,8 @@ import {
   Trash2,
   ArrowLeft,
   Loader2,
-  Lock,
-  MessageCircle,
+  ShoppingBag,
+  ChevronDown,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
@@ -34,6 +34,7 @@ export default function CheckoutPage() {
   const [deliveryZone, setDeliveryZone] = useState<DeliveryZone>("dhaka");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMobileSummary, setShowMobileSummary] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -140,7 +141,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-6 sm:space-y-8 pb-20">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-5 sm:space-y-8 pb-28 md:pb-20">
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <Link
@@ -156,11 +157,56 @@ export default function CheckoutPage() {
         </div>
       </div>
 
+      {/* Mobile Collapsible Order Summary Bar */}
+      <div className="lg:hidden bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-subtle">
+        <button
+          type="button"
+          onClick={() => setShowMobileSummary(!showMobileSummary)}
+          className="w-full p-4 flex items-center justify-between bg-slate-50/80 text-xs font-bold text-slate-800"
+        >
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-4 h-4 text-brand-maroon-700" />
+            <span>অর্ডারের পণ্যসমূহ ({cart.length} টি)</span>
+            <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${showMobileSummary ? "rotate-180" : ""}`} />
+          </div>
+          <span className="font-extrabold text-sm text-brand-maroon-700">{formatPrice(grandTotal)}</span>
+        </button>
+
+        {showMobileSummary && (
+          <div className="p-4 space-y-3 border-t border-slate-100 bg-white">
+            {cart.map((item) => (
+              <div
+                key={`${item.productId}-${item.variantId || "default"}`}
+                className="flex gap-3 items-center justify-between text-xs"
+              >
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-slate-50">
+                  <Image src={item.productImage || "/logo.jpg"} alt={item.productName} fill className="object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-slate-900 truncate">{item.productName}</h4>
+                  {item.variantName && <p className="text-[11px] text-slate-500">{item.variantName}</p>}
+                  <p className="text-[11px] text-slate-500">
+                    {formatPrice(item.price)} × {item.quantity}
+                  </p>
+                </div>
+                <span className="font-bold text-slate-900">{formatPrice(item.total)}</span>
+              </div>
+            ))}
+            <div className="pt-2 border-t border-slate-100 flex justify-between text-xs text-slate-500 font-medium">
+              <span>ডেলিভারি চার্জ:</span>
+              <span className="font-bold text-slate-800">
+                {isFreeDelivery ? "ফ্রি" : formatPrice(appliedDeliveryFee)}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
         {/* Customer Information Form (7 cols) */}
         <div className="lg:col-span-7">
           <div className="bg-white rounded-3xl p-5 sm:p-8 border border-brand-maroon-700/10 shadow-card space-y-5 sm:space-y-6">
-            <div className="space-y-1 pb-3.5 border-b border-slate-100 bg-brand-maroon-50/50 -mx-5 sm:-mx-8 -mt-5 sm:-mt-8 p-5 sm:p-7 rounded-t-3xl border-b border-brand-maroon-100">
+            <div className="space-y-1 pb-3.5 border-b border-brand-maroon-100 bg-brand-maroon-50/50 -mx-5 sm:-mx-8 -mt-5 sm:-mt-8 p-5 sm:p-7 rounded-t-3xl">
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-maroon-700 bg-white px-2.5 py-0.5 rounded-full border border-brand-maroon-200">
                 নিরাপদ চেকআউট
               </span>
@@ -296,8 +342,8 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Order Items & Summary (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* Order Items & Summary (Desktop 5 cols) */}
+        <div className="hidden lg:block lg:col-span-5 space-y-6">
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-black/[0.06] shadow-subtle space-y-5">
             <h3 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 pb-3 border-b border-slate-100">
               Order Summary ({cart.length} Items)
@@ -355,35 +401,13 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Place Order CTA Button */}
-            <button
-              form="checkout-form"
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider group disabled:opacity-75 min-h-[48px]"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>অর্ডার প্রসেস হচ্ছে...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-5 h-5 text-brand-gold-300" />
-                  <span>অর্ডার নিশ্চিত করুন (Cash on Delivery)</span>
-                </>
-              )}
-            </button>
-
             <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 pt-1 text-center">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>ডেলিভারির সময় প্যাকেট খুলে দেখে পেমেন্ট করুন</span>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
-

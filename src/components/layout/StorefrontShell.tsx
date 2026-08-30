@@ -27,8 +27,9 @@ export default function StorefrontShell({
   }
 
   const cleanWhatsAppNumber = (settings.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
-  const whatsappUrl = `https://wa.me/${cleanWhatsAppNumber}?text=${encodeURIComponent(
-    "Hello Hazen! I would like to inquire about your luxury bedsheet collections."
+  const formattedWhatsApp = cleanWhatsAppNumber.startsWith("88") ? cleanWhatsAppNumber : `88${cleanWhatsAppNumber}`;
+  const whatsappUrl = `https://wa.me/${formattedWhatsApp}?text=${encodeURIComponent(
+    "আসসালামু আলাইকুম Hazen! আমি আপনাদের পণ্য ও কালেকশন সম্পর্কে জানতে চাই।"
   )}`;
 
   return (
@@ -46,10 +47,10 @@ export default function StorefrontShell({
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-medium text-xs px-4 py-3 rounded-full shadow-card hover:shadow-card-hover transition-all duration-300 group border border-white/20"
+          className="flex items-center gap-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold text-xs px-4 py-3 rounded-full shadow-card hover:shadow-card-hover transition-all duration-300 group border border-white/20"
         >
           <MessageCircle className="w-4 h-4 fill-white group-hover:scale-110 transition-transform" />
-          <span>Concierge WhatsApp</span>
+          <span>হোয়াটসঅ্যাপে কথা বলুন</span>
         </a>
       </aside>
     </div>

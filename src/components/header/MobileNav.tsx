@@ -31,64 +31,64 @@ export default function MobileNav({ whatsappNumber }: { whatsappNumber: string }
           href="/"
           className={`flex flex-col items-center justify-center min-h-[44px] w-full py-1 rounded-xl transition-all ${
             isHome
-              ? "text-brand-dark font-semibold"
+              ? "text-brand-maroon-700 font-bold"
               : "text-slate-400 hover:text-slate-600 active:scale-95"
           }`}
         >
-          <Home className={`w-5 h-5 transition-transform ${isHome ? "scale-105 stroke-[2]" : "stroke-[1.75]"}`} />
-          <span className="text-[10px] tracking-tight mt-0.5">Overview</span>
+          <Home className={`w-5 h-5 transition-transform ${isHome ? "scale-105 stroke-[2.2]" : "stroke-[1.75]"}`} />
+          <span className="text-[10px] tracking-tight mt-0.5">হোম</span>
         </Link>
 
         <Link
           href="/products"
           className={`flex flex-col items-center justify-center min-h-[44px] w-full py-1 rounded-xl transition-all ${
             isCollections
-              ? "text-brand-dark font-semibold"
+              ? "text-brand-maroon-700 font-bold"
               : "text-slate-400 hover:text-slate-600 active:scale-95"
           }`}
         >
-          <Grid className={`w-5 h-5 transition-transform ${isCollections ? "scale-105 stroke-[2]" : "stroke-[1.75]"}`} />
-          <span className="text-[10px] tracking-tight mt-0.5">Collections</span>
+          <Grid className={`w-5 h-5 transition-transform ${isCollections ? "scale-105 stroke-[2.2]" : "stroke-[1.75]"}`} />
+          <span className="text-[10px] tracking-tight mt-0.5">কালেকশন</span>
         </Link>
 
         <button
           onClick={openCart}
-          className="relative flex flex-col items-center justify-center min-h-[44px] w-full py-1 rounded-xl text-slate-700 hover:text-brand-dark active:scale-95 transition-all"
+          className="relative flex flex-col items-center justify-center min-h-[44px] w-full py-1 rounded-xl text-slate-700 hover:text-brand-maroon-700 active:scale-95 transition-all font-medium"
           aria-label={`Open Bag with ${totalItems} items`}
         >
           <div className="relative">
             <ShoppingBag className="w-5 h-5 stroke-[1.75]" />
             {totalItems > 0 && (
-              <span className="absolute -top-1.5 -right-2.5 bg-brand-dark text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+              <span className="absolute -top-1.5 -right-2.5 bg-brand-maroon-700 text-white font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
                 {totalItems}
               </span>
             )}
           </div>
-          <span className="text-[10px] tracking-tight mt-0.5">Bag</span>
+          <span className="text-[10px] tracking-tight mt-0.5">ব্যাগ</span>
         </button>
 
         <Link
           href="/track-order"
           className={`flex flex-col items-center justify-center min-h-[44px] w-full py-1 rounded-xl transition-all ${
             isTracking
-              ? "text-brand-dark font-semibold"
+              ? "text-brand-maroon-700 font-bold"
               : "text-slate-400 hover:text-slate-600 active:scale-95"
           }`}
         >
-          <Truck className={`w-5 h-5 transition-transform ${isTracking ? "scale-105 stroke-[2]" : "stroke-[1.75]"}`} />
-          <span className="text-[10px] tracking-tight mt-0.5">Track</span>
+          <Truck className={`w-5 h-5 transition-transform ${isTracking ? "scale-105 stroke-[2.2]" : "stroke-[1.75]"}`} />
+          <span className="text-[10px] tracking-tight mt-0.5">ট্র্যাকিং</span>
         </Link>
 
         <a
           href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-            "Hello Hazen! I would like to inquire about your collections."
+            "আসসালামু আলাইকুম Hazen! আমি আপনাদের পণ্য ও কালেকশন সম্পর্কে জানতে চাই।"
           )}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex flex-col items-center justify-center min-h-[44px] w-full py-1 rounded-xl text-emerald-600 hover:text-emerald-700 active:scale-95 transition-all"
         >
           <MessageCircle className="w-5 h-5 stroke-[1.75]" />
-          <span className="text-[10px] tracking-tight mt-0.5">WhatsApp</span>
+          <span className="text-[10px] tracking-tight mt-0.5">হোয়াটসঅ্যাপ</span>
         </a>
       </div>
     </nav>

@@ -11,9 +11,12 @@ import {
   Globe,
   Tag,
   Loader2,
+  Image as ImageIcon,
+  Share2,
 } from "lucide-react";
 import { SiteSettings } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function AdminSettingsPage() {
   const { showToast } = useToast();
@@ -58,16 +61,34 @@ export default function AdminSettingsPage() {
     return <div className="py-20 text-center text-slate-400">Loading store settings...</div>;
   }
 
+  const hero = settings.heroBanners?.[0] || {
+    id: "hero-1",
+    title: "Luxury Bedsheets & Designer Window Curtains",
+    subtitle: "Export-grade 100% Egyptian cotton bedsheet sets, 100% blackout window drapes, and cloud comforters delivered with Cash on Delivery nationwide across Bangladesh.",
+    buttonText: "Explore Collections",
+    buttonLink: "/products",
+    image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
+    badge: "Seasonal Home Living Edition",
+  };
+
+  const updateHero = (field: string, value: string) => {
+    const updatedHero = { ...hero, [field]: value };
+    setSettings({
+      ...settings,
+      heroBanners: [updatedHero],
+    });
+  };
+
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-4xl pb-16">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            Site Settings & SEO Meta
+            Site Settings & Live Storefront Controls
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Configure hotlines, WhatsApp numbers, delivery charges, announcement bar and search engine metadata
+            হটলাইন, হোয়াটসঅ্যাপ নম্বর, ডেলিভারি চার্জ, হোমপেজ ব্যানার এবং এসইও মেটা কনফিগার করুন
           </p>
         </div>
 
@@ -75,10 +96,10 @@ export default function AdminSettingsPage() {
           form="settings-form"
           type="submit"
           disabled={saving}
-          className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
+          className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 min-h-[44px]"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          <span>Save Changes</span>
+          <span>Save All Settings</span>
         </button>
       </div>
 
@@ -87,7 +108,7 @@ export default function AdminSettingsPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
             <Phone className="w-4 h-4 text-brand-400" />
-            <span>Customer Hotlines & Instant WhatsApp</span>
+            <span>কাস্টমার হটলাইন ও হোয়াটসঅ্যাপ হেল্পলাইন (Hotline & WhatsApp)</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -101,10 +122,10 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">WhatsApp Order Number (with Country Code)</label>
+              <label className="block font-bold text-slate-300 mb-1">WhatsApp Order Number (e.g. 017XXXXXXXX)</label>
               <input
                 type="text"
-                placeholder="8801XXXXXXXXX"
+                placeholder="017XXXXXXXX"
                 value={settings.whatsappNumber}
                 onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
                 className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold text-emerald-400"
@@ -131,6 +152,77 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Homepage Hero Banner Editor */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
+            <ImageIcon className="w-4 h-4 text-brand-400" />
+            <span>Homepage Hero Banner & Promotions</span>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-300 mb-1">Hero Promotion Badge</label>
+                <input
+                  type="text"
+                  placeholder="Seasonal Home Living Edition"
+                  value={hero.badge || ""}
+                  onChange={(e) => updateHero("badge", e.target.value)}
+                  className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-medium"
+                />
+              </div>
+              <div>
+                <label className="block font-bold text-slate-300 mb-1">CTA Button Text & Link</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Explore Collections"
+                    value={hero.buttonText || ""}
+                    onChange={(e) => updateHero("buttonText", e.target.value)}
+                    className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-medium"
+                  />
+                  <input
+                    type="text"
+                    placeholder="/products"
+                    value={hero.buttonLink || ""}
+                    onChange={(e) => updateHero("buttonLink", e.target.value)}
+                    className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-medium font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">Hero Main Heading Title</label>
+              <input
+                type="text"
+                value={hero.title || ""}
+                onChange={(e) => updateHero("title", e.target.value)}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">Hero Subtitle / Description</label>
+              <textarea
+                rows={3}
+                value={hero.subtitle || ""}
+                onChange={(e) => updateHero("subtitle", e.target.value)}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-medium resize-none leading-relaxed"
+              />
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-300 mb-2">Hero Cover Image (Upload or URL)</label>
+              <ImageUploader
+                images={hero.image ? [hero.image] : []}
+                onChange={(imgs) => updateHero("image", imgs[0] || "/logo.jpg")}
+                maxImages={1}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Announcement Ticker Bar */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -146,7 +238,7 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, announcementBarActive: e.target.checked })}
                 className="w-4 h-4 rounded text-brand-500"
               />
-              <label htmlFor="barActive" className="text-slate-300 font-bold">Enabled</label>
+              <label htmlFor="barActive" className="text-slate-300 font-bold cursor-pointer">Enabled</label>
             </div>
           </div>
 
@@ -165,7 +257,7 @@ export default function AdminSettingsPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
             <Truck className="w-4 h-4 text-brand-400" />
-            <span>Delivery Fees & Free Shipping Policy</span>
+            <span>Delivery Tariffs & Complimentary Shipping Rule</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -208,7 +300,7 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        {/* Global SEO & Social Meta Configuration */}
+        {/* Global SEO Configuration */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
             <Globe className="w-4 h-4 text-brand-400" />
@@ -240,7 +332,7 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-300 mb-1">SEO Target Keywords (Comma separated)</label>
               <input
                 type="text"
-                value={settings.seoKeywords.join(", ")}
+                value={settings.seoKeywords ? settings.seoKeywords.join(", ") : ""}
                 onChange={(e) =>
                   setSettings({
                     ...settings,

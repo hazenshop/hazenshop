@@ -15,13 +15,14 @@ import {
   PhoneCall,
   Clock,
 } from "lucide-react";
-import { Order } from "@/lib/types";
+import { Order, SiteSettings } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
 export default function OrderSuccessPage() {
   const params = useParams();
   const orderId = params.orderId as string;
   const [order, setOrder] = useState<Order | null>(null);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,14 +37,16 @@ export default function OrderSuccessPage() {
       console.error(e);
     }
 
-    if (orderId) {
-      fetch(`/api/orders?id=${orderId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.order) setOrder(data.order);
-        })
-        .finally(() => setLoading(false));
-    }
+    Promise.all([
+      orderId ? fetch(`/api/orders?id=${orderId}`).then((r) => r.json()) : Promise.resolve({}),
+      fetch("/api/settings").then((r) => r.json()),
+    ])
+      .then(([orderData, setData]) => {
+        if (orderData.order) setOrder(orderData.order);
+        if (setData.settings) setSettings(setData.settings);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
   }, [orderId]);
 
   const handlePrint = () => {
@@ -52,7 +55,9 @@ export default function OrderSuccessPage() {
     }
   };
 
-  const whatsappInquiryUrl = `https://wa.me/8801700000000?text=${encodeURIComponent(
+  const cleanWhatsApp = (settings?.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
+  const formattedWhatsApp = cleanWhatsApp.startsWith("88") ? cleanWhatsApp : `88${cleanWhatsApp}`;
+  const whatsappInquiryUrl = `https://wa.me/${formattedWhatsApp}?text=${encodeURIComponent(
     `Hello Hazen! I just placed order #${orderId}. Please let me know when it will be dispatched.`
   )}`;
 

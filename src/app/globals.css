@@ -84,15 +84,26 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 2px rgba(184, 135, 63, 0.25);
 }
 
-/* Safe area insets for notched phones */
-.pb-safe {
-  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+/* Smooth Marquee Running Text */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
-.pt-safe {
-  padding-top: max(0.75rem, env(safe-area-inset-top));
+
+.animate-marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 22s linear infinite;
+  will-change: transform;
 }
-.bottom-safe {
-  bottom: max(0.5rem, env(safe-area-inset-bottom));
+
+.animate-marquee:hover,
+.animate-marquee:active {
+  animation-play-state: paused;
 }
 
 

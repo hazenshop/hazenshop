@@ -49,29 +49,29 @@ export default function Footer({
 
           {/* Quick Links */}
           <div className="space-y-3">
-            <h4 className="font-heading text-xs uppercase tracking-widest text-white font-semibold">
-              Navigation
+            <h4 className="font-heading text-xs uppercase tracking-widest text-white font-bold">
+              প্রয়োজনীয় লিংক
             </h4>
             <ul className="space-y-2 text-xs font-normal">
               <li>
                 <Link href="/" className="text-slate-400 hover:text-white transition-colors">
-                  Overview
+                  হোম পেজ
                 </Link>
               </li>
               <li>
                 <Link href="/products" className="text-slate-400 hover:text-white transition-colors">
-                  All Collections
+                  সকল কালেকশন
                 </Link>
               </li>
               <li>
                 <Link href="/track-order" className="text-slate-400 hover:text-white transition-colors flex items-center gap-1.5">
-                  <Truck className="w-3.5 h-3.5 text-brand-400" />
-                  <span>Track Parcel</span>
+                  <Truck className="w-3.5 h-3.5 text-brand-gold-400" />
+                  <span>পার্সেল ট্র্যাকিং</span>
                 </Link>
               </li>
               <li>
                 <Link href="/admin" className="text-slate-500 hover:text-slate-300 transition-colors">
-                  Store Management
+                  স্টোর ম্যানেজমেন্ট
                 </Link>
               </li>
             </ul>
@@ -79,8 +79,8 @@ export default function Footer({
 
           {/* Popular Categories */}
           <div className="space-y-3">
-            <h4 className="font-heading text-xs uppercase tracking-widest text-white font-semibold">
-              Collections
+            <h4 className="font-heading text-xs uppercase tracking-widest text-white font-bold">
+              পণ্য ক্যাটাগরি
             </h4>
             <ul className="space-y-2 text-xs font-normal">
               {categories.slice(0, 5).map((cat) => (
@@ -96,41 +96,41 @@ export default function Footer({
             </ul>
           </div>
 
-          {/* Contact & Concierge */}
+          {/* Contact & Customer Care */}
           <div className="space-y-3">
-            <h4 className="font-heading text-xs uppercase tracking-widest text-white font-semibold">
-              Concierge
+            <h4 className="font-heading text-xs uppercase tracking-widest text-white font-bold">
+              যোগাযোগ ও হেল্পলাইন
             </h4>
             <ul className="space-y-3 text-xs">
               <li className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-brand-400 shrink-0 border border-white/10">
-                  <Phone className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-brand-gold-400 shrink-0 border border-white/10">
+                  <Phone className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[10px] text-slate-400 uppercase tracking-wider">Hotline</span>
-                  <a href={`tel:${settings.hotline}`} className="font-semibold text-slate-200 hover:text-white">
+                  <span className="block text-[10px] text-slate-400 uppercase tracking-wider">হটলাইন (সরাসরি কল)</span>
+                  <a href={`tel:${settings.hotline}`} className="font-bold text-slate-200 hover:text-white text-sm">
                     {settings.hotline}
                   </a>
                 </div>
               </li>
               <li className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-brand-400 shrink-0 border border-white/10">
-                  <Mail className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-brand-gold-400 shrink-0 border border-white/10">
+                  <Mail className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[10px] text-slate-400 uppercase tracking-wider">Email</span>
+                  <span className="block text-[10px] text-slate-400 uppercase tracking-wider">ইমেইল সাপোর্ট</span>
                   <a href={`mailto:${settings.supportEmail}`} className="font-medium text-slate-200 hover:text-white">
                     {settings.supportEmail}
                   </a>
                 </div>
               </li>
               <li className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-brand-400 shrink-0 border border-white/10">
-                  <MapPin className="w-3.5 h-3.5" />
+                <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center text-brand-gold-400 shrink-0 border border-white/10">
+                  <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <span className="block text-[10px] text-slate-400 uppercase tracking-wider">Dispatch Center</span>
-                  <span className="text-slate-300 text-xs">Dhaka, Bangladesh</span>
+                  <span className="block text-[10px] text-slate-400 uppercase tracking-wider">ডেলিভারি হাব</span>
+                  <span className="text-slate-300 text-xs">ঢাকা, বাংলাদেশ (সারাদেশে হোম ডেলিভারি)</span>
                 </div>
               </li>
             </ul>
@@ -138,9 +138,9 @@ export default function Footer({
         </div>
 
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} HAZEN Luxury Living. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} HAZEN Luxury Living. সর্বস্বত্ব সংরক্ষিত।</p>
           <p className="text-slate-400">
-            Crafted for tranquil living & restorative slumber
+            ১০০% অথেনটিক কোয়ালিটি ও ক্যাশ অন ডেলিভারি সুবিধা
           </p>
         </div>
       </div>

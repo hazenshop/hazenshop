@@ -132,7 +132,12 @@ export const db = {
 
   async getProductBySlug(slug: string): Promise<Product | null> {
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from("products").select("*").eq("slug", slug).single();
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .or(`slug.eq.${slug},id.eq.${slug}`)
+        .limit(1)
+        .single();
       if (!error && data) {
         return {
           id: data.id,
@@ -537,20 +542,36 @@ export const db = {
     // Decrement inventory stock for ordered products
     try {
       cachedProducts = readJsonFile("products.json", cachedProducts);
-      newOrder.items.forEach((item) => {
-        const prodIndex = cachedProducts.findIndex((p) => p.id === item.productId);
+      for (const item of newOrder.items) {
+        const prodIndex = cachedProducts.findIndex(
+          (p) => p.id === item.productId || p.slug === item.productId
+        );
         if (prodIndex > -1) {
           const currentProd = cachedProducts[prodIndex];
           currentProd.stock = Math.max(0, currentProd.stock - item.quantity);
           if (item.variantId && currentProd.variants) {
             const vIndex = currentProd.variants.findIndex((v) => v.id === item.variantId);
             if (vIndex > -1) {
-              currentProd.variants[vIndex].stock = Math.max(0, currentProd.variants[vIndex].stock - item.quantity);
+              currentProd.variants[vIndex].stock = Math.max(
+                0,
+                currentProd.variants[vIndex].stock - item.quantity
+              );
             }
           }
           currentProd.updatedAt = new Date().toISOString();
+
+          // Sync stock to Supabase if configured
+          if (isSupabaseConfigured && supabase) {
+            await supabase
+              .from("products")
+              .update({
+                stock: currentProd.stock,
+                variants: currentProd.variants,
+              })
+              .eq("id", currentProd.id);
+          }
         }
-      });
+      }
       writeJsonFile("products.json", cachedProducts);
     } catch (err) {
       console.error("Failed to update product stock", err);
@@ -559,10 +580,18 @@ export const db = {
     return newOrder;
   },
 
-  async updateOrderStatus(id: string, status: OrderStatus, courierInfo?: { courierName?: string; trackingCode?: string }): Promise<Order | null> {
+  async updateOrderStatus(
+    id: string,
+    status: OrderStatus,
+    courierInfo?: { courierName?: string; trackingCode?: string }
+  ): Promise<Order | null> {
     cachedOrders = readJsonFile("orders.json", cachedOrders);
     const idx = cachedOrders.findIndex((o) => o.id === id);
     if (idx === -1) return null;
+
+    const previousStatus = cachedOrders[idx].status;
+    const isNowCancelled = status === "cancelled" || status === "returned";
+    const wasActive = previousStatus !== "cancelled" && previousStatus !== "returned";
 
     cachedOrders[idx] = {
       ...cachedOrders[idx],
@@ -573,6 +602,42 @@ export const db = {
     };
 
     writeJsonFile("orders.json", cachedOrders);
+
+    // Auto-restock inventory if an active order gets cancelled/returned
+    if (wasActive && isNowCancelled && cachedOrders[idx].items?.length) {
+      try {
+        cachedProducts = readJsonFile("products.json", cachedProducts);
+        for (const item of cachedOrders[idx].items) {
+          const prodIndex = cachedProducts.findIndex(
+            (p) => p.id === item.productId || p.slug === item.productId
+          );
+          if (prodIndex > -1) {
+            const currentProd = cachedProducts[prodIndex];
+            currentProd.stock += item.quantity;
+            if (item.variantId && currentProd.variants) {
+              const vIndex = currentProd.variants.findIndex((v) => v.id === item.variantId);
+              if (vIndex > -1) {
+                currentProd.variants[vIndex].stock += item.quantity;
+              }
+            }
+            currentProd.updatedAt = new Date().toISOString();
+
+            if (isSupabaseConfigured && supabase) {
+              await supabase
+                .from("products")
+                .update({
+                  stock: currentProd.stock,
+                  variants: currentProd.variants,
+                })
+                .eq("id", currentProd.id);
+            }
+          }
+        }
+        writeJsonFile("products.json", cachedProducts);
+      } catch (err) {
+        console.error("Failed to restock cancelled order products", err);
+      }
+    }
 
     if (isSupabaseConfigured && supabase) {
       await supabase

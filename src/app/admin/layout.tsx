@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -20,7 +20,22 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth", { method: "DELETE" });
+      router.push("/admin/login");
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const navItems = [
     { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -30,7 +45,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Media & Storage", href: "/admin/storage", icon: HardDrive },
     { name: "Site Settings & SEO", href: "/admin/settings", icon: Settings },
   ];
-
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
@@ -82,7 +96,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </Link>
           </div>
 
-
           {/* Nav List */}
           <nav className="space-y-1.5">
             {navItems.map((item) => {
@@ -117,6 +130,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <ExternalLink className="w-3.5 h-3.5" />
             <span>Open Live Storefront</span>
           </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 p-2 rounded-xl bg-slate-950/60 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800/80 text-xs font-medium transition-colors"
+          >
+            <span>Sign Out</span>
+          </button>
           <div className="text-[10px] text-slate-500 text-center">
             Hazen E-Commerce Engine v1.0
           </div>

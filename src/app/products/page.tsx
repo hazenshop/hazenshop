@@ -47,7 +47,7 @@ export default async function ProductsPage({
         </div>
 
         {/* Category Pills - Smooth horizontal scroll on mobile */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full scrollbar-none snap-x shrink-0">
+        <div className="w-full sm:w-auto min-w-0 flex items-center gap-2 overflow-x-auto pb-1 max-w-full scrollbar-none snap-x">
           <Link
             href="/products"
             className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 snap-start min-h-[38px] flex items-center ${

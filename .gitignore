@@ -2,30 +2,43 @@
 /node_modules
 /.pnp
 .pnp.js
+.yarn/install-state.gz
 
 # testing
 /coverage
 
-# next.js
+# next.js build outputs
 /.next/
 /out/
-
-# production
 /build
 
-# misc
+# misc & OS files
 .DS_Store
 *.pem
+Thumbs.db
 
-# debug
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
 
-# local env files
+# environment files (never commit real secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env*.local
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
+# vercel
+.vercel
+
+# turbo
+.turbo

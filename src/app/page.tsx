@@ -21,9 +21,6 @@ export default async function HomePage() {
   const allProducts = await db.getProducts();
 
   const flashSaleProducts = allProducts.filter((p) => p.flashSale);
-  const luxuryBedsheets = allProducts.filter((p) => p.category === "luxury-bedsheets" || p.category === "fitted-bedsheets");
-  const windowCurtains = allProducts.filter((p) => p.category === "window-curtains" || p.category === "blackout-curtains" || p.category === "sheer-curtains");
-  const comforters = allProducts.filter((p) => p.category === "comforters-quilts");
 
   const hero = settings.heroBanners?.[0] || {
     id: "hero-default",
@@ -36,10 +33,10 @@ export default async function HomePage() {
   };
 
   return (
-    <div className="space-y-12 sm:space-y-20 pb-16">
+    <div className="space-y-10 sm:space-y-16 pb-16">
       {/* EDITORIAL HERO BANNER */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-6">
-        <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white min-h-[400px] sm:min-h-[480px] md:min-h-[520px] flex items-center shadow-card border border-white/10">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4">
+        <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white min-h-[380px] sm:min-h-[460px] md:min-h-[500px] flex items-center shadow-card border border-white/10">
           {/* Background Image with Gradient Overlay */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -47,23 +44,23 @@ export default async function HomePage() {
               alt={hero.title}
               fill
               priority
-              className="object-cover object-center opacity-35 scale-100 transition-transform duration-1000"
+              className="object-cover object-center opacity-40 scale-100 transition-transform duration-1000"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-brand-maroon-800/95 via-brand-maroon-700/85 sm:via-brand-maroon-700/80 to-transparent" />
           </div>
 
           {/* Hero Content */}
-          <div className="relative z-10 p-5 sm:p-12 lg:p-16 max-w-2xl space-y-4 sm:space-y-6">
+          <div className="relative z-10 p-5 sm:p-10 lg:p-14 max-w-2xl space-y-3.5 sm:space-y-5">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-brand-gold-300 text-[10px] font-bold tracking-widest uppercase backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-brand-gold-300" />
               <span>{hero.badge || "Special Edition"}</span>
             </div>
 
-            <h1 className="font-heading text-2xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.15] sm:leading-[1.1] tracking-tight text-white">
+            <h1 className="font-heading text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.15] sm:leading-[1.1] tracking-tight text-white">
               {hero.title}
             </h1>
 
-            <p className="text-xs sm:text-base text-slate-100 font-normal leading-relaxed max-w-xl">
+            <p className="text-xs sm:text-sm text-slate-100 font-normal leading-relaxed max-w-xl">
               {hero.subtitle}
             </p>
 
@@ -76,63 +73,62 @@ export default async function HomePage() {
                 <ArrowRight className="w-4 h-4 text-brand-maroon-700 group-hover:translate-x-0.5 transition-transform" />
               </Link>
 
-
               <Link
                 href="/track-order"
                 className="bg-white/10 hover:bg-white/15 text-slate-200 font-medium px-5 sm:px-6 py-3 sm:py-3.5 rounded-full backdrop-blur-md transition-all text-xs sm:text-sm border border-white/10 text-center min-h-[44px] flex items-center justify-center"
               >
-                Track Your Parcel
+                পার্সেল ট্র্যাক করুন (Track Order)
               </Link>
             </div>
 
             {/* Quick trust metrics */}
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-3 sm:pt-5 text-[11px] sm:text-xs text-slate-300/90 font-normal border-t border-white/10">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-6 pt-3 sm:pt-4 text-[11px] sm:text-xs text-slate-300/90 font-normal border-t border-white/10">
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-                <span>Cash on Delivery (ক্যাশ অন ডেলিভারি)</span>
+                <CheckCircle className="w-3.5 h-3.5 text-brand-gold-400 shrink-0" />
+                <span>১০০% ক্যাশ অন ডেলিভারি</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-                <span>Inspect Before Payment</span>
+                <CheckCircle className="w-3.5 h-3.5 text-brand-gold-400 shrink-0" />
+                <span>প্যাকেট দেখে মূল্য পরিশোধ</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-brand-400 shrink-0" />
-                <span>7-Day Size & Color Exchange</span>
+                <CheckCircle className="w-3.5 h-3.5 text-brand-gold-400 shrink-0" />
+                <span>৭ দিনের সাইজ/কালার এক্সচেঞ্জ</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* POPULAR CATEGORIES */}
+      {/* POPULAR CATEGORIES SHOWCASE */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-5 sm:mb-8 pb-3 sm:pb-4 border-b border-black/[0.05]">
+        <div className="flex items-end justify-between mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
           <div>
-            <span className="text-[10px] font-bold uppercase text-brand-600 tracking-widest block mb-1">
+            <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
               Curated Departments
             </span>
-            <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Bedsheets & Window Curtains (পর্দা)
+            <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              সকল কালেকশন ও ক্যাটাগরি
             </h2>
           </div>
           <Link
             href="/products"
-            className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
+            className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1 group transition-colors"
           >
-            <span>View All</span>
+            <span>সব দেখুন</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
 
-        {/* Mobile Horizontal Scroll + Desktop Grid */}
-        <div className="flex sm:grid sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 overflow-x-auto sm:overflow-visible pb-2 sm:pb-0 scrollbar-none snap-x">
+        {/* Categories Grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
           {categories.map((cat) => (
             <Link
               key={cat.id}
               href={`/category/${cat.slug}`}
-              className="group relative rounded-2xl bg-white border border-black/[0.05] shadow-subtle hover:shadow-card-hover transition-all text-center p-3 sm:p-4 flex flex-col items-center hover:-translate-y-0.5 shrink-0 w-28 sm:w-auto snap-start"
+              className="group relative rounded-2xl bg-white border border-slate-100 shadow-subtle hover:shadow-card transition-all text-center p-3 sm:p-4 flex flex-col items-center hover:-translate-y-0.5"
             >
-              <div className="relative w-16 h-16 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-2.5 sm:mb-3.5 bg-slate-50 border border-slate-100 group-hover:scale-105 transition-transform duration-500">
+              <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-2 sm:mb-3 bg-slate-50 border border-slate-200 group-hover:scale-105 transition-transform duration-500">
                 <Image
                   src={cat.image || "/logo.jpg"}
                   alt={cat.name}
@@ -140,43 +136,38 @@ export default async function HomePage() {
                   className="object-cover"
                 />
               </div>
-              <h3 className="font-heading font-semibold text-xs sm:text-sm text-slate-900 group-hover:text-brand-700 transition-colors leading-tight line-clamp-2">
+              <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-brand-maroon-700 transition-colors leading-tight line-clamp-2">
                 {cat.name}
               </h3>
-              {cat.productCount ? (
-                <span className="text-[10px] text-slate-400 mt-1">
-                  {cat.productCount} items
-                </span>
-              ) : null}
             </Link>
           ))}
         </div>
       </section>
 
-      {/* FLASH SALE / LIMITED RELEASE */}
+      {/* FLASH SALE / LIMITED RELEASE (IF ANY) */}
       {flashSaleProducts.length > 0 && (
         <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-3xl p-4 sm:p-10 border border-black/[0.06] shadow-subtle">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100">
+          <div className="bg-white rounded-3xl p-4 sm:p-8 border border-black/[0.06] shadow-subtle space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="bg-brand-dark text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full">
-                    Limited Time Deals
+                  <span className="bg-brand-maroon-700 text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                    Flash Deals
                   </span>
-                  <span className="text-xs text-brand-600 font-medium">
-                    Complimentary Nationwide Delivery on Bundles
+                  <span className="text-xs text-brand-maroon-700 font-medium">
+                    সীমিত সময়ের বিশেষ মূল্যছাড়
                   </span>
                 </div>
-                <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Seasonal Home Flash Deals
+                <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  হট ডিল ও স্পেশাল অফার
                 </h2>
               </div>
 
               <Link
                 href="/products?filter=flashSale"
-                className="text-xs font-semibold text-brand-dark hover:text-brand-600 bg-slate-50 border border-slate-200/80 px-4 py-2 rounded-full transition-colors"
+                className="text-xs font-bold text-brand-maroon-700 hover:text-brand-maroon-800 bg-brand-50 border border-brand-200/80 px-4 py-2 rounded-full transition-colors"
               >
-                Explore All Deals
+                সব ডিল দেখুন &rarr;
               </Link>
             </div>
 
@@ -189,136 +180,44 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* LUXURY BEDSHEETS FEATURED GRID */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-5 sm:mb-8 pb-3 sm:pb-4 border-b border-black/[0.05]">
-          <div>
-            <span className="text-[10px] font-bold uppercase text-brand-600 tracking-widest block mb-1">
-              Master Craftsmanship
-            </span>
-            <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              100% Egyptian Cotton Bedsheets (বিছানার চাদর)
-            </h2>
-          </div>
-          <Link
-            href="/category/luxury-bedsheets"
-            className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
-          >
-            <span>Explore Bedsheets</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
+      {/* DYNAMIC CATEGORY SHOWCASE SECTIONS */}
+      {categories.map((category) => {
+        const catProducts = allProducts.filter((p) => p.category === category.slug);
+        if (catProducts.length === 0) return null;
 
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {luxuryBedsheets.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* WINDOW CURTAINS / PORDA SHOWCASE */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-5 sm:mb-8 pb-3 sm:pb-4 border-b border-black/[0.05]">
-          <div>
-            <span className="text-[10px] font-bold uppercase text-brand-600 tracking-widest block mb-1">
-              Window & Door Drapery
-            </span>
-            <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Designer Window Curtains & Porda (জানালার পর্দা)
-            </h2>
-          </div>
-          <Link
-            href="/category/window-curtains"
-            className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
-          >
-            <span>Explore Curtains</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {windowCurtains.slice(0, 4).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* EDITORIAL PROMO FEATURE: BLACKOUT CURTAINS & COMFORTERS */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white p-6 sm:p-12 shadow-card border border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
-          <div className="max-w-xl space-y-3 sm:space-y-4">
-            <span className="bg-white/15 text-brand-gold-300 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md border border-white/20">
-              কমপ্লিট হোম ডেকোর কালেকশন
-            </span>
-            <h3 className="font-heading text-xl sm:text-4xl font-extrabold leading-tight text-white">
-              ১০০% ব্ল্যাকআউট পর্দা ও প্রিমিয়াম এসি কম্ফোটার
-            </h3>
-            <p className="text-slate-100 text-xs sm:text-sm font-normal leading-relaxed">
-              সূর্যের কড়া আলো ও তাপ প্রতিরোধক ১০০% ব্ল্যাকআউট জানালার পর্দা এবং প্রিমিয়াম ৩৫০ জিএসএম ক্লাউড কম্ফোটার। পুরো বাংলাদেশে ক্যাশ অন ডেলিভারিতে হোম ডেলিভারি।
-            </p>
-            <div className="pt-2 flex flex-wrap gap-3">
+        return (
+          <section key={category.id} className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
+                  Collection
+                </span>
+                <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {category.name}
+                </h2>
+              </div>
               <Link
-                href="/category/blackout-curtains"
-                className="bg-white hover:bg-slate-100 text-brand-maroon-700 font-bold px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm shadow-card min-h-[44px]"
+                href={`/category/${category.slug}`}
+                className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1 group transition-colors"
               >
-                <span>ব্ল্যাকআউট পর্দা কালেকশন</span>
-                <ArrowRight className="w-4 h-4 text-brand-maroon-700" />
-              </Link>
-              <Link
-                href="/category/comforters-quilts"
-                className="bg-white/15 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-full transition-all inline-flex items-center justify-center gap-2 text-xs sm:text-sm border border-white/20 min-h-[44px]"
-              >
-                <span>এসি কম্ফোটার দেখুন</span>
+                <span>সব দেখুন ({catProducts.length})</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
-          </div>
 
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {catProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
-          <div className="relative w-full md:w-80 aspect-[4/3] rounded-2xl overflow-hidden shadow-card border border-white/10 shrink-0">
-            <Image
-              src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop"
-              alt="Luxury Window Curtain & Bedding"
-              fill
-              className="object-cover hover:scale-105 transition-transform duration-700"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ALL FEATURED PRODUCTS */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-5 sm:mb-8 pb-3 sm:pb-4 border-b border-black/[0.05]">
-          <div>
-            <span className="text-[10px] font-bold uppercase text-brand-600 tracking-widest block mb-1">
-              Curated Selection
-            </span>
-            <h2 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              All Bedsheet & Window Curtain Collections
-            </h2>
-          </div>
-          <Link
-            href="/products"
-            className="text-xs font-semibold text-slate-600 hover:text-brand-dark flex items-center gap-1 group transition-colors"
-          >
-            <span>Explore All ({allProducts.length})</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {allProducts.slice(0, 8).map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* TRUST BADGES SECTION */}
+      {/* TRUST BADGES */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <TrustBadges />
       </section>
     </div>
   );
 }
-
-
-
