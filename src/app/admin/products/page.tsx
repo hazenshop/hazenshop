@@ -9,10 +9,7 @@ import {
   Trash2,
   Edit2,
   Search,
-  CheckCircle2,
   ExternalLink,
-  Eye,
-  Layers,
 } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
@@ -61,21 +58,21 @@ export default function AdminProductsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
-            Product & Inventory Management
+          <h1 className="text-xl sm:text-3xl font-black text-white">
+            Product & Inventory
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-400 mt-0.5">
             Manage bedsheet catalogs, variations, pricing discounts & SEO meta tags
           </p>
         </div>
 
         <Link
           href="/admin/products/new"
-          className="bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-black text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center gap-2"
+          className="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-black text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>Add New Product</span>
@@ -83,7 +80,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Search Bar & Count */}
-      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
+      <div className="bg-slate-900 border border-slate-800 p-3.5 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-2 justify-between items-center">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
@@ -91,20 +88,112 @@ export default function AdminProductsPage() {
             placeholder="Search products by title or category..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950 text-xs text-white rounded-xl pl-10 pr-4 py-2.5 border border-slate-800 focus:outline-none focus:border-brand-500"
+            className="w-full bg-slate-950 text-xs text-white rounded-xl pl-10 pr-4 py-2.5 border border-slate-800 focus:outline-none focus:border-brand-500 min-h-[42px]"
           />
         </div>
-        <span className="text-xs text-slate-400 font-bold hidden sm:inline">
-          {filtered.length} Products Available
+        <span className="text-xs text-slate-400 font-bold self-start sm:self-auto">
+          {filtered.length} Products Found
         </span>
       </div>
 
-      {/* Products Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+      {/* MOBILE PRODUCT CARDS VIEW (Clean & Touch-friendly on Phones) */}
+      <div className="space-y-3 md:hidden">
+        {filtered.length === 0 ? (
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 space-y-3">
+            <Package className="w-8 h-8 mx-auto text-slate-500" />
+            <h4 className="text-white font-bold text-sm">No Products Found</h4>
+            <p className="text-xs text-slate-400">
+              {search ? `No products match "${search}".` : "Your catalog is empty. Click below to add your first product."}
+            </p>
+            {!search && (
+              <Link
+                href="/admin/products/new"
+                className="inline-flex items-center gap-1.5 bg-brand-500 text-brand-dark font-black text-xs px-4 py-2.5 rounded-xl min-h-[40px]"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add First Product</span>
+              </Link>
+            )}
+          </div>
+        ) : (
+          filtered.map((p) => (
+            <div
+              key={p.id}
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-md"
+            >
+              <div className="flex gap-3 items-start">
+                <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shrink-0">
+                  <Image src={p.images[0] || "/logo.jpg"} alt={p.name} fill className="object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    {p.categoryName}
+                  </span>
+                  <h3 className="font-bold text-white text-xs line-clamp-2 mt-0.5 leading-snug">
+                    {p.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="font-black text-brand-400 text-xs">
+                      {formatPrice(p.salePrice ?? p.price)}
+                    </span>
+                    {p.salePrice && (
+                      <span className="text-[10px] text-slate-500 line-through">
+                        {formatPrice(p.price)}
+                      </span>
+                    )}
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.2 rounded-full ${
+                        p.stock > 5
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                      }`}
+                    >
+                      {p.stock} in stock
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action row */}
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+                <a
+                  href={`/products/${p.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-brand-400 hover:text-brand-300 font-mono inline-flex items-center gap-1 min-h-[38px] py-1"
+                >
+                  <span>View on Store</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/admin/products/${p.id}/edit`}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-brand-400 font-bold text-xs flex items-center gap-1 min-h-[38px]"
+                    title="Edit Product"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
+                  </Link>
+                  <button
+                    onClick={() => handleDeleteProduct(p.id, p.name)}
+                    className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 min-h-[38px] min-w-[38px] flex items-center justify-center"
+                    title="Delete Product"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* DESKTOP PRODUCTS TABLE (Shown on md+ screens) */}
+      <div className="hidden md:block bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[650px]">
             <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-slate-800">
-
               <tr>
                 <th className="p-4">Product Image & Title</th>
                 <th className="p-4">Category</th>

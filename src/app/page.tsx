@@ -232,22 +232,16 @@ export default async function HomePage() {
             <p className="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
               আমাদের প্রিমিয়াম বেডশিট ও জানালার পর্দা কালেকশন প্রস্তুত হচ্ছে। সরাসরি হোয়াটসঅ্যাপে নক দিয়ে বিস্তারিত জানতে পারেন।
             </p>
-            <div className="pt-2 flex flex-wrap justify-center gap-3">
+            <div className="pt-2">
               <a
                 href={`https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent("আসসালামু আলাইকুম Hazen! আমি আপনাদের নতুন কালেকশন সম্পর্কে জানতে চাই।")}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-card transition-all"
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-card transition-all min-h-[44px]"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>হোয়াটসঅ্যাপে যোগাযোগ</span>
               </a>
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-5 py-3.5 rounded-full transition-all"
-              >
-                <span>স্টোর অ্যাডমিন লগইন</span>
-              </Link>
             </div>
           </div>
         </section>

@@ -69,11 +69,6 @@ export default function Footer({
                   <span>পার্সেল ট্র্যাকিং</span>
                 </Link>
               </li>
-              <li>
-                <Link href="/admin" className="text-slate-500 hover:text-slate-300 transition-colors">
-                  স্টোর ম্যানেজমেন্ট
-                </Link>
-              </li>
             </ul>
           </div>
 
