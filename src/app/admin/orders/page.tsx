@@ -199,12 +199,29 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800 text-slate-200">
-              {filteredOrders.map((order) => {
-                const statusStyle = getStatusColor(order.status);
-                const trackingUrl = getCourierTrackingUrl(order.courierName, order.trackingCode);
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="p-12 text-center text-slate-400">
+                    <div className="max-w-sm mx-auto space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                        <Clock className="w-6 h-6" />
+                      </div>
+                      <h4 className="text-white font-bold text-sm">No Orders Found</h4>
+                      <p className="text-xs text-slate-400">
+                        {search || statusFilter !== "all"
+                          ? "No orders match your filter criteria."
+                          : "No customer orders have been placed yet. New Cash on Delivery orders will appear here automatically."}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredOrders.map((order) => {
+                  const statusStyle = getStatusColor(order.status);
+                  const trackingUrl = getCourierTrackingUrl(order.courierName, order.trackingCode);
 
-                return (
-                  <tr key={order.id} className="hover:bg-slate-800/40 transition-colors">
+                  return (
+                    <tr key={order.id} className="hover:bg-slate-800/40 transition-colors">
                     {/* ID */}
                     <td className="p-4">
                       <span className="font-mono font-black text-brand-400 block">{order.id}</span>
@@ -327,8 +344,9 @@ export default function AdminOrdersPage() {
                     </td>
                   </tr>
                 );
-              })}
-            </tbody>
+              })
+            )}
+          </tbody>
           </table>
         </div>
       </div>

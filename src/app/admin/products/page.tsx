@@ -117,97 +117,122 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800 text-slate-200">
-              {filtered.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                  {/* Title & Image */}
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shrink-0">
-                        <Image src={p.images[0] || "/logo.jpg"} alt={p.name} fill className="object-cover" />
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="p-12 text-center text-slate-400">
+                    <div className="max-w-sm mx-auto space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+                        <Package className="w-6 h-6" />
                       </div>
-                      <div className="min-w-0">
+                      <h4 className="text-white font-bold text-sm">No Products Found</h4>
+                      <p className="text-xs text-slate-400">
+                        {search ? `No products match "${search}".` : "Your catalog is empty. Click below to add your first product."}
+                      </p>
+                      {!search && (
                         <Link
-                          href={`/admin/products/${p.id}/edit`}
-                          className="font-bold text-white hover:text-brand-400 block truncate max-w-xs transition-colors"
+                          href="/admin/products/new"
+                          className="inline-flex items-center gap-1.5 bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-4 py-2 rounded-xl transition-all shadow-md mt-2"
                         >
-                          {p.name}
+                          <Plus className="w-4 h-4" />
+                          <span>Add Your First Product</span>
                         </Link>
-                        <a
-                          href={`/products/${p.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-brand-400/80 hover:text-brand-300 font-mono inline-flex items-center gap-1 mt-0.5"
-                        >
-                          <span>/products/{p.slug}</span>
-                          <ExternalLink className="w-2.5 h-2.5" />
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Category */}
-                  <td className="p-4">
-                    <span className="bg-slate-800 text-slate-300 font-bold px-2.5 py-1 rounded-lg">
-                      {p.categoryName}
-                    </span>
-                  </td>
-
-                  {/* Regular Price */}
-                  <td className="p-4 font-bold text-slate-300">{formatPrice(p.price)}</td>
-
-                  {/* Sale Price */}
-                  <td className="p-4 font-black text-brand-400">
-                    {p.salePrice ? formatPrice(p.salePrice) : "-"}
-                  </td>
-
-                  {/* Stock */}
-                  <td className="p-4">
-                    <span
-                      className={`font-bold px-2.5 py-1 rounded-lg ${
-                        p.stock > 5 ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
-                      }`}
-                    >
-                      {p.stock} sets
-                    </span>
-                  </td>
-
-                  {/* Variants */}
-                  <td className="p-4">
-                    <span className="text-slate-300 font-bold">
-                      {p.variants ? p.variants.length : 0} options
-                    </span>
-                  </td>
-
-                  {/* Badge */}
-                  <td className="p-4">
-                    {p.badge && (
-                      <span className="bg-brand-500/20 text-brand-400 font-bold text-[10px] uppercase px-2 py-0.5 rounded border border-brand-500/30">
-                        {p.badge}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Action Buttons */}
-                  <td className="p-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href={`/admin/products/${p.id}/edit`}
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-400 hover:text-white transition-colors"
-                        title="Edit Product"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </Link>
-                      <button
-                        onClick={() => handleDeleteProduct(p.id, p.name)}
-                        className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
-                        title="Delete Product"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      )}
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
+                    {/* Title & Image */}
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shrink-0">
+                          <Image src={p.images[0] || "/logo.jpg"} alt={p.name} fill className="object-cover" />
+                        </div>
+                        <div className="min-w-0">
+                          <Link
+                            href={`/admin/products/${p.id}/edit`}
+                            className="font-bold text-white hover:text-brand-400 block truncate max-w-xs transition-colors"
+                          >
+                            {p.name}
+                          </Link>
+                          <a
+                            href={`/products/${p.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-brand-400/80 hover:text-brand-300 font-mono inline-flex items-center gap-1 mt-0.5"
+                          >
+                            <span>/products/{p.slug}</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Category */}
+                    <td className="p-4">
+                      <span className="bg-slate-800 text-slate-300 font-bold px-2.5 py-1 rounded-lg">
+                        {p.categoryName}
+                      </span>
+                    </td>
+
+                    {/* Regular Price */}
+                    <td className="p-4 font-bold text-slate-300">{formatPrice(p.price)}</td>
+
+                    {/* Sale Price */}
+                    <td className="p-4 font-black text-brand-400">
+                      {p.salePrice ? formatPrice(p.salePrice) : "-"}
+                    </td>
+
+                    {/* Stock */}
+                    <td className="p-4">
+                      <span
+                        className={`font-bold px-2.5 py-1 rounded-lg ${
+                          p.stock > 5 ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
+                        }`}
+                      >
+                        {p.stock} sets
+                      </span>
+                    </td>
+
+                    {/* Variants */}
+                    <td className="p-4">
+                      <span className="text-slate-300 font-bold">
+                        {p.variants ? p.variants.length : 0} options
+                      </span>
+                    </td>
+
+                    {/* Badge */}
+                    <td className="p-4">
+                      {p.badge && (
+                        <span className="bg-brand-500/20 text-brand-400 font-bold text-[10px] uppercase px-2 py-0.5 rounded border border-brand-500/30">
+                          {p.badge}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Action Buttons */}
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          href={`/admin/products/${p.id}/edit`}
+                          className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-400 hover:text-white transition-colors"
+                          title="Edit Product"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                          title="Delete Product"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

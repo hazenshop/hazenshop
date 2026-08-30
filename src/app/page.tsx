@@ -8,6 +8,7 @@ import {
   CheckCircle,
   Clock,
   Sparkles,
+  MessageCircle,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import ProductCard from "@/components/product/ProductCard";
@@ -31,6 +32,8 @@ export default async function HomePage() {
     image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
     badge: "Seasonal Home Living Edition",
   };
+
+  const cleanWhatsApp = (settings.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
 
   return (
     <div className="space-y-10 sm:space-y-16 pb-16">
@@ -101,48 +104,50 @@ export default async function HomePage() {
       </section>
 
       {/* POPULAR CATEGORIES SHOWCASE */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
-          <div>
-            <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
-              Curated Departments
-            </span>
-            <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-              সকল কালেকশন ও ক্যাটাগরি
-            </h2>
-          </div>
-          <Link
-            href="/products"
-            className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1 group transition-colors"
-          >
-            <span>সব দেখুন</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {/* Categories Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
-          {categories.map((cat) => (
+      {categories.length > 0 && (
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
+            <div>
+              <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
+                Curated Departments
+              </span>
+              <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                সকল কালেকশন ও ক্যাটাগরি
+              </h2>
+            </div>
             <Link
-              key={cat.id}
-              href={`/category/${cat.slug}`}
-              className="group relative rounded-2xl bg-white border border-slate-100 shadow-subtle hover:shadow-card transition-all text-center p-3 sm:p-4 flex flex-col items-center hover:-translate-y-0.5"
+              href="/products"
+              className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1 group transition-colors"
             >
-              <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-2 sm:mb-3 bg-slate-50 border border-slate-200 group-hover:scale-105 transition-transform duration-500">
-                <Image
-                  src={cat.image || "/logo.jpg"}
-                  alt={cat.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-brand-maroon-700 transition-colors leading-tight line-clamp-2">
-                {cat.name}
-              </h3>
+              <span>সব দেখুন</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
-          ))}
-        </div>
-      </section>
+          </div>
+
+          {/* Categories Grid */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/category/${cat.slug}`}
+                className="group relative rounded-2xl bg-white border border-slate-100 shadow-subtle hover:shadow-card transition-all text-center p-3 sm:p-4 flex flex-col items-center hover:-translate-y-0.5"
+              >
+                <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-2 sm:mb-3 bg-slate-50 border border-slate-200 group-hover:scale-105 transition-transform duration-500">
+                  <Image
+                    src={cat.image || "/logo.jpg"}
+                    alt={cat.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-heading font-bold text-xs sm:text-sm text-slate-900 group-hover:text-brand-maroon-700 transition-colors leading-tight line-clamp-2">
+                  {cat.name}
+                </h3>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* FLASH SALE / LIMITED RELEASE (IF ANY) */}
       {flashSaleProducts.length > 0 && (
@@ -213,6 +218,40 @@ export default async function HomePage() {
           </section>
         );
       })}
+
+      {/* EMPTY CATALOG GRACEFUL STATE */}
+      {allProducts.length === 0 && (
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl p-8 sm:p-14 text-center border border-black/[0.06] shadow-subtle space-y-4 max-w-2xl mx-auto">
+            <div className="w-14 h-14 rounded-full bg-brand-maroon-50 text-brand-maroon-700 flex items-center justify-center mx-auto">
+              <Sparkles className="w-6 h-6" />
+            </div>
+            <h3 className="font-heading font-extrabold text-lg sm:text-2xl text-slate-900">
+              নতুন এক্সক্লুসিভ কালেকশন যুক্ত হচ্ছে
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
+              আমাদের প্রিমিয়াম বেডশিট ও জানালার পর্দা কালেকশন প্রস্তুত হচ্ছে। সরাসরি হোয়াটসঅ্যাপে নক দিয়ে বিস্তারিত জানতে পারেন।
+            </p>
+            <div className="pt-2 flex flex-wrap justify-center gap-3">
+              <a
+                href={`https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent("আসসালামু আলাইকুম Hazen! আমি আপনাদের নতুন কালেকশন সম্পর্কে জানতে চাই।")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-card transition-all"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>হোয়াটসঅ্যাপে যোগাযোগ</span>
+              </a>
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs px-5 py-3.5 rounded-full transition-all"
+              >
+                <span>স্টোর অ্যাডমিন লগইন</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* TRUST BADGES */}
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">

@@ -272,7 +272,15 @@ export default function AdminDashboardPage() {
         </div>
 
         {orders.length === 0 ? (
-          <div className="py-12 text-center text-slate-500 text-xs">No orders recorded yet.</div>
+          <div className="py-12 text-center text-slate-400 space-y-2">
+            <div className="w-10 h-10 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            <p className="text-sm font-bold text-white">No Customer Orders Yet</p>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              When customers complete Cash on Delivery checkout on the storefront, their orders will appear here in real-time.
+            </p>
+          </div>
         ) : (
           <div className="divide-y divide-slate-800 text-xs">
             {orders.slice(0, 6).map((order) => {
