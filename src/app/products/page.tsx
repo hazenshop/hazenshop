@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import ProductCard from "@/components/product/ProductCard";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Filter } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -31,29 +31,29 @@ export default async function ProductsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-16">
-      {/* Header */}
-      <div className="bg-white rounded-3xl p-5 sm:p-8 border border-black/[0.06] shadow-subtle flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
+      {/* Header & Filter Card */}
+      <div className="bg-white rounded-3xl p-5 sm:p-8 border border-black/[0.06] shadow-subtle space-y-4 sm:space-y-5">
         <div>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-brand-600 uppercase tracking-widest mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-brand-maroon-700 uppercase tracking-widest mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-brand-gold-500" />
             <span>Curated Collections</span>
           </div>
           <h1 className="font-heading text-xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            {currentCategory ? currentCategory.name : searchParams.search ? `Search results for "${searchParams.search}"` : "All Collections"}
+            {currentCategory ? currentCategory.name : searchParams.search ? `Search results for "${searchParams.search}"` : "সকল কালেকশন"}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 font-normal mt-1">
-            Showing {products.length} artisanal pieces with Cash on Delivery across Bangladesh
+            {products.length}টি প্রিমিয়াম পণ্য রয়েছে • পুরো বাংলাদেশে ১০০% ক্যাশ অন ডেলিভারি
           </p>
         </div>
 
-        {/* Category Pills - Smooth horizontal scroll on mobile */}
-        <div className="w-full sm:w-auto min-w-0 flex items-center gap-2 overflow-x-auto pb-1 max-w-full scrollbar-none snap-x">
+        {/* Category Pills - Responsive: Smooth horizontal swipe on mobile, clean flex-wrap on desktop */}
+        <div className="pt-3 border-t border-slate-100 flex items-center gap-2 overflow-x-auto md:flex-wrap pb-1 scrollbar-none">
           <Link
             href="/products"
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 snap-start min-h-[38px] flex items-center ${
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 min-h-[38px] flex items-center ${
               !searchParams.category
-                ? "bg-brand-maroon-700 text-white shadow-card"
-                : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                ? "bg-brand-maroon-700 text-white shadow-card ring-2 ring-brand-maroon-700/20"
+                : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
             }`}
           >
             সকল কালেকশন
@@ -62,10 +62,10 @@ export default async function ProductsPage({
             <Link
               key={c.id}
               href={`/products?category=${c.slug}`}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 snap-start min-h-[38px] flex items-center ${
+              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 min-h-[38px] flex items-center ${
                 searchParams.category === c.slug
-                  ? "bg-brand-maroon-700 text-white shadow-card"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  ? "bg-brand-maroon-700 text-white shadow-card ring-2 ring-brand-maroon-700/20"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200"
               }`}
             >
               {c.name}
@@ -95,5 +95,3 @@ export default async function ProductsPage({
     </div>
   );
 }
-
-
