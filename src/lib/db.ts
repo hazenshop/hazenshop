@@ -849,6 +849,12 @@ export const db = {
     cachedMedia = readJsonFile("media.json", cachedMedia);
     const item = cachedMedia.find((m) => m.id === id || m.url === id);
     if (item) {
+      if (isSupabaseConfigured && (supabaseAdmin || supabase) && item.url.includes("/product-images/")) {
+        const fileName = item.url.split("/").pop();
+        if (fileName) {
+          await (supabaseAdmin || supabase)?.storage.from("product-images").remove([fileName]);
+        }
+      }
       deleteFileFromDisk(item.url);
       cachedMedia = cachedMedia.filter((m) => m.id !== id && m.url !== id && m.url !== item.url);
       writeJsonFile("media.json", cachedMedia);
@@ -858,6 +864,12 @@ export const db = {
   },
 
   async deleteFileByUrl(url: string): Promise<boolean> {
+    if (isSupabaseConfigured && (supabaseAdmin || supabase) && url.includes("/product-images/")) {
+      const fileName = url.split("/").pop();
+      if (fileName) {
+        await (supabaseAdmin || supabase)?.storage.from("product-images").remove([fileName]);
+      }
+    }
     deleteFileFromDisk(url);
     cachedMedia = readJsonFile("media.json", cachedMedia);
     cachedMedia = cachedMedia.filter((m) => m.url !== url);

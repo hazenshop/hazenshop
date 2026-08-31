@@ -4,24 +4,15 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Star,
   ShieldCheck,
   Truck,
-  RefreshCw,
   ShoppingBag,
   MessageCircle,
-  CheckCircle2,
-  Sparkles,
   Award,
-  Leaf,
   ChevronRight,
   Ruler,
-  X,
   ArrowRight,
-  HelpCircle,
-  Clock,
-  PackageCheck,
-  Check,
+  Sparkles,
 } from "lucide-react";
 import { Product, ProductVariant, SiteSettings, TrustBadgeItem } from "@/lib/types";
 import {
@@ -30,8 +21,8 @@ import {
   generateWhatsAppOrderUrl,
 } from "@/lib/utils";
 import ProductGallery from "@/components/product/ProductGallery";
-import UrgencyTimer from "@/components/product/UrgencyTimer";
 import FastCheckoutForm from "@/components/product/FastCheckoutForm";
+import ProductCard from "@/components/product/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 
@@ -49,11 +40,10 @@ export default function ProductDetailClient({
   const { showToast } = useToast();
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
-    product.variants[0] || undefined
+    product.variants && product.variants.length > 0 ? product.variants[0] : undefined
   );
   const [quantity, setQuantity] = useState(1);
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null);
-  const [showSizeChart, setShowSizeChart] = useState(false);
 
   const unitPrice = selectedVariant
     ? selectedVariant.salePrice ?? selectedVariant.price
@@ -73,7 +63,7 @@ export default function ProductDetailClient({
     showToast(`Added ${quantity}x "${product.name}" to bag.`);
   };
 
-  const handleDirectOrderNow = () => {
+  const handleScrollToOrder = () => {
     const el = document.getElementById("fast-order");
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
@@ -99,9 +89,11 @@ export default function ProductDetailClient({
   const getVariantLabel = () => {
     switch (product.variantType) {
       case "size":
-        return "সাইজ / পরিমাপ নির্বাচন করুন:";
+        return "সাইজ বাছাই করুন (Select Size):";
+      case "weight":
+        return "ওজন / পরিমাপ বাছাই করুন (Select Weight):";
       case "dimension":
-        return "বিছানার চাদর / পর্দার মাপ:";
+        return "পর্দার মাপ বাছাই করুন (Select Dimension):";
       default:
         return "সাইজ / অপশন বাছাই করুন:";
     }
@@ -117,388 +109,211 @@ export default function ProductDetailClient({
     ? product.trustBadges
     : defaultTrustBadges;
 
-  // Sample authentic social reviews for trust
-  const sampleReviews = [
-    {
-      name: "Sabrina Yasmin",
-      location: "Uttara, Dhaka",
-      date: "2 days ago",
-      rating: 5,
-      comment: "কাপড়ের মান অসাধারণ! কালার ঠিক ছবির মতোই এসেছে। ধোয়ার পরও একদম নরম ও সিল্কি ভাব বজায় আছে।",
-      verified: true,
-    },
-    {
-      name: "Engr. Mahmudul Hasan",
-      location: "Nasirabad, Chittagong",
-      date: "5 days ago",
-      rating: 5,
-      comment: "ব্ল্যাকআউট পর্দাটা সত্যি চমৎকার। দুপুরের কড়া রোদ পুরোপুরি আটকায় এবং ঘর বেশ ঠান্ডা থাকে। ধন্যবাদ!",
-      verified: true,
-    },
-    {
-      name: "Tanjila Akter",
-      location: "Sylhet Sadar",
-      date: "1 week ago",
-      rating: 5,
-      comment: "ডেলিভারিম্যানের সামনে খুলে চেক করার সুযোগ পেয়েছি। সাইজ এবং ফিনিশিং নিখুঁত।",
-      verified: true,
-    },
-  ];
-
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-8 sm:space-y-12 pb-28 md:pb-16">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center gap-2 text-xs text-slate-400 font-normal overflow-x-auto whitespace-nowrap pb-1 tracking-wide">
-        <Link href="/" className="hover:text-brand-dark transition-colors">হোম</Link>
-        <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
-        <Link href="/products" className="hover:text-brand-dark transition-colors">কালেকশন</Link>
-        <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
-        <Link href={`/category/${product.category}`} className="hover:text-brand-dark transition-colors">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-10 sm:space-y-14">
+      {/* Breadcrumb Navigation */}
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+        <Link href="/" className="hover:text-brand-maroon-700 transition-colors">
+          হোম
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+        <Link href="/products" className="hover:text-brand-maroon-700 transition-colors">
+          কালেকশন
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+        <Link
+          href={`/category/${product.category}`}
+          className="hover:text-brand-maroon-700 transition-colors"
+        >
           {product.categoryName}
         </Link>
-        <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
-        <span className="text-slate-800 font-medium truncate max-w-xs">{product.name}</span>
+        <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+        <span className="text-slate-900 font-semibold truncate max-w-[200px] sm:max-w-none">
+          {product.name}
+        </span>
       </nav>
 
-      {/* Main PDP Grid: 7 cols left (Gallery + Rich Content Stack) & 5 cols right (Sticky Order Box) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-start">
-        
-        {/* LEFT COLUMN: Gallery + Complete Trust, Dimension, Reviews & Craftsmanship Stack */}
+      {/* ========================================================================= */}
+      {/* TOP 2-COLUMN PRODUCT SHOWCASE (Left: Gallery & Specs, Right: Options & CTA) */}
+      {/* ========================================================================= */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        {/* LEFT COLUMN: Gallery & Authentic Product Details (7 Cols) */}
         <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-          
           {/* Gallery */}
-          <ProductGallery images={product.images} name={product.name} />
-
-          {/* Bangladeshi Trust Badges */}
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center text-xs text-slate-600">
-            {activeTrustBadges.map((tb, idx) => (
-              <div key={idx} className="p-3 sm:p-4 bg-white rounded-2xl border border-brand-maroon-700/10 shadow-subtle flex flex-col items-center justify-center">
-                <div className="w-8 h-8 rounded-full bg-brand-maroon-50 flex items-center justify-center text-brand-maroon-700 mb-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                </div>
-                <span className="font-bold text-slate-900 text-[11px] sm:text-xs leading-tight">{tb.title}</span>
-                <span className="text-[10px] text-slate-500 mt-0.5">{tb.subtitle}</span>
-              </div>
-            ))}
+          <div className="bg-white rounded-3xl p-2 sm:p-4 border border-black/[0.06] shadow-card">
+            <ProductGallery images={product.images} name={product.name} />
           </div>
 
-          {/* Social Proof & Fabric Quality Highlights */}
-          <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-4">
-            <div className="flex items-center gap-2 text-brand-maroon-700 font-bold text-xs uppercase tracking-wider">
-              <Sparkles className="w-4 h-4 text-brand-gold-500" />
-              <span>প্রিমিয়াম ফেব্রিক ও নির্মাণ বৈশিষ্ট্য</span>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                  ✓
-                </div>
-                <div className="text-xs">
-                  <span className="font-bold text-slate-900 block">১০০% কটন ও দীর্ঘস্থায়ী রং</span>
-                  <span className="text-slate-500">ধোয়ার পরও রোঁয়া উঠবে না বা রং মলিন হবে না</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                  ✓
-                </div>
-                <div className="text-xs">
-                  <span className="font-bold text-slate-900 block">নিখুঁত সাইজ ও ফিটিং</span>
-                  <span className="text-slate-500">বাংলাদেশের স্ট্যান্ডার্ড কিং, কুইন ও জানালার মাপে প্রস্তুত</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                  ✓
-                </div>
-                <div className="text-xs">
-                  <span className="font-bold text-slate-900 block">ক্যাশ অন ডেলিভারি সুবিধা</span>
-                  <span className="text-slate-500">পণ্য হাতে পেয়ে দেখে ডেলিভারিম্যানকে টাকা দিন</span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
-                  ✓
-                </div>
-                <div className="text-xs">
-                  <span className="font-bold text-slate-900 block">নিরাপদ ক্যাশ অন ডেলিভারি</span>
-                  <span className="text-slate-500">পণ্য হাতে পেয়ে চেক করে পেমেন্ট করার ১০০% নিশ্চয়তা</span>
-                </div>
+          {/* Product Description */}
+          {product.description && (
+            <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-3">
+              <h3 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 pb-2 border-b border-slate-100">
+                পণ্যের বিস্তারিত বিবরণ (Product Description)
+              </h3>
+              <div className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal whitespace-pre-line">
+                {product.description}
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Size & Dimension Guide Section directly on the left */}
+          {/* Specifications Table (if provided) */}
+          {product.specifications && Object.keys(product.specifications).length > 0 && (
+            <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-4">
+              <h3 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 pb-2 border-b border-slate-100">
+                ফেব্রিক ও স্পেসিফিকেশন (Fabric & Specs)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                {Object.entries(product.specifications).map(([key, val]) => (
+                  <div
+                    key={key}
+                    className="p-3 rounded-2xl bg-slate-50 border border-slate-200/60 flex justify-between items-center"
+                  >
+                    <span className="text-slate-500 font-medium">{key}</span>
+                    <span className="font-bold text-slate-900">{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Size & Dimension Guide (if provided) */}
           {product.sizeGuide && product.sizeGuide.length > 0 && (
             <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
                   <Ruler className="w-4 h-4 text-brand-maroon-700" />
-                  <span>সাইজ ও পরিমাপ নির্দেশিকা (Measurement Guide)</span>
+                  <span>সাইজ গাইড ও মাপ (Size & Dimension Guide)</span>
                 </div>
-                <span className="text-[11px] text-brand-maroon-700 font-semibold bg-brand-maroon-50 px-2.5 py-0.5 rounded-full">
-                  স্ট্যান্ডার্ড সাইজ
-                </span>
               </div>
-
-              <div className="rounded-2xl border border-slate-200 overflow-hidden text-xs">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border border-slate-200 rounded-2xl overflow-hidden">
+                  <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                     <tr>
-                      <th className="p-3">সাইজ / অপশন</th>
-                      <th className="p-3">প্রস্থ / মাপ</th>
-                      <th className="p-3">দৈর্ঘ্য / ড্রপ</th>
-                      {product.sizeGuide.some((g) => g.sleeve) && <th className="p-3">ইনক্লুশন / রিং</th>}
+                      <th className="p-3">সাইজ</th>
+                      <th className="p-3">প্রস্থ (Width)</th>
+                      <th className="p-3">দৈর্ঘ্য (Length)</th>
+                      {product.sizeGuide.some((s) => s.sleeve) && <th className="p-3">হাতা (Sleeve)</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {product.sizeGuide.map((row, idx) => (
-                      <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/50"}>
-                        <td className="p-3 font-bold text-brand-maroon-700">{row.size}</td>
-                        <td className="p-3 font-medium">{row.chest}</td>
-                        <td className="p-3">{row.length}</td>
-                        {row.sleeve && <td className="p-3 font-medium text-slate-600">{row.sleeve}</td>}
+                    {product.sizeGuide.map((item, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/50">
+                        <td className="p-3 font-bold text-slate-900">{item.size}</td>
+                        <td className="p-3">{item.chest}</td>
+                        <td className="p-3">{item.length}</td>
+                        {item.sleeve && <td className="p-3">{item.sleeve}</td>}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-
-              <p className="text-[11px] text-slate-400 text-center">
-                *সব মাপ ইঞ্চি ও ফুটে দেওয়া হয়েছে। আপনার খাটের তোশক বা জানালার ফ্রেম অনুযায়ী নির্বাচন করুন।
-              </p>
             </div>
           )}
-
-          {/* Description & Technical Specifications */}
-          <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-6">
-            <div>
-              <h2 className="font-heading text-lg sm:text-xl font-extrabold text-slate-900 mb-3 pb-2.5 border-b border-slate-100 tracking-tight">
-                পণ্যের বিস্তারিত বিবরণ (Product Details)
-              </h2>
-              <div className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line space-y-3 font-normal">
-                {product.description}
-              </div>
-            </div>
-
-            {/* Specifications Table */}
-            {product.specifications && Object.keys(product.specifications).length > 0 && (
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2.5">
-                  টেকনিক্যাল স্পেসিফিকেশন
-                </h3>
-                <div className="rounded-2xl border border-slate-200 overflow-hidden text-xs">
-                  {Object.entries(product.specifications).map(([key, val], idx) => (
-                    <div
-                      key={key}
-                      className={`flex items-center justify-between p-3 ${
-                        idx % 2 === 0 ? "bg-slate-50/70" : "bg-white"
-                      }`}
-                    >
-                      <span className="font-bold text-slate-700">{key}</span>
-                      <span className="text-slate-600">{val}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Verified Customer Reviews & Social Proof */}
-          <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="font-heading font-extrabold text-lg text-slate-900">
-                  গ্রাহকদের মতামত ও রিভিউ ({product.reviewCount}+)
-                </h3>
-                <div className="flex items-center gap-1.5 text-xs text-amber-500 mt-0.5">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <span className="font-bold text-slate-900">৪.৯ / ৫.০ রেটিং</span>
-                </div>
-              </div>
-              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                ১০০% ভেরিফাইড ক্রেতা
-              </span>
-            </div>
-
-            <div className="space-y-3">
-              {sampleReviews.map((rev, idx) => (
-                <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/60 space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-slate-900">{rev.name}</span>
-                      <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-100/70 px-1.5 py-0.2 rounded-full">
-                        Verified Purchase
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-400">{rev.location}</span>
-                  </div>
-                  <div className="flex text-amber-400">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 fill-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-xs text-slate-700 leading-relaxed font-normal">
-                    "{rev.comment}"
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* FAQs & Care Guide */}
-          <div className="bg-white rounded-3xl p-5 sm:p-7 border border-black/[0.06] shadow-subtle space-y-4">
-            <h3 className="font-heading font-extrabold text-base sm:text-lg text-slate-900 pb-2 border-b border-slate-100">
-              প্রায়শই জিজ্ঞাসিত প্রশ্নাবলী (FAQs)
-            </h3>
-            
-            <div className="space-y-3 text-xs">
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <span className="font-bold text-slate-900 block mb-1">
-                  প্রশ্ন: ডেলিভারি পেতে কতদিন সময় লাগবে?
-                </span>
-                <p className="text-slate-600 font-normal leading-relaxed">
-                  উত্তর: ঢাকা সিটির ভেতর ২৪ থেকে ৪৮ ঘন্টার মধ্যে এবং ঢাকার বাইরে ২ থেকে ৩ দিনের মধ্যে ক্যাশ অন ডেলিভারিতে পৌঁছে দেওয়া হয়।
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <span className="font-bold text-slate-900 block mb-1">
-                  প্রশ্ন: কাপড়ের রং কি ধোয়ার পর উঠবে?
-                </span>
-                <p className="text-slate-600 font-normal leading-relaxed">
-                  উত্তর: না। আমাদের প্রতিটি চাদর ও পর্দা প্রি-ওয়াশড ও কালার-ফাস্ট রিঅ্যাকটিভ ডাই দিয়ে প্রিন্ট করা, তাই রং ১০০% গ্যারান্টিযুক্ত।
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/60">
-                <span className="font-bold text-slate-900 block mb-1">
-                  প্রশ্ন: কোনো প্রশ্ন বা তথ্যের প্রয়োজন হলে কিভাবে যোগাযোগ করব?
-                </span>
-                <p className="text-slate-600 font-normal leading-relaxed">
-                  উত্তর: আমাদের হটলাইনে অথবা সরাসরি হোয়াটসঅ্যাপে মেসেজ দিলেই আমাদের কাস্টমার কেয়ার টিম সাথে সাথে আপনাকে সহায়তা করবে।
-                </p>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        {/* RIGHT COLUMN: Sticky Docked Order Box & 1-Click Fast Express Checkout */}
+        {/* RIGHT COLUMN: Product Options, Pricing & Quick Actions (5 Cols) */}
         <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
           <div className="bg-white p-5 sm:p-7 rounded-3xl border border-black/[0.06] shadow-card space-y-5">
             {/* Header & Title */}
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-2">
+                <Link
+                  href={`/category/${product.category}`}
+                  className="text-[10px] font-bold uppercase tracking-widest text-brand-maroon-700 bg-brand-maroon-50 px-2.5 py-0.5 rounded-full border border-brand-maroon-200 hover:bg-brand-maroon-100 transition-colors"
+                >
+                  {product.categoryName}
+                </Link>
                 {product.badge && (
-                  <span className="bg-brand-maroon-700 text-white font-bold text-[9px] uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-900 bg-brand-gold-300 px-2.5 py-0.5 rounded-full shadow-sm">
                     {product.badge}
                   </span>
                 )}
-                <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 border border-emerald-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  স্টকে আছে ({product.stock} টি সেট রেডি)
-                </span>
               </div>
 
-              <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
+              <h1 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900 tracking-tight leading-snug">
                 {product.name}
               </h1>
 
-              {/* Rating */}
-              <div className="flex items-center gap-2 mt-2 text-xs">
-                <div className="flex items-center text-amber-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <span className="font-bold text-slate-900">{product.rating.toFixed(1)}</span>
-                <span className="text-slate-400">({product.reviewCount} ভেরিফাইড রিভিউ)</span>
-              </div>
+              {product.shortDescription && (
+                <p className="text-xs sm:text-sm text-slate-500 font-normal mt-1.5 line-clamp-2">
+                  {product.shortDescription}
+                </p>
+              )}
             </div>
 
-            {/* Price Block */}
-            <div className="bg-brand-maroon-50/60 p-4 rounded-2xl border border-brand-maroon-100 flex items-baseline gap-3">
-              <span className="font-heading text-3xl sm:text-4xl font-extrabold text-brand-maroon-700 tracking-tight">
+            {/* Price Row */}
+            <div className="flex flex-wrap items-baseline gap-3 pt-3 border-t border-slate-100">
+              <span className="text-2xl sm:text-3xl font-heading font-black text-brand-maroon-700 tracking-tight">
                 {formatPrice(unitPrice)}
               </span>
-              {originalPrice > unitPrice && (
+
+              {discountPercent > 0 && (
                 <>
-                  <span className="text-sm text-slate-400 line-through font-normal">
+                  <span className="text-sm sm:text-base text-slate-400 line-through font-medium">
                     {formatPrice(originalPrice)}
                   </span>
-                  <span className="bg-brand-maroon-700 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                  <span className="bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-black px-2.5 py-0.5 rounded-full">
                     {discountPercent}% ছাড়
                   </span>
                 </>
               )}
             </div>
 
-            {/* Scarcity Countdown */}
-            <UrgencyTimer stock={product.stock} />
+            {/* Stock indicator */}
+            <div className="flex items-center gap-2">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  product.stock > 0 ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                }`}
+              />
+              <span className="text-xs font-semibold text-slate-700">
+                {product.stock > 0 ? (
+                  <>ইন স্টক ({product.stock} সেট রেডি টু শিপ)</>
+                ) : (
+                  <span className="text-rose-600">স্টক আউট</span>
+                )}
+              </span>
+            </div>
 
-            {/* Variant Selector */}
-            {product.variants.length > 0 && (
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+            {/* Variants Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="space-y-2.5 pt-2 border-t border-slate-100">
+                <div className="flex justify-between items-center text-xs">
+                  <label className="font-bold text-slate-800 uppercase tracking-wider">
                     {getVariantLabel()}
                   </label>
-                  {product.sizeGuide && product.sizeGuide.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setShowSizeChart(true)}
-                      className="text-xs font-semibold text-brand-maroon-700 hover:text-brand-maroon-900 flex items-center gap-1 underline"
-                    >
-                      <Ruler className="w-3.5 h-3.5" />
-                      <span>সাইজ চার্ট</span>
-                    </button>
+                  {selectedVariant && (
+                    <span className="font-bold text-brand-maroon-700">{selectedVariant.name}</span>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-2">
-                  {product.variants.map((variant) => {
-                    const isSelected = selectedVariant?.id === variant.id;
-                    const vPrice = variant.salePrice ?? variant.price;
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((v) => {
+                    const isSelected = selectedVariant?.id === v.id;
                     return (
                       <button
-                        key={variant.id}
+                        key={v.id}
                         type="button"
-                        onClick={() => setSelectedVariant(variant)}
-                        className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all active:scale-[0.99] min-h-[48px] ${
+                        onClick={() => setSelectedVariant(v)}
+                        className={`group px-3.5 py-2 rounded-2xl text-xs font-semibold border transition-all flex items-center gap-2 min-h-[40px] ${
                           isSelected
-                            ? "border-brand-maroon-700 bg-brand-maroon-50/50 shadow-subtle ring-1 ring-brand-maroon-700"
-                            : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "bg-brand-maroon-700 text-white border-brand-maroon-700 shadow-card"
+                            : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          {variant.colorCode && (
-                            <span
-                              className="w-3.5 h-3.5 rounded-full border border-slate-300 shrink-0"
-                              style={{ backgroundColor: variant.colorCode }}
-                            />
-                          )}
-                          <div>
-                            <span className="text-xs font-bold text-slate-900 block leading-tight">
-                              {variant.name}
-                            </span>
-                            {variant.material && (
-                              <span className="text-[10px] text-slate-400 block">
-                                {variant.material}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <span className="text-xs font-extrabold text-brand-maroon-700 shrink-0">
-                          {formatPrice(vPrice)}
+                        {v.colorCode && (
+                          <span
+                            className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
+                            style={{ backgroundColor: v.colorCode }}
+                          />
+                        )}
+                        <span>{v.name}</span>
+                        <span
+                          className={`text-[11px] ${
+                            isSelected ? "text-brand-gold-300 font-bold" : "text-slate-500 font-medium"
+                          }`}
+                        >
+                          {formatPrice(v.salePrice ?? v.price)}
                         </span>
                       </button>
                     );
@@ -507,11 +322,40 @@ export default function ProductDetailClient({
               </div>
             )}
 
-            {/* Bundle Offers */}
+            {/* Quantity Stepper */}
+            <div className="space-y-2 pt-2 border-t border-slate-100">
+              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                পরিমাণ (Quantity):
+              </label>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center border border-slate-200 rounded-full p-1 bg-slate-50">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-9 h-9 rounded-full bg-white hover:bg-slate-200 text-slate-800 flex items-center justify-center font-bold text-base transition-colors shadow-subtle min-h-[36px] min-w-[36px]"
+                  >
+                    -
+                  </button>
+                  <span className="w-10 text-center font-bold text-sm text-slate-900">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-9 h-9 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white flex items-center justify-center font-bold text-base transition-colors shadow-subtle min-h-[36px] min-w-[36px]"
+                  >
+                    +
+                  </button>
+                </div>
+                <span className="text-xs text-slate-500">
+                  মোট মূল্য: <strong className="text-slate-900 font-bold">{formatPrice(unitPrice * quantity)}</strong>
+                </span>
+              </div>
+            </div>
+
+            {/* Bundle Offers (if any) */}
             {product.bundleOffers && product.bundleOffers.length > 0 && (
               <div className="space-y-2 pt-2 border-t border-slate-100">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-brand-maroon-700 block">
-                  কম্বো অফার (Bundle Deals)
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider block">
+                  স্পেশাল অফার প্যাক (Special Combos):
                 </span>
                 <div className="grid grid-cols-1 gap-2">
                   {product.bundleOffers.map((bundle) => {
@@ -521,29 +365,21 @@ export default function ProductDetailClient({
                         key={bundle.id}
                         type="button"
                         onClick={() => handleSelectBundle(bundle)}
-                        className={`p-3 rounded-2xl border text-left flex items-center justify-between transition-all min-h-[46px] ${
+                        className={`p-3 rounded-2xl border text-left text-xs transition-all flex items-center justify-between min-h-[44px] ${
                           isSelected
-                            ? "border-brand-maroon-700 bg-brand-maroon-50/50 ring-1 ring-brand-maroon-700"
-                            : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "bg-brand-maroon-50/70 border-brand-maroon-700 text-brand-maroon-900 font-bold shadow-subtle ring-1 ring-brand-maroon-700"
+                            : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <div
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
-                              isSelected ? "border-brand-maroon-700 bg-brand-maroon-700" : "border-slate-300"
-                            }`}
-                          >
-                            {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
-                          </div>
-                          <span className="text-xs font-bold text-slate-800">
-                            {bundle.title}
-                          </span>
+                          <Sparkles className="w-4 h-4 text-brand-gold-500 shrink-0" />
+                          <span>{bundle.title}</span>
                         </div>
-                        {bundle.discountPercentage ? (
-                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            {bundle.discountPercentage}% সাশ্রয়
+                        {bundle.tag && (
+                          <span className="bg-brand-gold-300 text-brand-dark text-[10px] font-black px-2 py-0.5 rounded-full">
+                            {bundle.tag}
                           </span>
-                        ) : null}
+                        )}
                       </button>
                     );
                   })}
@@ -551,69 +387,61 @@ export default function ProductDetailClient({
               </div>
             )}
 
-            {/* Quantity Selector */}
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                পরিমাণ (Quantity)
-              </span>
-              <div className="flex items-center border border-slate-200 rounded-full p-1 bg-slate-50">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-slate-700 shadow-sm transition-colors text-sm"
-                  aria-label="Decrease quantity"
-                >
-                  -
-                </button>
-                <span className="w-10 text-center text-xs font-bold text-slate-900">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="w-8 h-8 rounded-full bg-white hover:bg-slate-100 flex items-center justify-center font-bold text-slate-700 shadow-sm transition-colors text-sm"
-                  aria-label="Increase quantity"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="space-y-2.5 pt-2">
+            {/* Primary Action Buttons */}
+            <div className="space-y-2.5 pt-2 border-t border-slate-100">
+              {/* Direct 1-Click Order Anchor CTA */}
               <button
                 type="button"
-                onClick={handleDirectOrderNow}
-                className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider group min-h-[50px]"
+                onClick={handleScrollToOrder}
+                className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider min-h-[48px] group"
               >
-                <span>অর্ডার করতে ফর্ম পূরণ করুন</span>
+                <span>সরাসরি অর্ডার করুন (ক্যাশ অন ডেলিভারি)</span>
                 <ArrowRight className="w-4 h-4 text-brand-gold-300 group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={handleAddToCart}
-                  className="w-full bg-slate-100 hover:bg-slate-200 active:scale-[0.99] text-slate-800 font-bold py-3 px-3 rounded-full transition-all flex items-center justify-center gap-1.5 text-xs min-h-[44px]"
-                >
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  <span>ব্যাগে যোগ করুন</span>
-                </button>
+              {/* Add To Cart */}
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="w-full bg-slate-50 hover:bg-slate-100 active:scale-[0.99] text-slate-800 font-bold py-3.5 px-6 rounded-full border border-slate-200 transition-all flex items-center justify-center gap-2 text-xs min-h-[44px]"
+              >
+                <ShoppingBag className="w-4 h-4 text-brand-maroon-700" />
+                <span>ব্যাগে যোগ করুন (Add to Cart)</span>
+              </button>
 
-                <a
-                  href={whatsAppOrderUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold py-3 px-3 rounded-full border border-emerald-200 transition-all flex items-center justify-center gap-1.5 text-xs text-center min-h-[44px]"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>WhatsApp অর্ডার</span>
-                </a>
-              </div>
+              {/* WhatsApp Inquiry */}
+              <a
+                href={whatsAppOrderUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-emerald-50 hover:bg-emerald-100 active:scale-[0.99] text-emerald-800 font-bold py-3 px-6 rounded-full border border-emerald-200 transition-all flex items-center justify-center gap-2 text-xs min-h-[42px]"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-600" />
+                <span>WhatsApp এ সরাসরি যোগাযোগ</span>
+              </a>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center">
+              {activeTrustBadges.map((b, i) => (
+                <div key={i} className="p-2 rounded-xl bg-slate-50 border border-slate-200/50 space-y-1">
+                  <div className="w-6 h-6 rounded-full bg-brand-maroon-50 text-brand-maroon-700 flex items-center justify-center mx-auto text-xs">
+                    ✓
+                  </div>
+                  <h4 className="text-[11px] font-bold text-slate-800 leading-tight">{b.title}</h4>
+                  <p className="text-[10px] text-slate-400 leading-tight">{b.subtitle}</p>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Embedded 1-Click Fast Checkout Form */}
+      {/* ========================================================================= */}
+      {/* BOTTOM FULL-WIDTH CASH ON DELIVERY (COD) EXPRESS CHECKOUT SECTION */}
+      {/* ========================================================================= */}
+      <section className="pt-4 sm:pt-6">
+        <div className="max-w-3xl mx-auto">
           <FastCheckoutForm
             product={product}
             selectedVariant={selectedVariant}
@@ -621,114 +449,38 @@ export default function ProductDetailClient({
             settings={settings}
           />
         </div>
-      </div>
+      </section>
 
-      {/* Related Products */}
+      {/* ========================================================================= */}
+      {/* RELATED PRODUCTS SHOWCASE */}
+      {/* ========================================================================= */}
       {relatedProducts.length > 0 && (
-        <div className="space-y-6 pt-6 border-t border-slate-100">
-          <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            সম্পর্কিত অন্যান্য কালেকশন (Related Products)
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
-            {relatedProducts.map((p) => (
-              <div key={p.id} className="bg-white rounded-2xl border border-black/[0.05] p-3 shadow-subtle hover:shadow-card transition-all">
-                <Link href={`/products/${p.slug}`}>
-                  <div className="relative aspect-square rounded-xl overflow-hidden mb-2 bg-slate-50">
-                    <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
-                  </div>
-                  <h4 className="text-xs font-semibold text-slate-900 truncate">{p.name}</h4>
-                  <span className="text-xs font-bold text-brand-maroon-700">{formatPrice(p.salePrice ?? p.price)}</span>
-                </Link>
-              </div>
+        <section className="pt-8 border-t border-black/[0.05] space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
+                More in this Collection
+              </span>
+              <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-slate-900">
+                সম্পর্কিত পণ্যসমূহ (Related Products)
+              </h3>
+            </div>
+            <Link
+              href={`/category/${product.category}`}
+              className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1"
+            >
+              <span>সব দেখুন</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+            {relatedProducts.slice(0, 4).map((rel) => (
+              <ProductCard key={rel.id} product={rel} />
             ))}
           </div>
-        </div>
+        </section>
       )}
-
-      {/* Size Chart Modal */}
-      {showSizeChart && product.sizeGuide && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-floating space-y-4 border border-black/10">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                <Ruler className="w-4 h-4 text-brand-maroon-700" />
-                <span>সাইজ ও পরিমাপ চার্ট (Size Guide)</span>
-              </div>
-              <button
-                onClick={() => setShowSizeChart(false)}
-                className="text-slate-400 hover:text-slate-700 p-1 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b">
-                  <tr>
-                    <th className="p-3">সাইজ</th>
-                    <th className="p-3">প্রস্থ</th>
-                    <th className="p-3">দৈর্ঘ্য</th>
-                    {product.sizeGuide.some((g) => g.sleeve) && <th className="p-3">ইনক্লুশন</th>}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {product.sizeGuide.map((row, idx) => (
-                    <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50/40"}>
-                      <td className="p-3 font-bold text-brand-maroon-700">{row.size}</td>
-                      <td className="p-3">{row.chest}</td>
-                      <td className="p-3">{row.length}</td>
-                      {row.sleeve && <td className="p-3">{row.sleeve}</td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <p className="text-[11px] text-slate-400 text-center">
-              *সব পরিমাপ ইঞ্চি ও ফুটে দেওয়া হয়েছে।
-            </p>
-
-            <button
-              onClick={() => setShowSizeChart(false)}
-              className="w-full bg-brand-maroon-700 text-white font-bold py-3 rounded-full text-xs min-h-[44px]"
-            >
-              বন্ধ করুন (Close)
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Sticky Mobile Bottom Bar */}
-      <div className="fixed bottom-0 inset-x-0 z-45 bg-white/95 backdrop-blur-xl border-t border-black/[0.08] pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3.5 flex items-center gap-2.5 md:hidden shadow-floating">
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          className="p-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          aria-label="Add to Bag"
-        >
-          <ShoppingBag className="w-4 h-4" />
-        </button>
-
-        <a
-          href={whatsAppOrderUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-3 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          aria-label="WhatsApp Order"
-        >
-          <MessageCircle className="w-4 h-4 text-emerald-600" />
-        </a>
-
-        <button
-          type="button"
-          onClick={handleDirectOrderNow}
-          className="flex-1 bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white font-bold text-xs py-3 px-4 rounded-full flex items-center justify-center gap-1.5 shadow-subtle active:scale-95 transition-all min-h-[44px]"
-        >
-          <span>এখনই অর্ডার করুন ({formatPrice(unitPrice * quantity)})</span>
-          <ArrowRight className="w-3.5 h-3.5 text-brand-gold-300" />
-        </button>
-      </div>
     </div>
   );
 }
