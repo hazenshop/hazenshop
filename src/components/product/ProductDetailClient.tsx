@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,6 +13,7 @@ import {
   Ruler,
   ArrowRight,
   Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { Product, ProductVariant, SiteSettings, TrustBadgeItem } from "@/lib/types";
 import {
@@ -20,6 +21,7 @@ import {
   calculateDiscountPercentage,
   generateWhatsAppOrderUrl,
 } from "@/lib/utils";
+import { trackViewContent, trackAddToCart as trackFBCart } from "@/lib/pixel";
 import ProductGallery from "@/components/product/ProductGallery";
 import FastCheckoutForm from "@/components/product/FastCheckoutForm";
 import ProductCard from "@/components/product/ProductCard";
@@ -45,6 +47,11 @@ export default function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null);
 
+  // Trigger Facebook Pixel ViewContent on load & variant change
+  useEffect(() => {
+    trackViewContent(product, selectedVariant);
+  }, [product, selectedVariant]);
+
   const unitPrice = selectedVariant
     ? selectedVariant.salePrice ?? selectedVariant.price
     : product.salePrice ?? product.price;
@@ -60,6 +67,7 @@ export default function ProductDetailClient({
 
   const handleAddToCart = () => {
     addToCart(product, selectedVariant, quantity, { silent: false });
+    trackFBCart(product, selectedVariant, quantity);
     showToast(`Added ${quantity}x "${product.name}" to bag.`);
   };
 
@@ -69,6 +77,7 @@ export default function ProductDetailClient({
       el.scrollIntoView({ behavior: "smooth" });
     } else {
       addToCart(product, selectedVariant, quantity, { silent: true });
+      trackFBCart(product, selectedVariant, quantity);
       router.push("/checkout");
     }
   };
@@ -89,7 +98,7 @@ export default function ProductDetailClient({
   const getVariantLabel = () => {
     switch (product.variantType) {
       case "size":
-        return "সাইজ বাছাই করুন (Select Size):";
+        return "সাইজ / পরিমাপ বাছাই করুন (Select Size):";
       case "weight":
         return "ওজন / পরিমাপ বাছাই করুন (Select Weight):";
       case "dimension":
@@ -275,46 +284,80 @@ export default function ProductDetailClient({
               </span>
             </div>
 
-            {/* Variants Selector */}
+            {/* Variants Selector (Mobile-Friendly Stacked Option Cards) */}
             {product.variants && product.variants.length > 0 && (
-              <div className="space-y-2.5 pt-2 border-t border-slate-100">
+              <div className="space-y-2.5 pt-3 border-t border-slate-100">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-slate-800 uppercase tracking-wider">
+                  <label className="font-bold text-slate-900 uppercase tracking-wider">
                     {getVariantLabel()}
                   </label>
                   {selectedVariant && (
-                    <span className="font-bold text-brand-maroon-700">{selectedVariant.name}</span>
+                    <span className="font-bold text-brand-maroon-700 bg-brand-maroon-50 px-2 py-0.5 rounded-md text-[11px]">
+                      {selectedVariant.name}
+                    </span>
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2">
                   {product.variants.map((v) => {
                     const isSelected = selectedVariant?.id === v.id;
+                    const variantPrice = v.salePrice ?? v.price;
                     return (
                       <button
                         key={v.id}
                         type="button"
                         onClick={() => setSelectedVariant(v)}
-                        className={`group px-3.5 py-2 rounded-2xl text-xs font-semibold border transition-all flex items-center gap-2 min-h-[40px] ${
+                        className={`group w-full p-3 sm:p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 min-h-[48px] ${
                           isSelected
-                            ? "bg-brand-maroon-700 text-white border-brand-maroon-700 shadow-card"
-                            : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+                            ? "bg-brand-maroon-50/70 border-brand-maroon-700 text-slate-900 shadow-subtle ring-1 ring-brand-maroon-700"
+                            : "bg-slate-50/70 hover:bg-slate-100/90 text-slate-700 border-slate-200"
                         }`}
                       >
-                        {v.colorCode && (
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          {/* Radio Indicator */}
+                          <div
+                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                              isSelected
+                                ? "border-brand-maroon-700 bg-brand-maroon-700"
+                                : "border-slate-300 bg-white group-hover:border-slate-400"
+                            }`}
+                          >
+                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                          </div>
+
+                          {/* Color Swatch if present */}
+                          {v.colorCode && (
+                            <span
+                              className="w-4 h-4 rounded-full border border-black/20 shrink-0"
+                              style={{ backgroundColor: v.colorCode }}
+                            />
+                          )}
+
+                          {/* Variant Title - Wrap cleanly on mobile */}
                           <span
-                            className="w-3.5 h-3.5 rounded-full border border-black/20 shrink-0"
-                            style={{ backgroundColor: v.colorCode }}
-                          />
-                        )}
-                        <span>{v.name}</span>
-                        <span
-                          className={`text-[11px] ${
-                            isSelected ? "text-brand-gold-300 font-bold" : "text-slate-500 font-medium"
-                          }`}
-                        >
-                          {formatPrice(v.salePrice ?? v.price)}
-                        </span>
+                            className={`text-xs sm:text-sm leading-snug break-words ${
+                              isSelected ? "font-bold text-brand-maroon-900" : "font-medium text-slate-800"
+                            }`}
+                          >
+                            {v.name}
+                          </span>
+                        </div>
+
+                        {/* Price Tag on Right */}
+                        <div className="shrink-0 text-right">
+                          <span
+                            className={`text-xs sm:text-sm font-extrabold block ${
+                              isSelected ? "text-brand-maroon-700" : "text-slate-700"
+                            }`}
+                          >
+                            {formatPrice(variantPrice)}
+                          </span>
+                          {v.salePrice && v.salePrice < v.price && (
+                            <span className="text-[10px] text-slate-400 line-through block">
+                              {formatPrice(v.price)}
+                            </span>
+                          )}
+                        </div>
                       </button>
                     );
                   })}

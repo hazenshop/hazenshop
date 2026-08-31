@@ -790,6 +790,7 @@ export const db = {
           seoTitle: data.seo_title,
           seoDescription: data.seo_description,
           seoKeywords: data.seo_keywords || [],
+          facebookPixelId: data.facebook_pixel_id || data.facebookPixelId || "",
           socialLinks: data.social_links || {},
         };
       }
@@ -824,6 +825,7 @@ export const db = {
           seo_title: cachedSettings.seoTitle,
           seo_description: cachedSettings.seoDescription,
           seo_keywords: cachedSettings.seoKeywords,
+          facebook_pixel_id: cachedSettings.facebookPixelId,
           social_links: cachedSettings.socialLinks,
           updated_at: new Date().toISOString(),
         });

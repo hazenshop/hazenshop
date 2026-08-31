@@ -20,6 +20,7 @@ import {
   generateOrderId,
   generateWhatsAppOrderUrl,
 } from "@/lib/utils";
+import { trackPurchase } from "@/lib/pixel";
 import { useToast } from "@/context/ToastContext";
 
 interface FastCheckoutFormProps {
@@ -121,6 +122,20 @@ export default function FastCheckoutForm({
       if (!res.ok) {
         throw new Error("Failed to place order");
       }
+
+      // Track Facebook Pixel Purchase Event
+      trackPurchase({
+        id: orderId,
+        totalAmount: grandTotal,
+        items: [
+          {
+            productId: product.id,
+            productName: product.name,
+            quantity,
+            price: unitPrice,
+          },
+        ],
+      });
 
       showToast("Order placed successfully. Cash on Delivery.", "success");
       router.push(`/order-success/${orderId}`);

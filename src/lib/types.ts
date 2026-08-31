@@ -136,6 +136,7 @@ export type SiteSettings = {
   seoKeywords: string[];
   tagline?: string;
   logoUrl?: string;
+  facebookPixelId?: string;
   socialLinks?: Record<string, string>;
   heroBanners?: {
     id: string;

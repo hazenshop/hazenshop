@@ -300,6 +300,30 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Marketing & Analytics Integrations (Facebook Pixel) */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
+            <span className="w-5 h-5 rounded-full bg-blue-600/30 text-blue-400 font-black flex items-center justify-center text-xs">f</span>
+            <span>Facebook Pixel / Meta Ads Tracking Integration</span>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-bold text-slate-300 mb-1">
+              Facebook Pixel ID (Meta Pixel Dataset ID)
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. 1234567890123456"
+              value={settings.facebookPixelId || ""}
+              onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
+              className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-sm focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
+            />
+            <p className="text-[11px] text-slate-400 leading-normal">
+              আপনার মেটা বিজনেস ম্যানেজার (Meta Events Manager) থেকে Pixel/Dataset ID টি এখানে দিন। স্বয়ংক্রিয়ভাবে PageView, ViewContent, AddToCart, এবং Purchase ইভেন্ট ট্র্যাক হবে।
+            </p>
+          </div>
+        </div>
+
         {/* Global SEO Configuration */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
