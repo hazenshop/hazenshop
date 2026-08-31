@@ -1,1 +1,60 @@
-[]
+[
+  {
+    "id": "prod-1788174520192",
+    "slug": "l",
+    "name": "Luxury Bedsheets",
+    "shortDescription": "Luxury Bedsheets",
+    "description": "100% coton\n100% color guarantee \n1 pcs Bedsheet\n2 pcs pillow cover\n1 pcs side pillow cover",
+    "price": 1800,
+    "salePrice": 1200,
+    "images": [
+      "/uploads/gemini_generated_image_xz6ur0xz6ur0xz6u-1788182415646-img-1788182416190-zuszl.webp"
+    ],
+    "category": "luxary-bedsheets-",
+    "categoryName": "Luxary Bedsheets",
+    "stock": 20,
+    "rating": 5,
+    "reviewCount": 42,
+    "badge": "Hot Deal",
+    "featured": false,
+    "flashSale": true,
+    "variants": [
+      {
+        "id": "v-king-1788174148076",
+        "name": "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers",
+        "color": "Signature Gold",
+        "price": 1800,
+        "stock": 16,
+        "material": "100% Egyptian Cotton (350 TC)",
+        "colorCode": "#b8873f",
+        "salePrice": 1200
+      },
+      {
+        "id": "v-queen-1788174148076",
+        "name": "Queen Size (7ft x 8ft / 84x96 in) + 2 Pillow Covers",
+        "color": "Signature Gold",
+        "price": 1800,
+        "stock": 10,
+        "material": "100% Egyptian Cotton (350 TC)",
+        "colorCode": "#b8873f",
+        "salePrice": 1200
+      },
+      {
+        "id": "v-single-1788174148076",
+        "name": "Single Size (5ft x 7.5ft / 60x90 in) + 1 Pillow Cover",
+        "color": "Signature Gold",
+        "price": 1600,
+        "stock": 6,
+        "material": "100% Egyptian Cotton (350 TC)",
+        "colorCode": "#b8873f",
+        "salePrice": 1050
+      }
+    ],
+    "bundleOffers": [],
+    "features": [],
+    "specifications": {},
+    "seoTitle": "Luxury Bedsheets",
+    "seoDescription": "Luxury Bedsheets ",
+    "createdAt": "2026-08-31T11:08:40.192+00:00"
+  }
+]

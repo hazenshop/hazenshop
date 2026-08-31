@@ -150,8 +150,8 @@ export default function OrderInvoiceModal({
 
           {/* Footer Note */}
           <div className="border-t pt-4 text-[10px] text-slate-500 text-center space-y-1">
-            <p className="font-bold text-slate-700">Thank you for choosing Hazen!</p>
-            <p>For any exchange or quality inquiries, please reach out to our hotline: {settings?.hotline || "+880 1700-000000"}</p>
+            <p className="font-bold text-slate-700">Thank you for choosing HAZENSHOP (hazenshop.com)!</p>
+            <p>For any inquiries or customer support, please reach out to our hotline: {settings?.hotline || "+880 1700-000000"}</p>
           </div>
         </div>
       </div>

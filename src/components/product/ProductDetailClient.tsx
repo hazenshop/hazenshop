@@ -110,7 +110,7 @@ export default function ProductDetailClient({
   const defaultTrustBadges: TrustBadgeItem[] = [
     { icon: "award", title: "১০০% প্রিমিয়াম কোয়ালিটি", subtitle: "এক্সপোর্ট গ্রেড ফেব্রিক" },
     { icon: "truck", title: "ক্যাশ অন ডেলিভারি", subtitle: "৬৪ জেলায় হোম ডেলিভারি" },
-    { icon: "refresh", title: "৭ দিনের এক্সচেঞ্জ", subtitle: "প্যাকেট দেখে পেমেন্ট" },
+    { icon: "shield", title: "নিরাপদ প্যাকেজিং", subtitle: "প্যাকেট দেখে পেমেন্ট" },
   ];
 
   const activeTrustBadges = product.trustBadges && product.trustBadges.length > 0
@@ -225,8 +225,8 @@ export default function ProductDetailClient({
                   ✓
                 </div>
                 <div className="text-xs">
-                  <span className="font-bold text-slate-900 block">৭ দিনের ফ্রি এক্সচেঞ্জ</span>
-                  <span className="text-slate-500">সাইজ বা কালার পছন্দ না হলে সাথে সাথে পরিবর্তন</span>
+                  <span className="font-bold text-slate-900 block">নিরাপদ ক্যাশ অন ডেলিভারি</span>
+                  <span className="text-slate-500">পণ্য হাতে পেয়ে চেক করে পেমেন্ট করার ১০০% নিশ্চয়তা</span>
                 </div>
               </div>
             </div>
@@ -381,10 +381,10 @@ export default function ProductDetailClient({
 
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/60">
                 <span className="font-bold text-slate-900 block mb-1">
-                  প্রশ্ন: সাইজ পরিবর্তন বা কোনো সমস্যা হলে কি করব?
+                  প্রশ্ন: কোনো প্রশ্ন বা তথ্যের প্রয়োজন হলে কিভাবে যোগাযোগ করব?
                 </span>
                 <p className="text-slate-600 font-normal leading-relaxed">
-                  উত্তর: আমাদের রয়েছে ৭ দিনের সহজ এক্সচেঞ্জ সুবিধা। আমাদের হটলাইনে বা হোয়াটসঅ্যাপে মেসেজ দিলেই সমাধান করে দেওয়া হবে।
+                  উত্তর: আমাদের হটলাইনে অথবা সরাসরি হোয়াটসঅ্যাপে মেসেজ দিলেই আমাদের কাস্টমার কেয়ার টিম সাথে সাথে আপনাকে সহায়তা করবে।
                 </p>
               </div>
             </div>

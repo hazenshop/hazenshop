@@ -15,8 +15,8 @@ export default function TrustBadges() {
     },
     {
       icon: RefreshCw,
-      title: "৭ দিনের ফ্রি এক্সচেঞ্জ",
-      subtitle: "সাইজ বা কালার পরিবর্তন সুবিধা",
+      title: "নিরাপদ প্যাকেজিং",
+      subtitle: "সুরক্ষিত ও নিখুঁত হোম ডেলিভারি",
     },
     {
       icon: Award,

@@ -96,7 +96,7 @@ export default async function HomePage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckCircle className="w-3.5 h-3.5 text-brand-gold-400 shrink-0" />
-                <span>৭ দিনের সাইজ/কালার এক্সচেঞ্জ</span>
+                <span>১০০% প্রিমিয়াম ফেব্রিক গ্যারান্টি</span>
               </div>
             </div>
           </div>
