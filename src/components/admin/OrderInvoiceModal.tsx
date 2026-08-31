@@ -56,9 +56,9 @@ export default function OrderInvoiceModal({
                 <Image src="/logo.jpg" alt="Hazen" fill className="object-cover" />
               </div>
               <div>
-                <h1 className="text-xl font-black tracking-tight">HAZEN BEDDING</h1>
-                <p className="text-slate-500">Premium Bedding & Home Living</p>
-                <p className="text-slate-500">Hotline: {settings?.hotline || "+880 1700-000000"} • www.hazenbd.com</p>
+                <h1 className="text-xl font-black tracking-tight">HAZENSHOP</h1>
+                <p className="text-slate-500">Luxury Bedsheets & Designer Window Curtains</p>
+                <p className="text-slate-500">Hotline: {settings?.hotline || "+880 1700-000000"} • www.hazenshop.com</p>
               </div>
             </div>
 

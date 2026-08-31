@@ -70,20 +70,22 @@ export const initialProducts: Product[] = [];
 export const initialOrders: Order[] = [];
 
 export const initialSiteSettings: SiteSettings = {
-  siteName: "HAZEN Luxury Living",
+  siteName: "HAZENSHOP — Luxury Living",
   tagline: "Artisanal Bedsheets & Designer Window Curtains",
   hotline: "+880 1700-000000",
   whatsappNumber: "8801700000000",
-  supportEmail: "support@hazenbd.com",
+  supportEmail: "support@hazenshop.com",
   dhakaDeliveryFee: 60,
   outsideDhakaDeliveryFee: 120,
   suburbsDeliveryFee: 100,
   freeShippingThreshold: 2500,
   announcementBarActive: true,
-  announcementBarText: "✨ বিশেষ অফার: সকল বেডশিট ও পর্দা কালেকশনে ফ্রি ডেলিভারি ও ক্যাশ অন ডেলিভারি সুবিধা!",
-  seoTitle: "HAZEN — Luxury Bedsheets (বিছানার চাদর) & Window Curtains (জানালার পর্দা) in Bangladesh",
-  seoDescription: "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online in Bangladesh with Cash on Delivery nationwide.",
+  announcementBarText: "✨ বিশেষ অফার: hazenshop.com এর সকল বেডশিট ও পর্দা কালেকশনে ক্যাশ অন ডেলিভারি সুবিধা!",
+  seoTitle: "HAZENSHOP (hazenshop.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
+  seoDescription: "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online at hazenshop.com with Cash on Delivery nationwide.",
   seoKeywords: [
+    "hazenshop",
+    "hazenshop.com",
     "bedsheets bangladesh",
     "badsheet",
     "bichanar chador",

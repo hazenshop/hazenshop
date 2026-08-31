@@ -9,15 +9,17 @@ import {
   CheckCircle,
   Truck,
   ArrowRight,
-  TrendingUp,
   Package,
-  Eye,
   Printer,
   AlertTriangle,
   Database,
-  Activity,
   RefreshCw,
-  Zap,
+  FolderTree,
+  HardDrive,
+  Settings,
+  PlusCircle,
+  Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import { Order, OrderStatus, Product, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor } from "@/lib/utils";
@@ -28,6 +30,7 @@ export default function AdminDashboardPage() {
   const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categoriesCount, setCategoriesCount] = useState<number>(0);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
   const [healthData, setHealthData] = useState<any>(null);
@@ -36,16 +39,18 @@ export default function AdminDashboardPage() {
 
   const loadData = async () => {
     try {
-      const [orderRes, setRes, prodRes, healthRes] = await Promise.all([
+      const [orderRes, setRes, prodRes, catRes, healthRes] = await Promise.all([
         fetch("/api/orders").then((r) => r.json()),
         fetch("/api/settings").then((r) => r.json()),
         fetch("/api/products").then((r) => r.json()),
+        fetch("/api/categories").then((r) => r.json()).catch(() => ({ categories: [] })),
         fetch("/api/health").then((r) => r.json()).catch(() => null),
       ]);
 
       if (orderRes.orders) setOrders(orderRes.orders);
       if (setRes.settings) setSettings(setRes.settings);
       if (prodRes.products) setProducts(prodRes.products);
+      if (catRes.categories) setCategoriesCount(catRes.categories.length);
       if (healthRes) setHealthData(healthRes);
     } catch (e) {
       console.error(e);
@@ -93,44 +98,172 @@ export default function AdminDashboardPage() {
   // Metrics
   const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  const confirmedOrders = orders.filter((o) => o.status === "confirmed" || o.status === "packaging").length;
+  const confirmedOrders = orders.filter((o) => o.status === "confirmed" || o.status === "packaging" || o.status === "shipped").length;
   const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
   const lowStockProducts = products.filter((p) => p.stock <= 3);
+
+  // Admin Nav Cards Configuration
+  const adminNavCards = [
+    {
+      title: "অর্ডার ও ডেলিভারি (Orders)",
+      subtitle: "কাস্টমার অর্ডার, ফোন কল কনফার্মেশন ও চালান প্রিন্ট",
+      icon: ShoppingBag,
+      href: "/admin/orders",
+      badge: `${orders.length} Orders (${pendingOrders} Pending)`,
+      badgeColor: pendingOrders > 0 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+      accentBg: "from-amber-500/10 to-amber-950/20 border-amber-500/30 hover:border-amber-400/60",
+      iconColor: "text-amber-400 bg-amber-500/10",
+      cta: "অর্ডার ম্যানেজ করুন",
+    },
+    {
+      title: "পণ্য ও স্টক (Products)",
+      subtitle: "বেডশিট ও পর্দার ক্যাটালগ, সাইজ, ভ্যারিয়েশন ও মূল্য",
+      icon: Package,
+      href: "/admin/products",
+      badge: `${products.length} Products Available`,
+      badgeColor: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+      accentBg: "from-cyan-500/10 to-cyan-950/20 border-cyan-500/30 hover:border-cyan-400/60",
+      iconColor: "text-cyan-400 bg-cyan-500/10",
+      cta: "পণ্য তালিকা দেখুন",
+    },
+    {
+      title: "+ নতুন পণ্য তৈরি (Add Product)",
+      subtitle: "ক্যাটালগে নতুন আকর্ষণীয় আইটেম সরাসরি যুক্ত করুন",
+      icon: PlusCircle,
+      href: "/admin/products/new",
+      badge: "Quick Creator",
+      badgeColor: "bg-brand-500/20 text-brand-400 border-brand-500/30",
+      accentBg: "from-brand-500/10 to-brand-950/20 border-brand-500/40 hover:border-brand-400",
+      iconColor: "text-brand-400 bg-brand-500/10",
+      cta: "পণ্য যোগ করুন",
+    },
+    {
+      title: "ক্যাটাগরি কালেকশন (Categories)",
+      subtitle: "বেডশিট, পর্দা, কমফোর্টার ক্যাটাগরি ও ফিল্টার",
+      icon: FolderTree,
+      href: "/admin/categories",
+      badge: `${categoriesCount} Categories`,
+      badgeColor: "bg-purple-500/20 text-purple-400 border-purple-500/30",
+      accentBg: "from-purple-500/10 to-purple-950/20 border-purple-500/30 hover:border-purple-400/60",
+      iconColor: "text-purple-400 bg-purple-500/10",
+      cta: "ক্যাটাগরি সাজান",
+    },
+    {
+      title: "ছবি ও ফাইল স্টোরেজ (Media)",
+      subtitle: "পণ্য ও ব্যানারের হাই-রেজ ছবি আপলোড ও CDN লিঙ্ক",
+      icon: HardDrive,
+      href: "/admin/storage",
+      badge: "Cloud Storage",
+      badgeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+      accentBg: "from-emerald-500/10 to-emerald-950/20 border-emerald-500/30 hover:border-emerald-400/60",
+      iconColor: "text-emerald-400 bg-emerald-500/10",
+      cta: "মিডিয়া ফাইল দেখুন",
+    },
+    {
+      title: "স্টোর সেটিংস ও এসইও (Settings)",
+      subtitle: "হটলাইন, হোয়াটসঅ্যাপ, ডেলিভারি চার্জ ও ব্যানার নোটিশ",
+      icon: Settings,
+      href: "/admin/settings",
+      badge: "hazenshop.com Config",
+      badgeColor: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+      accentBg: "from-rose-500/10 to-rose-950/20 border-rose-500/30 hover:border-rose-400/60",
+      iconColor: "text-rose-400 bg-rose-500/10",
+      cta: "সেটিংস পরিবর্তন করুন",
+    },
+  ];
 
   return (
     <div className="space-y-8">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
-            Store Performance Overview
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-brand-400 uppercase tracking-widest bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">
+              hazenshop.com
+            </span>
+            <span className="text-xs text-slate-500">Live Control Center</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">
+            Store Dashboard & Modules
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time sales, order fulfillment pipeline & cash on delivery analytics
+          <p className="text-xs text-slate-400 mt-0.5">
+            Select a management module below or review real-time orders & inventory health
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={pingHealth}
             disabled={pinging}
-            className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-700 transition-all flex items-center gap-1.5"
+            className="bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-800 transition-all flex items-center gap-1.5 min-h-[40px]"
             title="Check real-time database connection & latency"
           >
             <RefreshCw className={`w-3.5 h-3.5 text-brand-400 ${pinging ? "animate-spin" : ""}`} />
-            <span>Ping DB Health</span>
+            <span>Ping DB</span>
           </button>
 
           <Link
             href="/admin/products/new"
-            className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5"
+            className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 min-h-[40px] active:scale-95"
           >
-            <Package className="w-4 h-4" />
-            <span>+ Add New Product</span>
+            <PlusCircle className="w-4 h-4" />
+            <span>+ Add Product</span>
           </Link>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* PRIMARY ADMIN NAVIGATION CARDS GRID (Requested Card Navigation Module) */}
+      {/* ========================================================================= */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            Navigation Modules (কন্ট্রোল কার্ডস)
+          </h2>
+          <span className="text-[11px] text-slate-500">Click any card to open</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {adminNavCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Link
+                key={card.href}
+                href={card.href}
+                className={`group relative p-5 rounded-2xl bg-gradient-to-b ${card.accentBg} border transition-all duration-200 shadow-md hover:shadow-xl flex flex-col justify-between space-y-4 active:scale-[0.99]`}
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className={`p-2.5 rounded-xl ${card.iconColor} border border-white/5`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <span
+                      className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${card.badgeColor}`}
+                    >
+                      {card.badge}
+                    </span>
+                  </div>
+
+                  <div className="mt-3.5 space-y-1">
+                    <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-brand-300 transition-colors">
+                      {card.title}
+                    </h3>
+                    <p className="text-xs text-slate-400 font-normal leading-relaxed">
+                      {card.subtitle}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-bold text-brand-400 group-hover:text-brand-300">
+                  <span>{card.cta}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       {/* Database & Cloud Connection Health Card */}
       {healthData && (
@@ -160,15 +293,10 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto text-[11px] text-slate-400">
-            <span>Health Route:</span>
-            <a
-              href="/api/health"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-mono bg-slate-950 px-2 py-1 rounded text-brand-400 border border-slate-800 hover:border-brand-500/50 transition-colors"
-            >
-              /api/health ↗
-            </a>
+            <span>Ping Latency:</span>
+            <span className="font-mono bg-slate-950 px-2.5 py-1 rounded text-emerald-400 border border-slate-800 font-bold">
+              {healthData.totalLatencyMs ?? 0}ms
+            </span>
           </div>
         </div>
       )}
@@ -196,7 +324,7 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* KPI Cards */}
+      {/* KPI Performance Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}
         <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
@@ -208,7 +336,7 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <span className="text-2xl font-black text-white">{formatPrice(totalRevenue)}</span>
-            <span className="block text-[10px] text-slate-400 mt-1">Across all order statuses</span>
+            <span className="block text-[10px] text-slate-400 mt-1">Cash on Delivery Sales</span>
           </div>
         </div>
 
@@ -229,14 +357,14 @@ export default function AdminDashboardPage() {
         {/* In Processing */}
         <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400">Processing & Shipping</span>
+            <span className="text-xs font-bold text-slate-400">Processing & Shipped</span>
             <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl">
               <Truck className="w-5 h-5" />
             </div>
           </div>
           <div>
             <span className="text-2xl font-black text-blue-400">{confirmedOrders}</span>
-            <span className="block text-[10px] text-slate-400 mt-1">Confirmed & in transit</span>
+            <span className="block text-[10px] text-slate-400 mt-1">In fulfillment pipeline</span>
           </div>
         </div>
 
@@ -250,13 +378,13 @@ export default function AdminDashboardPage() {
           </div>
           <div>
             <span className="text-2xl font-black text-emerald-400">{deliveredOrders}</span>
-            <span className="block text-[10px] text-slate-400 mt-1">Cash received from courier</span>
+            <span className="block text-[10px] text-slate-400 mt-1">Successfully delivered</span>
           </div>
         </div>
       </div>
 
       {/* Recent Orders List */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl space-y-5">
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-5">
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div>
             <h2 className="text-base font-bold text-white">Recent Customer Orders</h2>
@@ -264,7 +392,7 @@ export default function AdminDashboardPage() {
           </div>
           <Link
             href="/admin/orders"
-            className="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1"
+            className="text-xs font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1 min-h-[38px]"
           >
             <span>View All Orders ({orders.length})</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -278,7 +406,7 @@ export default function AdminDashboardPage() {
             </div>
             <p className="text-sm font-bold text-white">No Customer Orders Yet</p>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              When customers complete Cash on Delivery checkout on the storefront, their orders will appear here in real-time.
+              When customers complete Cash on Delivery checkout on hazenshop.com, their orders will appear here in real-time.
             </p>
           </div>
         ) : (
@@ -323,7 +451,7 @@ export default function AdminDashboardPage() {
 
                     <button
                       onClick={() => setSelectedInvoiceOrder(order)}
-                      className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors"
+                      className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors min-h-[36px] min-w-[36px] flex items-center justify-center"
                       title="Print Invoice"
                     >
                       <Printer className="w-3.5 h-3.5" />
