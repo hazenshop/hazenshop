@@ -67,21 +67,35 @@ export default async function HomePage() {
               {hero.subtitle}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
-              <Link
-                href={hero.buttonLink || "/products"}
-                className="bg-white hover:bg-slate-100 active:scale-95 text-brand-maroon-700 font-extrabold text-xs sm:text-sm px-6 sm:px-7 py-3 sm:py-3.5 rounded-full shadow-card transition-all text-center flex items-center justify-center gap-2 group min-h-[44px]"
-              >
-                <span>{hero.buttonText}</span>
-                <ArrowRight className="w-4 h-4 text-brand-maroon-700 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+            {/* Direct Category Badges / Quick Navigation inside Hero */}
+            <div className="space-y-2 pt-1 sm:pt-2">
+              <span className="text-[11px] font-bold text-brand-gold-300 uppercase tracking-wider block">
+                ক্যাটাগরি বাছাই করুন (Select Category):
+              </span>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                <Link
+                  href="/products"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 sm:py-2.5 rounded-full bg-white text-brand-maroon-700 font-extrabold text-xs sm:text-sm shadow-card hover:bg-slate-100 active:scale-95 transition-all min-h-[40px]"
+                >
+                  <span>সব কালেকশন</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-brand-maroon-700" />
+                </Link>
 
-              <Link
-                href="/track-order"
-                className="bg-white/10 hover:bg-white/15 text-slate-200 font-medium px-5 sm:px-6 py-3 sm:py-3.5 rounded-full backdrop-blur-md transition-all text-xs sm:text-sm border border-white/10 text-center min-h-[44px] flex items-center justify-center"
-              >
-                পার্সেল ট্র্যাক করুন (Track Order)
-              </Link>
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/category/${cat.slug}`}
+                    className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold text-xs sm:text-sm border border-white/20 backdrop-blur-md transition-all min-h-[40px]"
+                  >
+                    {cat.image && (
+                      <div className="relative w-4 h-4 sm:w-5 sm:h-5 rounded-full overflow-hidden shrink-0 border border-white/30">
+                        <Image src={cat.image} alt={cat.name} fill className="object-cover" />
+                      </div>
+                    )}
+                    <span>{cat.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
 
             {/* Quick trust metrics */}
