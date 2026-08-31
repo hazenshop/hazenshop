@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { isSupabaseConfigured, supabase } from "./supabase";
+import { isSupabaseConfigured, supabase, supabaseAdmin } from "./supabase";
 import { Category, Order, Product, SiteSettings, OrderStatus, MediaItem } from "./types";
 import {
   initialCategories,
