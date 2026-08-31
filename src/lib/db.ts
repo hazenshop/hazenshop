@@ -213,6 +213,75 @@ export const db = {
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
+    if (isSupabaseConfigured && supabase) {
+      const supabasePayload: Record<string, any> = {};
+      if (updates.name !== undefined) supabasePayload.name = updates.name;
+      if (updates.slug !== undefined) supabasePayload.slug = updates.slug;
+      if (updates.shortDescription !== undefined) supabasePayload.short_description = updates.shortDescription;
+      if (updates.description !== undefined) supabasePayload.description = updates.description;
+      if (updates.price !== undefined) supabasePayload.price = updates.price;
+      if (updates.salePrice !== undefined) supabasePayload.sale_price = updates.salePrice;
+      if (updates.images !== undefined) supabasePayload.images = updates.images;
+      if (updates.category !== undefined) supabasePayload.category = updates.category;
+      if (updates.categoryName !== undefined) supabasePayload.category_name = updates.categoryName;
+      if (updates.stock !== undefined) supabasePayload.stock = updates.stock;
+      if (updates.badge !== undefined) supabasePayload.badge = updates.badge;
+      if (updates.featured !== undefined) supabasePayload.featured = updates.featured;
+      if (updates.flashSale !== undefined) supabasePayload.flash_sale = updates.flashSale;
+      if (updates.variants !== undefined) supabasePayload.variants = updates.variants;
+      if (updates.bundleOffers !== undefined) supabasePayload.bundle_offers = updates.bundleOffers;
+      if (updates.features !== undefined) supabasePayload.features = updates.features;
+      if (updates.specifications !== undefined) supabasePayload.specifications = updates.specifications;
+      if (updates.seoTitle !== undefined) supabasePayload.seo_title = updates.seoTitle;
+      if (updates.seoDescription !== undefined) supabasePayload.seo_description = updates.seoDescription;
+
+      const { data, error } = await supabase
+        .from("products")
+        .update(supabasePayload)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const updatedProduct: Product = {
+          id: data.id,
+          slug: data.slug,
+          name: data.name,
+          shortDescription: data.short_description,
+          description: data.description,
+          price: Number(data.price),
+          salePrice: data.sale_price ? Number(data.sale_price) : undefined,
+          images: data.images || [],
+          category: data.category,
+          categoryName: data.category_name,
+          stock: data.stock,
+          rating: Number(data.rating || 5),
+          reviewCount: data.review_count || 0,
+          badge: data.badge,
+          featured: data.featured,
+          flashSale: data.flash_sale,
+          variants: data.variants || [],
+          bundleOffers: data.bundle_offers || [],
+          features: data.features || [],
+          specifications: data.specifications || {},
+          seoTitle: data.seo_title,
+          seoDescription: data.seo_description,
+          createdAt: data.created_at,
+        };
+
+        cachedProducts = readJsonFile("products.json", cachedProducts);
+        const idx = cachedProducts.findIndex((p) => p.id === id);
+        if (idx > -1) {
+          cachedProducts[idx] = updatedProduct;
+        } else {
+          cachedProducts.unshift(updatedProduct);
+        }
+        writeJsonFile("products.json", cachedProducts);
+
+        return updatedProduct;
+      }
+    }
+
     cachedProducts = readJsonFile("products.json", cachedProducts);
     const idx = cachedProducts.findIndex((p) => p.id === id);
     if (idx === -1) return null;
@@ -220,43 +289,35 @@ export const db = {
     cachedProducts[idx] = { ...cachedProducts[idx], ...updates };
     writeJsonFile("products.json", cachedProducts);
 
-    if (isSupabaseConfigured && supabase) {
-      await supabase
-        .from("products")
-        .update({
-          name: updates.name,
-          slug: updates.slug,
-          short_description: updates.shortDescription,
-          description: updates.description,
-          price: updates.price,
-          sale_price: updates.salePrice,
-          images: updates.images,
-          category: updates.category,
-          category_name: updates.categoryName,
-          stock: updates.stock,
-          badge: updates.badge,
-          featured: updates.featured,
-          flash_sale: updates.flashSale,
-          variants: updates.variants,
-          bundle_offers: updates.bundleOffers,
-          features: updates.features,
-          specifications: updates.specifications,
-          seo_title: updates.seoTitle,
-          seo_description: updates.seoDescription,
-        })
-        .eq("id", id);
-    }
-
     return cachedProducts[idx];
   },
 
   async deleteProduct(id: string): Promise<boolean> {
+    const imagesToDelete = new Set<string>();
+
+    if (isSupabaseConfigured && supabase) {
+      const { data } = await supabase.from("products").select("images, variants").eq("id", id).single();
+      if (data?.images && Array.isArray(data.images)) {
+        data.images.forEach((img: string) => {
+          if (img && typeof img === "string" && img.startsWith("/uploads/")) {
+            imagesToDelete.add(img);
+          }
+        });
+      }
+      if (data?.variants && Array.isArray(data.variants)) {
+        data.variants.forEach((v: any) => {
+          if (v?.image && typeof v.image === "string" && v.image.startsWith("/uploads/")) {
+            imagesToDelete.add(v.image);
+          }
+        });
+      }
+      await supabase.from("products").delete().eq("id", id);
+    }
+
     cachedProducts = readJsonFile("products.json", cachedProducts);
     const prodToDelete = cachedProducts.find((p) => p.id === id);
 
     if (prodToDelete) {
-      // Cascade delete local uploaded images from disk & media tracking
-      const imagesToDelete = new Set<string>();
       if (prodToDelete.images && Array.isArray(prodToDelete.images)) {
         prodToDelete.images.forEach((img) => {
           if (img && typeof img === "string" && img.startsWith("/uploads/")) {
@@ -271,22 +332,19 @@ export const db = {
           }
         });
       }
-
-      if (imagesToDelete.size > 0) {
-        cachedMedia = readJsonFile("media.json", cachedMedia);
-        imagesToDelete.forEach((url) => {
-          deleteFileFromDisk(url);
-          cachedMedia = cachedMedia.filter((m) => m.url !== url && m.productId !== id);
-        });
-        writeJsonFile("media.json", cachedMedia);
-      }
     }
+
+    imagesToDelete.forEach((imgUrl) => {
+      deleteFileFromDisk(imgUrl);
+    });
 
     cachedProducts = cachedProducts.filter((p) => p.id !== id);
     writeJsonFile("products.json", cachedProducts);
-    if (isSupabaseConfigured && supabase) {
-      await supabase.from("products").delete().eq("id", id);
-    }
+
+    cachedMedia = readJsonFile("media.json", cachedMedia);
+    cachedMedia = cachedMedia.filter((m) => !imagesToDelete.has(m.url));
+    writeJsonFile("media.json", cachedMedia);
+
     return true;
   },
 
@@ -317,11 +375,12 @@ export const db = {
     return item || null;
   },
 
-  async createCategory(category: Omit<Category, "id">): Promise<Category> {
+  async createCategory(category: Omit<Category, "id" | "createdAt">): Promise<Category> {
     const newCategory: Category = {
       ...category,
       id: `cat-${Date.now()}`,
       productCount: 0,
+      createdAt: new Date().toISOString(),
     };
     if (isSupabaseConfigured && supabase) {
       await supabase.from("categories").insert({
@@ -332,6 +391,7 @@ export const db = {
         image: newCategory.image,
         featured: newCategory.featured,
         product_count: 0,
+        created_at: newCategory.createdAt,
       });
     }
     cachedCategories.push(newCategory);
@@ -340,46 +400,72 @@ export const db = {
   },
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+    if (isSupabaseConfigured && supabase) {
+      const updatePayload: Record<string, any> = {};
+      if (updates.name !== undefined) updatePayload.name = updates.name;
+      if (updates.slug !== undefined) updatePayload.slug = updates.slug;
+      if (updates.description !== undefined) updatePayload.description = updates.description;
+      if (updates.image !== undefined) updatePayload.image = updates.image;
+      if (updates.featured !== undefined) updatePayload.featured = updates.featured;
+
+      const { data, error } = await supabase
+        .from("categories")
+        .update(updatePayload)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const updatedCat: Category = {
+          id: data.id,
+          slug: data.slug,
+          name: data.name,
+          description: data.description,
+          image: data.image,
+          featured: data.featured,
+          productCount: data.product_count || 0,
+          createdAt: data.created_at || new Date().toISOString(),
+        };
+
+        cachedCategories = readJsonFile("categories.json", cachedCategories);
+        const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
+        if (idx > -1) {
+          cachedCategories[idx] = updatedCat;
+        } else {
+          cachedCategories.push(updatedCat);
+        }
+        writeJsonFile("categories.json", cachedCategories);
+
+        return updatedCat;
+      }
+    }
+
     cachedCategories = readJsonFile("categories.json", cachedCategories);
     const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
     if (idx === -1) return null;
 
     cachedCategories[idx] = { ...cachedCategories[idx], ...updates };
     writeJsonFile("categories.json", cachedCategories);
-
-    if (isSupabaseConfigured && supabase) {
-      await supabase
-        .from("categories")
-        .update({
-          name: updates.name,
-          slug: updates.slug,
-          description: updates.description,
-          image: updates.image,
-          featured: updates.featured,
-        })
-        .eq("id", id);
-    }
     return cachedCategories[idx];
   },
 
   async deleteCategory(id: string): Promise<boolean> {
-    cachedCategories = readJsonFile("categories.json", cachedCategories);
-    const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
-    if (idx === -1) return false;
-
-    const cat = cachedCategories[idx];
-    if (cat.image && typeof cat.image === "string" && cat.image.startsWith("/uploads/")) {
-      deleteFileFromDisk(cat.image);
-      cachedMedia = readJsonFile("media.json", cachedMedia);
-      cachedMedia = cachedMedia.filter((m) => m.url !== cat.image && m.categorySlug !== cat.slug);
-      writeJsonFile("media.json", cachedMedia);
-    }
-
-    cachedCategories.splice(idx, 1);
-    writeJsonFile("categories.json", cachedCategories);
-
     if (isSupabaseConfigured && supabase) {
       await supabase.from("categories").delete().eq("id", id);
+    }
+
+    cachedCategories = readJsonFile("categories.json", cachedCategories);
+    const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
+    if (idx > -1) {
+      const cat = cachedCategories[idx];
+      if (cat.image && typeof cat.image === "string" && cat.image.startsWith("/uploads/")) {
+        deleteFileFromDisk(cat.image);
+        cachedMedia = readJsonFile("media.json", cachedMedia);
+        cachedMedia = cachedMedia.filter((m) => m.url !== cat.image && m.categorySlug !== cat.slug);
+        writeJsonFile("media.json", cachedMedia);
+      }
+      cachedCategories.splice(idx, 1);
+      writeJsonFile("categories.json", cachedCategories);
     }
     return true;
   },
@@ -585,6 +671,56 @@ export const db = {
     status: OrderStatus,
     courierInfo?: { courierName?: string; trackingCode?: string }
   ): Promise<Order | null> {
+    if (isSupabaseConfigured && supabase) {
+      const updatePayload: Record<string, any> = {
+        status,
+        updated_at: new Date().toISOString(),
+      };
+      if (courierInfo?.courierName) updatePayload.courier_name = courierInfo.courierName;
+      if (courierInfo?.trackingCode) updatePayload.tracking_code = courierInfo.trackingCode;
+
+      const { data, error } = await supabase
+        .from("orders")
+        .update(updatePayload)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const updatedOrder: Order = {
+          id: data.id,
+          customerName: data.customer_name,
+          customerPhone: data.customer_phone,
+          customerAddress: data.customer_address,
+          customerCity: data.customer_city,
+          deliveryZone: data.delivery_zone,
+          deliveryFee: Number(data.delivery_fee),
+          subtotal: Number(data.subtotal),
+          discount: Number(data.discount || 0),
+          totalAmount: Number(data.total_amount),
+          paymentMethod: data.payment_method,
+          status: data.status,
+          notes: data.notes,
+          items: data.items || [],
+          courierName: data.courier_name,
+          trackingCode: data.tracking_code,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+        };
+
+        cachedOrders = readJsonFile("orders.json", cachedOrders);
+        const idx = cachedOrders.findIndex((o) => o.id === id);
+        if (idx > -1) {
+          cachedOrders[idx] = updatedOrder;
+        } else {
+          cachedOrders.unshift(updatedOrder);
+        }
+        writeJsonFile("orders.json", cachedOrders);
+
+        return updatedOrder;
+      }
+    }
+
     cachedOrders = readJsonFile("orders.json", cachedOrders);
     const idx = cachedOrders.findIndex((o) => o.id === id);
     if (idx === -1) return null;
@@ -621,34 +757,12 @@ export const db = {
               }
             }
             currentProd.updatedAt = new Date().toISOString();
-
-            if (isSupabaseConfigured && supabase) {
-              await supabase
-                .from("products")
-                .update({
-                  stock: currentProd.stock,
-                  variants: currentProd.variants,
-                })
-                .eq("id", currentProd.id);
-            }
           }
         }
         writeJsonFile("products.json", cachedProducts);
       } catch (err) {
         console.error("Failed to restock cancelled order products", err);
       }
-    }
-
-    if (isSupabaseConfigured && supabase) {
-      await supabase
-        .from("orders")
-        .update({
-          status,
-          ...(courierInfo?.courierName ? { courier_name: courierInfo.courierName } : {}),
-          ...(courierInfo?.trackingCode ? { tracking_code: courierInfo.trackingCode } : {}),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", id);
     }
 
     return cachedOrders[idx];
