@@ -137,6 +137,7 @@ export type SiteSettings = {
   tagline?: string;
   logoUrl?: string;
   facebookPixelId?: string;
+  facebookTestEventCode?: string;
   socialLinks?: Record<string, string>;
   heroBanners?: {
     id: string;

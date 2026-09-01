@@ -307,20 +307,38 @@ export default function AdminSettingsPage() {
             <span>Facebook Pixel / Meta Ads Tracking Integration</span>
           </div>
 
-          <div className="space-y-2">
-            <label className="block font-bold text-slate-300 mb-1">
-              Facebook Pixel ID (Meta Pixel Dataset ID)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. 1234567890123456"
-              value={settings.facebookPixelId || ""}
-              onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
-              className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-sm focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
-            />
-            <p className="text-[11px] text-slate-400 leading-normal">
-              আপনার মেটা বিজনেস ম্যানেজার (Meta Events Manager) থেকে Pixel/Dataset ID টি এখানে দিন। স্বয়ংক্রিয়ভাবে PageView, ViewContent, AddToCart, এবং Purchase ইভেন্ট ট্র্যাক হবে।
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block font-bold text-slate-300">
+                Facebook Pixel ID (Meta Pixel Dataset ID)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 2242388576616945"
+                value={settings.facebookPixelId || ""}
+                onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-sm focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
+              />
+              <p className="text-[11px] text-slate-400 leading-normal">
+                মেটা বিজনেস ম্যানেজারের Pixel/Dataset ID। স্বয়ংক্রিয়ভাবে PageView, ViewContent, AddToCart ও Purchase ট্র্যাক হবে।
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block font-bold text-slate-300">
+                Meta Test Event Code (Optional)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. TEST82490"
+                value={settings.facebookTestEventCode || ""}
+                onChange={(e) => setSettings({ ...settings, facebookTestEventCode: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-sm focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
+              />
+              <p className="text-[11px] text-slate-400 leading-normal">
+                Meta Events Manager &gt; Test Events ট্যাবের টেস্ট কোড (যেমন: TEST82490)। লাইভ টেস্ট চেক করতে ব্যবহার করুন।
+              </p>
+            </div>
           </div>
         </div>
 

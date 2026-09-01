@@ -96,6 +96,8 @@ export const initialSiteSettings: SiteSettings = {
     "comforter sets",
     "luxury bedding"
   ],
+  facebookPixelId: "2242388576616945",
+  facebookTestEventCode: "TEST82490",
   heroBanners: [
     {
       id: "hero-1",

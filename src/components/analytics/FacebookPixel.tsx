@@ -3,23 +3,37 @@
 import React, { Suspense, useEffect } from "react";
 import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
+import { setPixelTestCode } from "@/lib/pixel";
 
-function PixelTracker({ pixelId }: { pixelId?: string }) {
+function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventCode?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (!pixelId) return;
-    if (typeof window !== "undefined" && (window as any).fbq) {
-      (window as any).fbq("track", "PageView");
+    if (testEventCode) {
+      setPixelTestCode(testEventCode);
     }
-  }, [pathname, searchParams, pixelId]);
+  }, [testEventCode]);
+
+  useEffect(() => {
+    const activeId = pixelId || "2242388576616945";
+    if (typeof window !== "undefined" && (window as any).fbq) {
+      const extra = testEventCode ? { test_event_code: testEventCode } : undefined;
+      (window as any).fbq("track", "PageView", extra);
+    }
+  }, [pathname, searchParams, pixelId, testEventCode]);
 
   return null;
 }
 
-export default function FacebookPixel({ pixelId }: { pixelId?: string }) {
-  if (!pixelId) return null;
+export default function FacebookPixel({
+  pixelId = "2242388576616945",
+  testEventCode = "TEST82490",
+}: {
+  pixelId?: string;
+  testEventCode?: string;
+}) {
+  const activePixelId = pixelId || "2242388576616945";
 
   return (
     <>
@@ -36,8 +50,8 @@ export default function FacebookPixel({ pixelId }: { pixelId?: string }) {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${pixelId}');
-            fbq('track', 'PageView');
+            fbq('init', '${activePixelId}');
+            fbq('track', 'PageView'${testEventCode ? `, { test_event_code: '${testEventCode}' }` : ""});
           `,
         }}
       />
@@ -46,12 +60,12 @@ export default function FacebookPixel({ pixelId }: { pixelId?: string }) {
           height="1"
           width="1"
           style={{ display: "none" }}
-          src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
+          src={`https://www.facebook.com/tr?id=${activePixelId}&ev=PageView&noscript=1`}
           alt=""
         />
       </noscript>
       <Suspense fallback={null}>
-        <PixelTracker pixelId={pixelId} />
+        <PixelTracker pixelId={activePixelId} testEventCode={testEventCode} />
       </Suspense>
     </>
   );

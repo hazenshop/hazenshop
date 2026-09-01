@@ -3,13 +3,25 @@ import { Order, Product, ProductVariant } from "./types";
 declare global {
   interface Window {
     fbq?: (...args: any[]) => void;
+    _fb_test_code?: string;
+  }
+}
+
+export function setPixelTestCode(code: string) {
+  if (typeof window !== "undefined") {
+    window._fb_test_code = code;
   }
 }
 
 export function trackPixelEvent(eventName: string, data?: Record<string, any>) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
-    if (data) {
-      window.fbq("track", eventName, data);
+    const payload = { ...(data || {}) };
+    if (window._fb_test_code && !payload.test_event_code) {
+      payload.test_event_code = window._fb_test_code;
+    }
+
+    if (Object.keys(payload).length > 0) {
+      window.fbq("track", eventName, payload);
     } else {
       window.fbq("track", eventName);
     }

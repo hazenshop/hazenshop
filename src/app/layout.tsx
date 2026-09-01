@@ -37,7 +37,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
-        <FacebookPixel pixelId={settings.facebookPixelId} />
+        <FacebookPixel
+          pixelId={settings.facebookPixelId || "2242388576616945"}
+          testEventCode={settings.facebookTestEventCode || "TEST82490"}
+        />
         <CartProvider>
           <ToastProvider>
             <StorefrontShell settings={settings} categories={categories}>
