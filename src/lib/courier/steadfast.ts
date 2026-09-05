@@ -51,11 +51,22 @@ export async function createSteadfastOrder(
         "Secret-Key": secretKey,
         "Content-Type": "application/json",
         Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
       },
       body: JSON.stringify(payload),
     });
 
-    const data: SteadfastCreateOrderResponse = await res.json();
+    const text = await res.text();
+    let data: SteadfastCreateOrderResponse | any = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return {
+        success: false,
+        message: `Steadfast Server error (${res.status}): ${text.slice(0, 150)}`,
+        raw: text,
+      };
+    }
 
     if (data.status === 200 && data.consignment) {
       return {
@@ -90,7 +101,7 @@ export async function createSteadfastOrder(
 
 export async function getSteadfastBalance(
   settings: SiteSettings
-): Promise<{ success: boolean; currentBalance?: number; message: string }> {
+): Promise<{ success: boolean; currentBalance?: number; message: string; diagnostic?: string }> {
   const apiKey = (settings.steadfastApiKey || process.env.STEADFAST_API_KEY || "").trim();
   const secretKey = (settings.steadfastSecretKey || process.env.STEADFAST_SECRET_KEY || "").trim();
 
@@ -98,6 +109,7 @@ export async function getSteadfastBalance(
     return {
       success: false,
       message: "Steadfast API Key or Secret Key is missing",
+      diagnostic: "API Key or Secret Key field is empty.",
     };
   }
 
@@ -109,6 +121,7 @@ export async function getSteadfastBalance(
         "Secret-Key": secretKey,
         "Content-Type": "application/json",
         Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
       },
     });
 
@@ -119,7 +132,8 @@ export async function getSteadfastBalance(
     } catch {
       return {
         success: false,
-        message: `Steadfast Server returned HTTP ${res.status}: ${text.slice(0, 100)}`,
+        message: `Steadfast Server returned HTTP ${res.status}: ${text.slice(0, 150)}`,
+        diagnostic: `Raw response from Steadfast: ${text.slice(0, 300)}`,
       };
     }
 
@@ -131,14 +145,17 @@ export async function getSteadfastBalance(
       };
     }
 
+    const errorMsg = data.message || data.error || (res.status === 401 ? "Invalid API Key or Secret Key (Unauthorized 401)" : `Steadfast status code ${res.status}`);
     return {
       success: false,
-      message: data.message || data.error || (res.status === 401 ? "Invalid API Key or Secret Key (Unauthorized)" : `Steadfast returned status ${res.status}`),
+      message: errorMsg,
+      diagnostic: `HTTP ${res.status} | Data: ${JSON.stringify(data)}`,
     };
   } catch (err: unknown) {
     return {
       success: false,
       message: err instanceof Error ? err.message : "Network error",
+      diagnostic: err instanceof Error ? err.stack : undefined,
     };
   }
 }

@@ -162,6 +162,11 @@ export default function CourierTestModal({
                       : "কানেকশন ব্যর্থ হয়েছে (Connection Failed)"}
                   </h4>
                   <p className="text-[11px] opacity-90 leading-relaxed break-words">{result.message}</p>
+                  {result.diagnostic && !result.success && (
+                    <p className="text-[10px] font-mono text-rose-300/80 bg-black/40 p-2 rounded-lg mt-1 break-all">
+                      {result.diagnostic}
+                    </p>
+                  )}
                 </div>
               </div>
 
