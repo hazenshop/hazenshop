@@ -49,17 +49,24 @@ export async function fetchSteadfastFraudStats(
       next: { revalidate: 300 }, // Cache 5 min
     });
 
-    if (!res.ok) {
+    const text = await res.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
       return null;
     }
 
-    const data = await res.json();
+    if (res.status !== 200 && data.status !== 200) {
+      return null;
+    }
     
     // Steadfast structure: total_parcels, total_delivered, total_cancelled, total_fraud_reports
-    const totalParcels = Number(data.total_parcels || data.Total_parcels || 0);
-    const delivered = Number(data.total_delivered || data.Total_delivered || 0);
-    const cancelled = Number(data.total_cancelled || data.Total_cancelled || 0);
-    const fraudReports = Number(data.total_fraud_reports || data.Total_fraud_reports || 0);
+    const d = data.data || data;
+    const totalParcels = Number(d.total_parcels ?? d.Total_parcels ?? 0);
+    const delivered = Number(d.total_delivered ?? d.Total_delivered ?? 0);
+    const cancelled = Number(d.total_cancelled ?? d.Total_cancelled ?? 0);
+    const fraudReports = Number(d.total_fraud_reports ?? d.Total_fraud_reports ?? 0);
 
     const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
     const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
