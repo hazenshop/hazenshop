@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   ShieldCheck,
@@ -39,6 +39,7 @@ export default function FastCheckoutForm({
   const router = useRouter();
   const { showToast } = useToast();
 
+  const [draftOrderId] = useState(() => generateOrderId());
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
@@ -62,6 +63,44 @@ export default function FastCheckoutForm({
   const appliedDeliveryFee = isFreeDelivery ? 0 : deliveryFee;
   const grandTotal = itemSubtotal + appliedDeliveryFee;
 
+  // Capture incomplete draft in background when customer enters 11-digit phone
+  useEffect(() => {
+    const cleanPhone = customerPhone.replace(/[^0-9]/g, "");
+    if (cleanPhone.length >= 11) {
+      const timer = setTimeout(() => {
+        fetch("/api/orders/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: draftOrderId,
+            customerName: customerName.trim() || "Customer (Draft)",
+            customerPhone: cleanPhone,
+            customerAddress: customerAddress.trim() || "Incomplete Address",
+            deliveryZone,
+            deliveryFee: appliedDeliveryFee,
+            subtotal: itemSubtotal,
+            totalAmount: grandTotal,
+            notes: "Incomplete Product Page COD Form (Unsubmitted)",
+            items: [
+              {
+                productId: product.id,
+                productName: product.name,
+                productSlug: product.slug,
+                productImage: (selectedVariant?.image || product.images[0]) || "/logo.jpg",
+                variantId: selectedVariant?.id,
+                variantName: selectedVariant?.name,
+                quantity,
+                price: unitPrice,
+                total: itemSubtotal,
+              },
+            ],
+          }),
+        }).catch(() => {});
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [customerPhone, customerName, customerAddress, deliveryZone, grandTotal, appliedDeliveryFee, itemSubtotal, unitPrice, product, selectedVariant, quantity, draftOrderId]);
+
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -84,7 +123,7 @@ export default function FastCheckoutForm({
     setIsSubmitting(true);
 
     try {
-      const orderId = generateOrderId();
+      const orderId = draftOrderId || generateOrderId();
       const orderData = {
         id: orderId,
         customerName: customerName.trim(),
@@ -139,8 +178,22 @@ export default function FastCheckoutForm({
 
       showToast("Order placed successfully. Cash on Delivery.", "success");
       router.push(`/order-success/${orderId}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Order submission error:", err);
+      // Record failed submission draft for admin follow-up
+      fetch("/api/orders/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: draftOrderId,
+          customerName: customerName.trim(),
+          customerPhone: cleanPhone,
+          customerAddress: customerAddress.trim(),
+          deliveryZone,
+          totalAmount: grandTotal,
+          notes: `Failed Submission Attempt (${err instanceof Error ? err.message : "Network error"})`,
+        }),
+      }).catch(() => {});
       showToast("Something went wrong. Please try again or order on WhatsApp.", "error");
     } finally {
       setIsSubmitting(false);

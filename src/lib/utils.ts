@@ -154,6 +154,8 @@ export function getStatusColor(status: string): { bg: string; text: string; bord
     case "cancelled":
     case "returned":
       return { bg: "bg-rose-500/10", text: "text-rose-400", border: "border-rose-500/30" };
+    case "incomplete":
+      return { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/30" };
     default:
       return { bg: "bg-slate-500/10", text: "text-slate-400", border: "border-slate-500/30" };
   }

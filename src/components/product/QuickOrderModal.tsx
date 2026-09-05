@@ -32,6 +32,7 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
   const { quickOrderProduct, quickOrderVariant, closeQuickOrder } = useCart();
   const { showToast } = useToast();
 
+  const [draftOrderId] = useState(() => generateOrderId());
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
   const [customerName, setCustomerName] = useState("");
@@ -56,6 +57,66 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
     }
   }, [quickOrderProduct, quickOrderVariant]);
 
+  const unitPrice = quickOrderProduct
+    ? (selectedVariant
+        ? selectedVariant.salePrice ?? selectedVariant.price
+        : quickOrderProduct.salePrice ?? quickOrderProduct.price)
+    : 0;
+
+  const originalPrice = quickOrderProduct
+    ? (selectedVariant ? selectedVariant.price : quickOrderProduct.price)
+    : 0;
+  const discountPercent = calculateDiscountPercentage(originalPrice, unitPrice);
+
+  const itemSubtotal = unitPrice * quantity;
+  const deliveryFee = getDeliveryFee(deliveryZone, {
+    dhaka: Number(settings?.dhakaDeliveryFee ?? 60),
+    outside_dhaka: Number(settings?.outsideDhakaDeliveryFee ?? 120),
+    suburbs: Number(settings?.suburbsDeliveryFee ?? 100),
+  });
+
+  const isFreeDelivery = itemSubtotal >= Number(settings?.freeShippingThreshold ?? 2500);
+  const appliedDeliveryFee = isFreeDelivery ? 0 : deliveryFee;
+  const grandTotal = itemSubtotal + appliedDeliveryFee;
+
+  // Capture incomplete draft in background when customer enters 11-digit phone
+  useEffect(() => {
+    const cleanPhone = customerPhone.replace(/[^0-9]/g, "");
+    if (cleanPhone.length >= 11 && quickOrderProduct) {
+      const timer = setTimeout(() => {
+        fetch("/api/orders/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: draftOrderId,
+            customerName: customerName.trim() || "Customer (Draft)",
+            customerPhone: cleanPhone,
+            customerAddress: customerAddress.trim() || "Incomplete Address",
+            deliveryZone,
+            deliveryFee: appliedDeliveryFee,
+            subtotal: itemSubtotal,
+            totalAmount: grandTotal,
+            notes: "Incomplete Quick Order (Unsubmitted)",
+            items: [
+              {
+                productId: quickOrderProduct.id,
+                productName: quickOrderProduct.name,
+                productSlug: quickOrderProduct.slug,
+                productImage: (selectedVariant?.image || quickOrderProduct.images[0]) || "/logo.jpg",
+                variantId: selectedVariant?.id,
+                variantName: selectedVariant?.name,
+                quantity,
+                price: unitPrice,
+                total: itemSubtotal,
+              },
+            ],
+          }),
+        }).catch(() => {});
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [customerPhone, customerName, customerAddress, deliveryZone, grandTotal, appliedDeliveryFee, itemSubtotal, unitPrice, quickOrderProduct, selectedVariant, quantity, draftOrderId]);
+
   // Handle ESC key to close
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -70,24 +131,6 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
   if (!quickOrderProduct) {
     return null;
   }
-
-  const unitPrice = selectedVariant
-    ? selectedVariant.salePrice ?? selectedVariant.price
-    : quickOrderProduct.salePrice ?? quickOrderProduct.price;
-
-  const originalPrice = selectedVariant ? selectedVariant.price : quickOrderProduct.price;
-  const discountPercent = calculateDiscountPercentage(originalPrice, unitPrice);
-
-  const itemSubtotal = unitPrice * quantity;
-  const deliveryFee = getDeliveryFee(deliveryZone, {
-    dhaka: Number(settings?.dhakaDeliveryFee ?? 60),
-    outside_dhaka: Number(settings?.outsideDhakaDeliveryFee ?? 120),
-    suburbs: Number(settings?.suburbsDeliveryFee ?? 100),
-  });
-
-  const isFreeDelivery = itemSubtotal >= Number(settings?.freeShippingThreshold ?? 2500);
-  const appliedDeliveryFee = isFreeDelivery ? 0 : deliveryFee;
-  const grandTotal = itemSubtotal + appliedDeliveryFee;
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,7 +154,7 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
     setIsSubmitting(true);
 
     try {
-      const orderId = generateOrderId();
+      const orderId = draftOrderId || generateOrderId();
       const orderData = {
         id: orderId,
         customerName: customerName.trim(),
@@ -167,8 +210,22 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
       showToast("অর্ডার সফলভাবে সম্পন্ন হয়েছে! ক্যাশ অন ডেলিভারি।", "success");
       closeQuickOrder();
       router.push(`/order-success/${orderId}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Quick order submission error:", err);
+      // Record failed submission draft for admin follow-up
+      fetch("/api/orders/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: draftOrderId,
+          customerName: customerName.trim(),
+          customerPhone: cleanPhone,
+          customerAddress: customerAddress.trim(),
+          deliveryZone,
+          totalAmount: grandTotal,
+          notes: `Failed Submission Attempt (${err instanceof Error ? err.message : "Network error"})`,
+        }),
+      }).catch(() => {});
       showToast("অর্ডার প্রসেস করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা হোয়াটসঅ্যাপে অর্ডার দিন।", "error");
     } finally {
       setIsSubmitting(false);

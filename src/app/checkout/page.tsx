@@ -28,6 +28,7 @@ export default function CheckoutPage() {
   const { showToast } = useToast();
 
   const [settings, setSettings] = useState<SiteSettings | null>(null);
+  const [draftOrderId] = useState(() => generateOrderId());
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
@@ -57,6 +58,32 @@ export default function CheckoutPage() {
   const appliedDeliveryFee = isFreeDelivery ? 0 : deliveryFee;
   const grandTotal = subtotal + appliedDeliveryFee;
 
+  // Capture incomplete checkout draft in background when phone is entered
+  useEffect(() => {
+    const cleanPhone = customerPhone.replace(/[^0-9]/g, "");
+    if (cleanPhone.length >= 11 && cart.length > 0) {
+      const timer = setTimeout(() => {
+        fetch("/api/orders/draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: draftOrderId,
+            customerName: customerName.trim() || "Customer (Draft)",
+            customerPhone: cleanPhone,
+            customerAddress: customerAddress.trim() || "Incomplete Address",
+            deliveryZone,
+            deliveryFee: appliedDeliveryFee,
+            subtotal,
+            totalAmount: grandTotal,
+            notes: "Incomplete Full Checkout Page (Unsubmitted)",
+            items: cart,
+          }),
+        }).catch(() => {});
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [customerPhone, customerName, customerAddress, deliveryZone, grandTotal, cart, subtotal, appliedDeliveryFee, draftOrderId]);
+
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -84,7 +111,7 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      const orderId = generateOrderId();
+      const orderId = draftOrderId || generateOrderId();
       const orderData = {
         id: orderId,
         customerName: customerName.trim(),
@@ -114,8 +141,23 @@ export default function CheckoutPage() {
       clearCart();
       showToast("অর্ডার সফল হয়েছে! ক্যাশ অন ডেলিভারিতে পাঠানো হচ্ছে।", "success");
       router.push(`/order-success/${orderId}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
+      // Record failed submission draft for admin follow-up
+      fetch("/api/orders/draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: draftOrderId,
+          customerName: customerName.trim(),
+          customerPhone: cleanPhone,
+          customerAddress: customerAddress.trim(),
+          deliveryZone,
+          totalAmount: grandTotal,
+          notes: `Failed Checkout Attempt (${err instanceof Error ? err.message : "Network error"})`,
+          items: cart,
+        }),
+      }).catch(() => {});
       showToast("অর্ডার প্রসেস করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।", "error");
     } finally {
       setIsSubmitting(false);

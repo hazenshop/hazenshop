@@ -96,10 +96,14 @@ export default function AdminDashboardPage() {
   };
 
   // Metrics
-  const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const completedOrders = orders.filter((o) => o.status !== "incomplete");
+  const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalAmount, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
   const confirmedOrders = orders.filter((o) => o.status === "confirmed" || o.status === "packaging" || o.status === "shipped").length;
   const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
+  const incompleteOrders = orders.filter((o) => o.status === "incomplete");
+  const incompleteCount = incompleteOrders.length;
+  const incompleteValue = incompleteOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
   const lowStockProducts = products.filter((p) => p.stock <= 3);
 
   // Admin Nav Cards Configuration
@@ -114,6 +118,17 @@ export default function AdminDashboardPage() {
       accentBg: "from-amber-500/10 to-amber-950/20 border-amber-500/30 hover:border-amber-400/60",
       iconColor: "text-amber-400 bg-amber-500/10",
       cta: "অর্ডার ম্যানেজ করুন",
+    },
+    {
+      title: "অসম্পূর্ণ অর্ডার ও লিড (Incomplete Leads)",
+      subtitle: "ড্রাফট ও ড্রপ-অফ অর্ডার রিকভারি এবং ১-ক্লিক হোয়াটসঅ্যাপ মেসেজিং",
+      icon: Clock,
+      href: "/admin/incomplete-orders",
+      badge: `${incompleteCount} Abandoned Leads`,
+      badgeColor: incompleteCount > 0 ? "bg-amber-500/20 text-amber-400 border-amber-500/30" : "bg-slate-800 text-slate-400 border-slate-700",
+      accentBg: "from-amber-500/10 to-orange-950/20 border-amber-500/30 hover:border-amber-400/60",
+      iconColor: "text-amber-400 bg-amber-500/10",
+      cta: "লিড রিকভার করুন",
     },
     {
       title: "পণ্য ও স্টক (Products)",
@@ -161,7 +176,7 @@ export default function AdminDashboardPage() {
     },
     {
       title: "স্টোর সেটিংস ও এসইও (Settings)",
-      subtitle: "হটলাইন, হোয়াটসঅ্যাপ, ডেলিভারি চার্জ ও ব্যানার নোটিশ",
+      subtitle: "হটলাইন, হোয়াটসঅ্যাপ, কুরিয়ার এপিআই ও ডেলিভারি চার্জ",
       icon: Settings,
       href: "/admin/settings",
       badge: "hazenshopbd.com Config",
@@ -298,6 +313,29 @@ export default function AdminDashboardPage() {
               {healthData.totalLatencyMs ?? 0}ms
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Incomplete / Abandoned Leads Alert (if any) */}
+      {incompleteCount > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <Clock className="w-5 h-5 text-amber-400 shrink-0" />
+            <div>
+              <h4 className="text-xs font-bold text-amber-300">
+                {incompleteCount} Incomplete Orders / Abandoned Leads ({formatPrice(incompleteValue)} Potential Sales)
+              </h4>
+              <p className="text-[11px] text-slate-300">
+                Customers typed their phone number but dropped off. Send a 1-tap WhatsApp message to recover these sales!
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/incomplete-orders"
+            className="text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-xl transition-colors shrink-0 flex items-center gap-1.5"
+          >
+            <span>Recover Leads &rarr;</span>
+          </Link>
         </div>
       )}
 

@@ -163,6 +163,8 @@ export default function AdminOrdersPage() {
     return matchStatus && matchSearch;
   });
 
+  const incompleteCount = orders.filter((o) => o.status === "incomplete").length;
+
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Top Header & Bulk Actions */}
@@ -174,13 +176,23 @@ export default function AdminOrdersPage() {
           </p>
         </div>
 
-        <button
-          onClick={handleExportCSV}
-          className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-brand-400 hover:text-brand-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
-        >
-          <Download className="w-4 h-4" />
-          <span>Export CSV ({filteredOrders.length})</span>
-        </button>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <Link
+            href="/admin/incomplete-orders"
+            className="w-full sm:w-auto bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-amber-500/30 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+          >
+            <Clock className="w-4 h-4" />
+            <span>Incomplete Orders ({incompleteCount})</span>
+          </Link>
+
+          <button
+            onClick={handleExportCSV}
+            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-brand-400 hover:text-brand-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export CSV ({filteredOrders.length})</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
@@ -205,7 +217,7 @@ export default function AdminOrdersPage() {
 
         {/* Status Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full pb-1 scrollbar-none">
-          {["all", "pending", "confirmed", "packaging", "shipped", "delivered", "cancelled"].map((st) => (
+          {["all", "pending", "confirmed", "packaging", "shipped", "delivered", "incomplete", "cancelled"].map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
@@ -216,6 +228,7 @@ export default function AdminOrdersPage() {
               }`}
             >
               {st}
+              {st === "incomplete" && incompleteCount > 0 ? ` (${incompleteCount})` : ""}
             </button>
           ))}
         </div>

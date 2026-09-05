@@ -97,7 +97,8 @@ export type OrderStatus =
   | "out_for_delivery"
   | "delivered"
   | "cancelled"
-  | "returned";
+  | "returned"
+  | "incomplete";
 
 export type Order = {
   id: string;
