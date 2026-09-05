@@ -16,6 +16,16 @@ export interface SteadfastCreateOrderResponse {
   errors?: Record<string, string[]>;
 }
 
+export function getSteadfastHeaders(apiKey: string, secretKey: string) {
+  return {
+    "Api-Key": apiKey,
+    "Secret-Key": secretKey,
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  };
+}
+
 export async function createSteadfastOrder(
   order: Order,
   settings: SiteSettings
@@ -46,13 +56,7 @@ export async function createSteadfastOrder(
   try {
     const res = await fetch("https://portal.packzy.com/api/v1/create_order", {
       method: "POST",
-      headers: {
-        "Api-Key": apiKey,
-        "Secret-Key": secretKey,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-      },
+      headers: getSteadfastHeaders(apiKey, secretKey),
       body: JSON.stringify(payload),
     });
 
@@ -116,13 +120,7 @@ export async function getSteadfastBalance(
   try {
     const res = await fetch("https://portal.packzy.com/api/v1/get_balance", {
       method: "GET",
-      headers: {
-        "Api-Key": apiKey,
-        "Secret-Key": secretKey,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-      },
+      headers: getSteadfastHeaders(apiKey, secretKey),
     });
 
     const text = await res.text();

@@ -20,30 +20,18 @@ export function generateOrderId(): string {
   return `HZ-${randomNum}`;
 }
 
+const ZONE_LABELS: Record<DeliveryZone, string> = {
+  dhaka: "Inside Dhaka (৳60)",
+  outside_dhaka: "Outside Dhaka (৳120)",
+  suburbs: "Suburbs / Dhaka Surrounding (৳100)",
+};
+
 export function getDeliveryFee(zone: DeliveryZone, fees = { dhaka: 60, outside_dhaka: 120, suburbs: 100 }): number {
-  switch (zone) {
-    case "dhaka":
-      return fees.dhaka;
-    case "outside_dhaka":
-      return fees.outside_dhaka;
-    case "suburbs":
-      return fees.suburbs;
-    default:
-      return fees.dhaka;
-  }
+  return fees[zone] ?? fees.dhaka;
 }
 
 export function getDeliveryZoneLabel(zone: DeliveryZone): string {
-  switch (zone) {
-    case "dhaka":
-      return "Inside Dhaka (৳60)";
-    case "outside_dhaka":
-      return "Outside Dhaka (৳120)";
-    case "suburbs":
-      return "Suburbs / Dhaka Surrounding (৳100)";
-    default:
-      return "Inside Dhaka";
-  }
+  return ZONE_LABELS[zone] ?? "Inside Dhaka";
 }
 
 export function generateWhatsAppOrderUrl(
