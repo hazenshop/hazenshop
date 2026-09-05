@@ -1016,12 +1016,11 @@ export const db = {
 
     if (isSupabaseConfigured && dbClient) {
       try {
-        await dbClient
+        const { error } = await dbClient
           .from("site_settings")
           .upsert({
             id: "primary",
             store_name: cachedSettings.siteName,
-            site_name: cachedSettings.siteName,
             tagline: cachedSettings.tagline,
             logo_url: cachedSettings.logoUrl,
             hotline: cachedSettings.hotline,
@@ -1038,7 +1037,6 @@ export const db = {
             seo_description: cachedSettings.seoDescription,
             seo_keywords: cachedSettings.seoKeywords,
             facebook_pixel_id: cachedSettings.facebookPixelId,
-            facebook_test_event_code: cachedSettings.facebookTestEventCode,
             social_links: cachedSettings.socialLinks,
             steadfast_api_key: cachedSettings.steadfastApiKey,
             steadfast_secret_key: cachedSettings.steadfastSecretKey,
@@ -1052,6 +1050,9 @@ export const db = {
             pathao_enabled: cachedSettings.pathaoEnabled,
             updated_at: new Date().toISOString(),
           });
+        if (error) {
+          console.warn("Supabase site_settings upsert error:", error);
+        }
       } catch (err) {
         console.warn("Supabase settings upsert error (saved locally):", err);
       }

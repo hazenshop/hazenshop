@@ -27,7 +27,7 @@ export default function AdminSettingsPage() {
   const [activeTestCourier, setActiveTestCourier] = useState<"steadfast" | "pathao" | null>(null);
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch("/api/settings", { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
       .then((res) => res.json())
       .then((data) => {
         if (data.settings) setSettings(data.settings);
@@ -57,12 +57,18 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(payload),
       });
 
+      const resData = await res.json().catch(() => null);
+
       if (res.ok) {
+        if (resData?.settings) {
+          setSettings(resData.settings);
+        } else {
+          setSettings(payload);
+        }
         showToast("সাইটের সেটিংস সফলভাবে আপডেট করা হয়েছে! (Settings saved)", "success");
         setSavedModalOpen(true);
       } else {
-        const errData = await res.json().catch(() => null);
-        throw new Error(errData?.error || "সেটিংস সংরক্ষণ করা যায়নি। দয়া করে ইনপুটগুলো চেক করুন। (Failed to save)");
+        throw new Error(resData?.error || "সেটিংস সংরক্ষণ করা যায়নি। দয়া করে ইনপুটগুলো চেক করুন। (Failed to save)");
       }
     } catch (e: any) {
       showToast(e?.message || "Error updating settings. Please check your connection.", "error");
