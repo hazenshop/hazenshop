@@ -1,20 +1,18 @@
 {
-  "siteName": "HAZENSHOP BD — Luxury Living",
+  "siteName": "HAZENSHOP — Luxury Living",
   "tagline": "Artisanal Bedsheets & Designer Window Curtains",
-  "hotline": "+880 1700-000000",
-  "whatsappNumber": "8801700000000",
-  "supportEmail": "support@hazenshopbd.com",
-  "dhakaDeliveryFee": 60,
-  "outsideDhakaDeliveryFee": 120,
-  "suburbsDeliveryFee": 100,
+  "hotline": "+880 1711-030546",
+  "whatsappNumber": "8801711-030546",
+  "supportEmail": "support@hazenshop.com",
+  "dhakaDeliveryFee": 90,
+  "outsideDhakaDeliveryFee": 30,
+  "suburbsDeliveryFee": 133,
   "freeShippingThreshold": 2500,
   "announcementBarActive": true,
-  "announcementBarText": "✨ বিশেষ অফার: hazenshopbd.com এর সকল বেডশিট ও পর্দা কালেকশনে ক্যাশ অন ডেলিভারি সুবিধা!",
-  "seoTitle": "HAZENSHOP BD (hazenshopbd.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
-  "seoDescription": "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online at hazenshopbd.com with Cash on Delivery nationwide.",
+  "announcementBarText": "✨ বিশেষ অফার: hazenshop.com এর সকল বেডশিট ও পর্দা কালেকশনে ক্যাশ অন ডেলিভারি সুবিধা!",
+  "seoTitle": "HAZENSHOP (hazenshop.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
+  "seoDescription": "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online at hazenshop.com with Cash on Delivery nationwide.",
   "seoKeywords": [
-    "hazenshopbd",
-    "hazenshopbd.com",
     "hazenshop",
     "hazenshop.com",
     "bedsheets bangladesh",
@@ -38,16 +36,17 @@
   "pathaoPassword": "",
   "pathaoStoreId": "",
   "pathaoSandbox": false,
-  "pathaoEnabled": true,
+  "pathaoEnabled": false,
   "heroBanners": [
     {
       "id": "hero-1",
+      "badge": "Seasonal Home Living Edition",
+      "image": "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
       "title": "Luxury Bedsheets & Designer Window Curtains",
       "subtitle": "Export-grade 100% Egyptian cotton bedsheet sets, 100% blackout window drapes, and cloud comforters delivered with Cash on Delivery nationwide across Bangladesh.",
-      "buttonText": "Explore Collections",
       "buttonLink": "/products",
-      "image": "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
-      "badge": "Seasonal Home Living Edition"
+      "buttonText": "Explore Collections"
     }
-  ]
+  ],
+  "socialLinks": {}
 }

@@ -46,7 +46,7 @@ export default function ProductForm({
   const [sku, setSku] = useState(initialProduct?.sku || "");
   const [slug, setSlug] = useState(initialProduct?.slug || "");
   const [category, setCategory] = useState(
-    initialProduct?.category || (categories[0]?.slug || "mens-panjabi-fashion")
+    initialProduct?.category || (categories[0]?.slug || "luxury-bedsheets")
   );
   const [price, setPrice] = useState(initialProduct?.price ? initialProduct.price.toString() : "");
   const [salePrice, setSalePrice] = useState(
@@ -62,7 +62,7 @@ export default function ProductForm({
   const [featured, setFeatured] = useState(initialProduct?.featured ?? true);
   const [flashSale, setFlashSale] = useState(initialProduct?.flashSale ?? false);
   const [variantType, setVariantType] = useState<Product["variantType"]>(
-    initialProduct?.variantType || "size"
+    initialProduct?.variantType || "dimension"
   );
 
   // Images list
@@ -89,14 +89,14 @@ export default function ProductForm({
       ? initialProduct.variants
       : [
           {
-            id: "v-1",
-            name: "Size 40 (M)",
-            price: Number(price) || 2450,
-            salePrice: Number(salePrice) || 1750,
-            stock: 10,
-            color: "Signature",
-            colorCode: "#7A1C2C",
-            material: "100% Combed Cotton",
+            id: `v-${Date.now()}`,
+            name: "King Size (7.5ft x 8.5ft / 90x102 in) + 2 Pillow Covers",
+            price: Number(price) || 2650,
+            salePrice: Number(salePrice) || 1890,
+            stock: 16,
+            color: "Signature Gold",
+            colorCode: "#b8873f",
+            material: "100% Egyptian Cotton (350 TC)",
           },
         ]
   );
@@ -203,38 +203,42 @@ export default function ProductForm({
     e.preventDefault();
 
     if (!name.trim()) {
-      showToast("Product name is required", "error");
+      showToast("Product name is required (পণ্যের নাম দিন)", "error");
       return;
     }
     if (!price || Number(price) <= 0) {
-      showToast("Please enter a valid product price", "error");
+      showToast("Please enter a valid product price (সঠিক মূল্য লিখুন)", "error");
       return;
     }
 
     setSaving(true);
-    const catObj = categories.find((c) => c.slug === category);
-    const autoSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const selectedCategorySlug = category || categories[0]?.slug || "luxury-bedsheets";
+    const catObj = categories.find((c) => c.slug === selectedCategorySlug);
+    const autoSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+    const shortDesc = shortDescription.trim() || name.trim();
+    const fullDesc = description.trim() || shortDesc;
 
     const payload = {
       sku: sku.trim() || undefined,
       name: name.trim(),
       slug: autoSlug,
-      category,
-      categoryName: catObj?.name || category,
+      category: selectedCategorySlug,
+      categoryName: catObj?.name || categories[0]?.name || "Luxury Bedsheets",
       price: Number(price),
-      salePrice: salePrice ? Number(salePrice) : undefined,
-      stock: isUnlimitedStock ? 999999 : Number(stock) || 0,
-      isUnlimitedStock,
+      salePrice: salePrice && Number(salePrice) > 0 ? Number(salePrice) : undefined,
+      stock: isUnlimitedStock ? 999999 : (Number(stock) >= 0 ? Number(stock) : 20),
+      isUnlimitedStock: Boolean(isUnlimitedStock),
       badge,
       featured,
       flashSale,
       variantType,
       images: images.length > 0 ? images : ["/logo.jpg"],
-      shortDescription: shortDescription.trim() || name,
-      description: description.trim() || name,
-      variants,
-      seoTitle: seoTitle.trim() || name,
-      seoDescription: seoDescription.trim() || shortDescription,
+      shortDescription: shortDesc,
+      description: fullDesc,
+      variants: Array.isArray(variants) ? variants : [],
+      seoTitle: seoTitle.trim() || name.trim(),
+      seoDescription: seoDescription.trim() || shortDesc,
       rating: initialProduct?.rating || 5.0,
       reviewCount: initialProduct?.reviewCount || 42,
     };
@@ -257,14 +261,14 @@ export default function ProductForm({
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.error || "পণ্যটি সংরক্ষণ করা যায়নি। দয়া করে তথ্যগুলো পুনরায় চেক করুন। (Failed to save product)");
+        throw new Error(errorData?.error || "Failed to save product. Please check your data.");
       }
 
       showToast(`পণ্য "${name}" সফলভাবে সংরক্ষণ করা হয়েছে! (Product saved)`, "success");
       router.push("/admin/products");
       router.refresh();
     } catch (err: any) {
-      console.error(err);
+      console.error("Product save error:", err);
       showToast(err?.message || "পণ্যটি সেভ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", "error");
     } finally {
       setSaving(false);

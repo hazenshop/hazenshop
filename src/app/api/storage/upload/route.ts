@@ -5,6 +5,9 @@ import { db } from "@/lib/db";
 import { MediaItem } from "@/lib/types";
 import { isSupabaseConfigured, supabaseAdmin, supabase } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads");
 const SUPABASE_BUCKET = "product-images";
 

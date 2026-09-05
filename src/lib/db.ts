@@ -59,6 +59,8 @@ function deleteFileFromDisk(fileUrl: string) {
   }
 }
 
+const dbClient = supabaseAdmin || supabase;
+
 // In-memory + disk persistence store
 let cachedProducts: Product[] = readJsonFile("products.json", initialProducts);
 let cachedCategories: Category[] = readJsonFile("categories.json", initialCategories);
@@ -70,41 +72,46 @@ export const db = {
 
   // PRODUCTS
   async getProducts(options?: { category?: string; featured?: boolean; flashSale?: boolean; search?: string }): Promise<Product[]> {
-    if (isSupabaseConfigured && supabase) {
-      let query = supabase.from("products").select("*").order("created_at", { ascending: false });
-      if (options?.category) query = query.eq("category", options.category);
-      if (options?.featured !== undefined) query = query.eq("featured", options.featured);
-      if (options?.flashSale !== undefined) query = query.eq("flash_sale", options.flashSale);
-      if (options?.search) query = query.ilike("name", `%${options.search}%`);
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        let query = dbClient.from("products").select("*").order("created_at", { ascending: false });
+        if (options?.category) query = query.eq("category", options.category);
+        if (options?.featured !== undefined) query = query.eq("featured", options.featured);
+        if (options?.flashSale !== undefined) query = query.eq("flash_sale", options.flashSale);
+        if (options?.search) query = query.ilike("name", `%${options.search}%`);
 
-      const { data, error } = await query;
-      if (!error && data) {
-        return data.map((item) => ({
-          id: item.id,
-          sku: item.sku || item.id,
-          slug: item.slug,
-          name: item.name,
-          shortDescription: item.short_description,
-          description: item.description,
-          price: Number(item.price),
-          salePrice: item.sale_price ? Number(item.sale_price) : undefined,
-          images: item.images || [],
-          category: item.category,
-          categoryName: item.category_name,
-          stock: item.stock,
-          rating: Number(item.rating || 5),
-          reviewCount: item.review_count || 0,
-          badge: item.badge,
-          featured: item.featured,
-          flashSale: item.flash_sale,
-          variants: item.variants || [],
-          bundleOffers: item.bundle_offers || [],
-          features: item.features || [],
-          specifications: item.specifications || {},
-          seoTitle: item.seo_title,
-          seoDescription: item.seo_description,
-          createdAt: item.created_at,
-        }));
+        const { data, error } = await query;
+        if (!error && data && data.length > 0) {
+          return data.map((item) => ({
+            id: item.id,
+            sku: item.sku || item.id,
+            slug: item.slug,
+            name: item.name,
+            shortDescription: item.short_description || item.name,
+            description: item.description || item.short_description || item.name,
+            price: Number(item.price),
+            salePrice: item.sale_price ? Number(item.sale_price) : undefined,
+            images: item.images || [],
+            category: item.category,
+            categoryName: item.category_name,
+            stock: item.is_unlimited_stock ? 999999 : Number(item.stock || 0),
+            isUnlimitedStock: Boolean(item.is_unlimited_stock),
+            rating: Number(item.rating || 5),
+            reviewCount: item.review_count || 0,
+            badge: item.badge,
+            featured: item.featured,
+            flashSale: item.flash_sale,
+            variants: item.variants || [],
+            bundleOffers: item.bundle_offers || [],
+            features: item.features || [],
+            specifications: item.specifications || {},
+            seoTitle: item.seo_title || item.name,
+            seoDescription: item.seo_description || item.short_description || item.name,
+            createdAt: item.created_at,
+          }));
+        }
+      } catch (err) {
+        console.warn("Supabase getProducts warning, using local fallback:", err);
       }
     }
 
@@ -133,40 +140,45 @@ export const db = {
   },
 
   async getProductBySlug(slug: string): Promise<Product | null> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .or(`slug.eq.${slug},id.eq.${slug},sku.eq.${slug}`)
-        .limit(1)
-        .single();
-      if (!error && data) {
-        return {
-          id: data.id,
-          sku: data.sku || data.id,
-          slug: data.slug,
-          name: data.name,
-          shortDescription: data.short_description,
-          description: data.description,
-          price: Number(data.price),
-          salePrice: data.sale_price ? Number(data.sale_price) : undefined,
-          images: data.images || [],
-          category: data.category,
-          categoryName: data.category_name,
-          stock: data.stock,
-          rating: Number(data.rating || 5),
-          reviewCount: data.review_count || 0,
-          badge: data.badge,
-          featured: data.featured,
-          flashSale: data.flash_sale,
-          variants: data.variants || [],
-          bundleOffers: data.bundle_offers || [],
-          features: data.features || [],
-          specifications: data.specifications || {},
-          seoTitle: data.seo_title,
-          seoDescription: data.seo_description,
-          createdAt: data.created_at,
-        };
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data, error } = await dbClient
+          .from("products")
+          .select("*")
+          .or(`slug.eq.${slug},id.eq.${slug},sku.eq.${slug}`)
+          .limit(1)
+          .maybeSingle();
+        if (!error && data) {
+          return {
+            id: data.id,
+            sku: data.sku || data.id,
+            slug: data.slug,
+            name: data.name,
+            shortDescription: data.short_description || data.name,
+            description: data.description || data.short_description || data.name,
+            price: Number(data.price),
+            salePrice: data.sale_price ? Number(data.sale_price) : undefined,
+            images: data.images || [],
+            category: data.category,
+            categoryName: data.category_name,
+            stock: data.is_unlimited_stock ? 999999 : Number(data.stock || 0),
+            isUnlimitedStock: Boolean(data.is_unlimited_stock),
+            rating: Number(data.rating || 5),
+            reviewCount: data.review_count || 0,
+            badge: data.badge,
+            featured: data.featured,
+            flashSale: data.flash_sale,
+            variants: data.variants || [],
+            bundleOffers: data.bundle_offers || [],
+            features: data.features || [],
+            specifications: data.specifications || {},
+            seoTitle: data.seo_title || data.name,
+            seoDescription: data.seo_description || data.short_description || data.name,
+            createdAt: data.created_at,
+          };
+        }
+      } catch (err) {
+        console.warn("Supabase getProductBySlug error:", err);
       }
     }
 
@@ -187,39 +199,55 @@ export const db = {
       finalSlug = `${finalSlug}-${Math.floor(100 + Math.random() * 900)}`;
     }
 
+    const shortDesc = product.shortDescription?.trim() || product.name.trim() || "Premium export quality fabric";
+    const fullDesc = product.description?.trim() || shortDesc;
+
     const newProduct: Product = {
       ...product,
       id: `prod-${Date.now()}-${Math.floor(10 + Math.random() * 90)}`,
       sku: product.sku || `HZN-${Date.now().toString().slice(-6)}`,
       slug: finalSlug,
+      name: product.name.trim(),
+      category: product.category || "luxury-bedsheets",
+      categoryName: product.categoryName || "Luxury Bedsheets",
       price: Number(product.price) || 0,
       salePrice: product.salePrice !== undefined && product.salePrice !== null ? Number(product.salePrice) : undefined,
       stock: product.isUnlimitedStock ? 999999 : (product.stock !== undefined ? Number(product.stock) : 20),
-      isUnlimitedStock: product.isUnlimitedStock ?? false,
+      isUnlimitedStock: Boolean(product.isUnlimitedStock),
+      shortDescription: shortDesc,
+      description: fullDesc,
+      badge: product.badge || "Best Seller",
+      featured: product.featured ?? true,
+      flashSale: Boolean(product.flashSale),
+      variantType: product.variantType || "dimension",
       rating: Number(product.rating || 5),
       reviewCount: Number(product.reviewCount || 42),
       images: Array.isArray(product.images) && product.images.length > 0 ? product.images : ["/logo.jpg"],
       variants: Array.isArray(product.variants) ? product.variants : [],
+      bundleOffers: Array.isArray(product.bundleOffers) ? product.bundleOffers : [],
       features: Array.isArray(product.features) ? product.features : [],
       specifications: product.specifications || {},
+      seoTitle: product.seoTitle?.trim() || product.name.trim(),
+      seoDescription: product.seoDescription?.trim() || shortDesc,
       createdAt: new Date().toISOString(),
     };
 
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       try {
-        await supabase.from("products").insert({
+        const { error } = await dbClient.from("products").insert({
           id: newProduct.id,
           sku: newProduct.sku,
           slug: newProduct.slug,
           name: newProduct.name,
-          short_description: newProduct.shortDescription || newProduct.name,
-          description: newProduct.description || newProduct.name,
+          short_description: newProduct.shortDescription,
+          description: newProduct.description,
           price: newProduct.price,
-          sale_price: newProduct.salePrice,
+          sale_price: newProduct.salePrice ?? null,
           images: newProduct.images,
           category: newProduct.category,
           category_name: newProduct.categoryName,
           stock: newProduct.stock,
+          is_unlimited_stock: newProduct.isUnlimitedStock,
           rating: newProduct.rating,
           review_count: newProduct.reviewCount,
           badge: newProduct.badge,
@@ -233,6 +261,10 @@ export const db = {
           seo_description: newProduct.seoDescription,
           created_at: newProduct.createdAt,
         });
+
+        if (error) {
+          console.error("Supabase insert product error:", error);
+        }
       } catch (sbErr) {
         console.warn("Supabase insert product warning, persisting to disk fallback:", sbErr);
       }
@@ -244,19 +276,20 @@ export const db = {
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       const supabasePayload: Record<string, any> = {};
       if (updates.sku !== undefined) supabasePayload.sku = updates.sku;
       if (updates.name !== undefined) supabasePayload.name = updates.name;
       if (updates.slug !== undefined) supabasePayload.slug = updates.slug;
       if (updates.shortDescription !== undefined) supabasePayload.short_description = updates.shortDescription;
       if (updates.description !== undefined) supabasePayload.description = updates.description;
-      if (updates.price !== undefined) supabasePayload.price = updates.price;
-      if (updates.salePrice !== undefined) supabasePayload.sale_price = updates.salePrice;
+      if (updates.price !== undefined) supabasePayload.price = Number(updates.price);
+      if (updates.salePrice !== undefined) supabasePayload.sale_price = updates.salePrice ? Number(updates.salePrice) : null;
       if (updates.images !== undefined) supabasePayload.images = updates.images;
       if (updates.category !== undefined) supabasePayload.category = updates.category;
       if (updates.categoryName !== undefined) supabasePayload.category_name = updates.categoryName;
-      if (updates.stock !== undefined) supabasePayload.stock = updates.stock;
+      if (updates.stock !== undefined) supabasePayload.stock = updates.isUnlimitedStock ? 999999 : Number(updates.stock);
+      if (updates.isUnlimitedStock !== undefined) supabasePayload.is_unlimited_stock = Boolean(updates.isUnlimitedStock);
       if (updates.badge !== undefined) supabasePayload.badge = updates.badge;
       if (updates.featured !== undefined) supabasePayload.featured = updates.featured;
       if (updates.flashSale !== undefined) supabasePayload.flash_sale = updates.flashSale;
@@ -267,50 +300,58 @@ export const db = {
       if (updates.seoTitle !== undefined) supabasePayload.seo_title = updates.seoTitle;
       if (updates.seoDescription !== undefined) supabasePayload.seo_description = updates.seoDescription;
 
-      const { data, error } = await supabase
-        .from("products")
-        .update(supabasePayload)
-        .eq("id", id)
-        .select()
-        .single();
+      try {
+        const { data, error } = await dbClient
+          .from("products")
+          .update(supabasePayload)
+          .eq("id", id)
+          .select()
+          .maybeSingle();
 
-      if (!error && data) {
-        const updatedProduct: Product = {
-          id: data.id,
-          slug: data.slug,
-          name: data.name,
-          shortDescription: data.short_description,
-          description: data.description,
-          price: Number(data.price),
-          salePrice: data.sale_price ? Number(data.sale_price) : undefined,
-          images: data.images || [],
-          category: data.category,
-          categoryName: data.category_name,
-          stock: data.stock,
-          rating: Number(data.rating || 5),
-          reviewCount: data.review_count || 0,
-          badge: data.badge,
-          featured: data.featured,
-          flashSale: data.flash_sale,
-          variants: data.variants || [],
-          bundleOffers: data.bundle_offers || [],
-          features: data.features || [],
-          specifications: data.specifications || {},
-          seoTitle: data.seo_title,
-          seoDescription: data.seo_description,
-          createdAt: data.created_at,
-        };
+        if (error) {
+          console.error("Supabase updateProduct error:", error);
+        } else if (data) {
+          const updatedProduct: Product = {
+            id: data.id,
+            sku: data.sku || data.id,
+            slug: data.slug,
+            name: data.name,
+            shortDescription: data.short_description || data.name,
+            description: data.description || data.short_description || data.name,
+            price: Number(data.price),
+            salePrice: data.sale_price ? Number(data.sale_price) : undefined,
+            images: data.images || [],
+            category: data.category,
+            categoryName: data.category_name,
+            stock: data.is_unlimited_stock ? 999999 : Number(data.stock || 0),
+            isUnlimitedStock: Boolean(data.is_unlimited_stock),
+            rating: Number(data.rating || 5),
+            reviewCount: data.review_count || 0,
+            badge: data.badge,
+            featured: data.featured,
+            flashSale: data.flash_sale,
+            variants: data.variants || [],
+            bundleOffers: data.bundle_offers || [],
+            features: data.features || [],
+            specifications: data.specifications || {},
+            seoTitle: data.seo_title || data.name,
+            seoDescription: data.seo_description || data.short_description || data.name,
+            createdAt: data.created_at,
+          };
 
-        cachedProducts = readJsonFile("products.json", cachedProducts);
-        const idx = cachedProducts.findIndex((p) => p.id === id);
-        if (idx > -1) {
-          cachedProducts[idx] = updatedProduct;
-        } else {
-          cachedProducts.unshift(updatedProduct);
+          cachedProducts = readJsonFile("products.json", cachedProducts);
+          const idx = cachedProducts.findIndex((p) => p.id === id);
+          if (idx > -1) {
+            cachedProducts[idx] = updatedProduct;
+          } else {
+            cachedProducts.unshift(updatedProduct);
+          }
+          writeJsonFile("products.json", cachedProducts);
+
+          return updatedProduct;
         }
-        writeJsonFile("products.json", cachedProducts);
-
-        return updatedProduct;
+      } catch (err) {
+        console.warn("Supabase updateProduct exception:", err);
       }
     }
 
@@ -327,23 +368,27 @@ export const db = {
   async deleteProduct(id: string): Promise<boolean> {
     const imagesToDelete = new Set<string>();
 
-    if (isSupabaseConfigured && supabase) {
-      const { data } = await supabase.from("products").select("images, variants").eq("id", id).single();
-      if (data?.images && Array.isArray(data.images)) {
-        data.images.forEach((img: string) => {
-          if (img && typeof img === "string" && img.startsWith("/uploads/")) {
-            imagesToDelete.add(img);
-          }
-        });
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data } = await dbClient.from("products").select("images, variants").eq("id", id).maybeSingle();
+        if (data?.images && Array.isArray(data.images)) {
+          data.images.forEach((img: string) => {
+            if (img && typeof img === "string" && img.startsWith("/uploads/")) {
+              imagesToDelete.add(img);
+            }
+          });
+        }
+        if (data?.variants && Array.isArray(data.variants)) {
+          data.variants.forEach((v: any) => {
+            if (v?.image && typeof v.image === "string" && v.image.startsWith("/uploads/")) {
+              imagesToDelete.add(v.image);
+            }
+          });
+        }
+        await dbClient.from("products").delete().eq("id", id);
+      } catch (err) {
+        console.warn("Supabase deleteProduct error:", err);
       }
-      if (data?.variants && Array.isArray(data.variants)) {
-        data.variants.forEach((v: any) => {
-          if (v?.image && typeof v.image === "string" && v.image.startsWith("/uploads/")) {
-            imagesToDelete.add(v.image);
-          }
-        });
-      }
-      await supabase.from("products").delete().eq("id", id);
     }
 
     cachedProducts = readJsonFile("products.json", cachedProducts);
@@ -382,19 +427,23 @@ export const db = {
 
   // CATEGORIES
   async getCategories(): Promise<Category[]> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from("categories").select("*");
-      if (!error && data) {
-        return data.map((c) => ({
-          id: c.id,
-          slug: c.slug,
-          name: c.name,
-          description: c.description,
-          image: c.image,
-          featured: c.featured,
-          productCount: c.product_count,
-          createdAt: c.created_at || new Date().toISOString(),
-        }));
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data, error } = await dbClient.from("categories").select("*").order("created_at", { ascending: true });
+        if (!error && data && data.length > 0) {
+          return data.map((c) => ({
+            id: c.id,
+            slug: c.slug,
+            name: c.name,
+            description: c.description || "",
+            image: c.image || "/logo.jpg",
+            featured: c.featured ?? true,
+            productCount: c.product_count || 0,
+            createdAt: c.created_at || new Date().toISOString(),
+          }));
+        }
+      } catch (err) {
+        console.warn("Supabase getCategories error:", err);
       }
     }
     cachedCategories = readJsonFile("categories.json", cachedCategories);
@@ -402,9 +451,9 @@ export const db = {
   },
 
   async getCategoryById(id: string): Promise<Category | null> {
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await dbClient
           .from("categories")
           .select("*")
           .or(`id.eq.${id},slug.eq.${id}`)
@@ -415,9 +464,9 @@ export const db = {
             id: data.id,
             slug: data.slug,
             name: data.name,
-            description: data.description,
-            image: data.image,
-            featured: data.featured,
+            description: data.description || "",
+            image: data.image || "/logo.jpg",
+            featured: data.featured ?? true,
             productCount: data.product_count || 0,
             createdAt: data.created_at || new Date().toISOString(),
           };
@@ -435,22 +484,23 @@ export const db = {
   async createCategory(category: Omit<Category, "id" | "createdAt">): Promise<Category> {
     const newCategory: Category = {
       ...category,
-      id: `cat-${Date.now()}`,
+      id: category.slug ? `cat-${category.slug}` : `cat-${Date.now()}`,
       productCount: 0,
       createdAt: new Date().toISOString(),
     };
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       try {
-        await supabase.from("categories").insert({
+        const { error } = await dbClient.from("categories").insert({
           id: newCategory.id,
           slug: newCategory.slug,
           name: newCategory.name,
-          description: newCategory.description,
-          image: newCategory.image,
-          featured: newCategory.featured,
+          description: newCategory.description || "",
+          image: newCategory.image || "/logo.jpg",
+          featured: newCategory.featured ?? true,
           product_count: 0,
           created_at: newCategory.createdAt,
         });
+        if (error) console.error("Supabase createCategory error:", error);
       } catch (err) {
         console.warn("Supabase createCategory warning:", err);
       }
@@ -462,15 +512,10 @@ export const db = {
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
     let updatedCat: Category | null = null;
-    let oldCategorySlug: string | undefined;
-
     cachedCategories = readJsonFile("categories.json", cachedCategories);
     const localIdx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
-    if (localIdx > -1) {
-      oldCategorySlug = cachedCategories[localIdx].slug;
-    }
 
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       try {
         const updatePayload: Record<string, any> = {};
         if (updates.name !== undefined) updatePayload.name = updates.name;
@@ -479,8 +524,7 @@ export const db = {
         if (updates.image !== undefined) updatePayload.image = updates.image;
         if (updates.featured !== undefined) updatePayload.featured = updates.featured;
 
-        // Try update by id first, then by slug
-        let { data, error } = await supabase
+        let { data, error } = await dbClient
           .from("categories")
           .update(updatePayload)
           .eq("id", id)
@@ -488,7 +532,7 @@ export const db = {
           .maybeSingle();
 
         if (!data) {
-          const res = await supabase
+          const res = await dbClient
             .from("categories")
             .update(updatePayload)
             .eq("slug", id)
@@ -503,9 +547,9 @@ export const db = {
             id: data.id,
             slug: data.slug,
             name: data.name,
-            description: data.description,
-            image: data.image,
-            featured: data.featured,
+            description: data.description || "",
+            image: data.image || "/logo.jpg",
+            featured: data.featured ?? true,
             productCount: data.product_count || 0,
             createdAt: data.created_at || new Date().toISOString(),
           };
@@ -529,7 +573,6 @@ export const db = {
       return updatedCat;
     }
 
-    // If neither existed yet, create it as fallback
     const fallbackCat: Category = {
       id: id.startsWith("cat-") ? id : `cat-${Date.now()}`,
       slug: updates.slug || id,
@@ -546,8 +589,12 @@ export const db = {
   },
 
   async deleteCategory(id: string): Promise<boolean> {
-    if (isSupabaseConfigured && supabase) {
-      await supabase.from("categories").delete().eq("id", id);
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        await dbClient.from("categories").delete().or(`id.eq.${id},slug.eq.${id}`);
+      } catch (err) {
+        console.warn("Supabase deleteCategory error:", err);
+      }
     }
 
     cachedCategories = readJsonFile("categories.json", cachedCategories);
@@ -566,35 +613,37 @@ export const db = {
     return true;
   },
 
-
-
   // ORDERS
   async getOrders(options?: { status?: OrderStatus; search?: string }): Promise<Order[]> {
-    if (isSupabaseConfigured && supabase) {
-      let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
-      if (options?.status) query = query.eq("status", options.status);
-      const { data, error } = await query;
-      if (!error && data) {
-        return data.map((o) => ({
-          id: o.id,
-          customerName: o.customer_name,
-          customerPhone: o.customer_phone,
-          customerAddress: o.customer_address,
-          customerCity: o.customer_city,
-          deliveryZone: o.delivery_zone,
-          deliveryFee: Number(o.delivery_fee),
-          subtotal: Number(o.subtotal),
-          discount: Number(o.discount || 0),
-          totalAmount: Number(o.total_amount),
-          paymentMethod: o.payment_method,
-          status: o.status,
-          notes: o.notes,
-          items: o.items || [],
-          courierName: o.courier_name,
-          trackingCode: o.tracking_code,
-          createdAt: o.created_at,
-          updatedAt: o.updated_at,
-        }));
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        let query = dbClient.from("orders").select("*").order("created_at", { ascending: false });
+        if (options?.status) query = query.eq("status", options.status);
+        const { data, error } = await query;
+        if (!error && data) {
+          return data.map((o) => ({
+            id: o.id,
+            customerName: o.customer_name,
+            customerPhone: o.customer_phone,
+            customerAddress: o.customer_address,
+            customerCity: o.customer_city,
+            deliveryZone: o.delivery_zone,
+            deliveryFee: Number(o.delivery_fee),
+            subtotal: Number(o.subtotal),
+            discount: Number(o.discount || 0),
+            totalAmount: Number(o.total_amount),
+            paymentMethod: o.payment_method,
+            status: o.status,
+            notes: o.notes,
+            items: o.items || [],
+            courierName: o.courier_name,
+            trackingCode: o.tracking_code,
+            createdAt: o.created_at,
+            updatedAt: o.updated_at,
+          }));
+        }
+      } catch (err) {
+        console.warn("Supabase getOrders error:", err);
       }
     }
 
@@ -616,29 +665,33 @@ export const db = {
   },
 
   async getOrderById(id: string): Promise<Order | null> {
-    if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from("orders").select("*").eq("id", id).single();
-      if (!error && data) {
-        return {
-          id: data.id,
-          customerName: data.customer_name,
-          customerPhone: data.customer_phone,
-          customerAddress: data.customer_address,
-          customerCity: data.customer_city,
-          deliveryZone: data.delivery_zone,
-          deliveryFee: Number(data.delivery_fee),
-          subtotal: Number(data.subtotal),
-          discount: Number(data.discount || 0),
-          totalAmount: Number(data.total_amount),
-          paymentMethod: data.payment_method,
-          status: data.status,
-          notes: data.notes,
-          items: data.items || [],
-          courierName: data.courier_name,
-          trackingCode: data.tracking_code,
-          createdAt: data.created_at,
-          updatedAt: data.updated_at,
-        };
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data, error } = await dbClient.from("orders").select("*").eq("id", id).maybeSingle();
+        if (!error && data) {
+          return {
+            id: data.id,
+            customerName: data.customer_name,
+            customerPhone: data.customer_phone,
+            customerAddress: data.customer_address,
+            customerCity: data.customer_city,
+            deliveryZone: data.delivery_zone,
+            deliveryFee: Number(data.delivery_fee),
+            subtotal: Number(data.subtotal),
+            discount: Number(data.discount || 0),
+            totalAmount: Number(data.total_amount),
+            paymentMethod: data.payment_method,
+            status: data.status,
+            notes: data.notes,
+            items: data.items || [],
+            courierName: data.courier_name,
+            trackingCode: data.tracking_code,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+          };
+        }
+      } catch (err) {
+        console.warn("Supabase getOrderById error:", err);
       }
     }
 
@@ -650,33 +703,37 @@ export const db = {
 
   async getOrdersByPhone(phone: string): Promise<Order[]> {
     const cleanPhone = phone.replace(/[^0-9]/g, "");
-    if (isSupabaseConfigured && supabase) {
-      const { data } = await supabase
-        .from("orders")
-        .select("*")
-        .ilike("customer_phone", `%${cleanPhone}%`)
-        .order("created_at", { ascending: false });
-      if (data) {
-        return data.map((o) => ({
-          id: o.id,
-          customerName: o.customer_name,
-          customerPhone: o.customer_phone,
-          customerAddress: o.customer_address,
-          customerCity: o.customer_city,
-          deliveryZone: o.delivery_zone,
-          deliveryFee: Number(o.delivery_fee),
-          subtotal: Number(o.subtotal),
-          discount: Number(o.discount || 0),
-          totalAmount: Number(o.total_amount),
-          paymentMethod: o.payment_method,
-          status: o.status,
-          notes: o.notes,
-          items: o.items || [],
-          courierName: o.courier_name,
-          trackingCode: o.tracking_code,
-          createdAt: o.created_at,
-          updatedAt: o.updated_at,
-        }));
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data } = await dbClient
+          .from("orders")
+          .select("*")
+          .ilike("customer_phone", `%${cleanPhone}%`)
+          .order("created_at", { ascending: false });
+        if (data) {
+          return data.map((o) => ({
+            id: o.id,
+            customerName: o.customer_name,
+            customerPhone: o.customer_phone,
+            customerAddress: o.customer_address,
+            customerCity: o.customer_city,
+            deliveryZone: o.delivery_zone,
+            deliveryFee: Number(o.delivery_fee),
+            subtotal: Number(o.subtotal),
+            discount: Number(o.discount || 0),
+            totalAmount: Number(o.total_amount),
+            paymentMethod: o.payment_method,
+            status: o.status,
+            notes: o.notes,
+            items: o.items || [],
+            courierName: o.courier_name,
+            trackingCode: o.tracking_code,
+            createdAt: o.created_at,
+            updatedAt: o.updated_at,
+          }));
+        }
+      } catch (err) {
+        console.warn("Supabase getOrdersByPhone error:", err);
       }
     }
 
@@ -694,27 +751,31 @@ export const db = {
       updatedAt: new Date().toISOString(),
     };
 
-    if (isSupabaseConfigured && supabase) {
-      await supabase.from("orders").insert({
-        id: newOrder.id,
-        customer_name: newOrder.customerName,
-        customer_phone: newOrder.customerPhone,
-        customer_address: newOrder.customerAddress,
-        customer_city: newOrder.customerCity,
-        delivery_zone: newOrder.deliveryZone,
-        delivery_fee: newOrder.deliveryFee,
-        subtotal: newOrder.subtotal,
-        discount: newOrder.discount,
-        total_amount: newOrder.totalAmount,
-        payment_method: newOrder.paymentMethod,
-        status: newOrder.status,
-        notes: newOrder.notes,
-        items: newOrder.items,
-        courier_name: newOrder.courierName,
-        tracking_code: newOrder.trackingCode,
-        created_at: newOrder.createdAt,
-        updated_at: newOrder.updatedAt,
-      });
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        await dbClient.from("orders").insert({
+          id: newOrder.id,
+          customer_name: newOrder.customerName,
+          customer_phone: newOrder.customerPhone,
+          customer_address: newOrder.customerAddress,
+          customer_city: newOrder.customerCity,
+          delivery_zone: newOrder.deliveryZone,
+          delivery_fee: newOrder.deliveryFee,
+          subtotal: newOrder.subtotal,
+          discount: newOrder.discount,
+          total_amount: newOrder.totalAmount,
+          payment_method: newOrder.paymentMethod,
+          status: newOrder.status,
+          notes: newOrder.notes,
+          items: newOrder.items,
+          courier_name: newOrder.courierName,
+          tracking_code: newOrder.trackingCode,
+          created_at: newOrder.createdAt,
+          updated_at: newOrder.updatedAt,
+        });
+      } catch (err) {
+        console.warn("Supabase createOrder error:", err);
+      }
     }
 
     cachedOrders = readJsonFile("orders.json", cachedOrders);
@@ -745,8 +806,8 @@ export const db = {
           currentProd.updatedAt = new Date().toISOString();
 
           // Sync stock to Supabase if configured
-          if (isSupabaseConfigured && supabase) {
-            await supabase
+          if (isSupabaseConfigured && dbClient) {
+            await dbClient
               .from("products")
               .update({
                 stock: currentProd.stock,
@@ -769,7 +830,7 @@ export const db = {
     status: OrderStatus,
     courierInfo?: { courierName?: string; trackingCode?: string }
   ): Promise<Order | null> {
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       const updatePayload: Record<string, any> = {
         status,
         updated_at: new Date().toISOString(),
@@ -777,45 +838,49 @@ export const db = {
       if (courierInfo?.courierName) updatePayload.courier_name = courierInfo.courierName;
       if (courierInfo?.trackingCode) updatePayload.tracking_code = courierInfo.trackingCode;
 
-      const { data, error } = await supabase
-        .from("orders")
-        .update(updatePayload)
-        .eq("id", id)
-        .select()
-        .single();
+      try {
+        const { data, error } = await dbClient
+          .from("orders")
+          .update(updatePayload)
+          .eq("id", id)
+          .select()
+          .maybeSingle();
 
-      if (!error && data) {
-        const updatedOrder: Order = {
-          id: data.id,
-          customerName: data.customer_name,
-          customerPhone: data.customer_phone,
-          customerAddress: data.customer_address,
-          customerCity: data.customer_city,
-          deliveryZone: data.delivery_zone,
-          deliveryFee: Number(data.delivery_fee),
-          subtotal: Number(data.subtotal),
-          discount: Number(data.discount || 0),
-          totalAmount: Number(data.total_amount),
-          paymentMethod: data.payment_method,
-          status: data.status,
-          notes: data.notes,
-          items: data.items || [],
-          courierName: data.courier_name,
-          trackingCode: data.tracking_code,
-          createdAt: data.created_at,
-          updatedAt: data.updated_at,
-        };
+        if (!error && data) {
+          const updatedOrder: Order = {
+            id: data.id,
+            customerName: data.customer_name,
+            customerPhone: data.customer_phone,
+            customerAddress: data.customer_address,
+            customerCity: data.customer_city,
+            deliveryZone: data.delivery_zone,
+            deliveryFee: Number(data.delivery_fee),
+            subtotal: Number(data.subtotal),
+            discount: Number(data.discount || 0),
+            totalAmount: Number(data.total_amount),
+            paymentMethod: data.payment_method,
+            status: data.status,
+            notes: data.notes,
+            items: data.items || [],
+            courierName: data.courier_name,
+            trackingCode: data.tracking_code,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at,
+          };
 
-        cachedOrders = readJsonFile("orders.json", cachedOrders);
-        const idx = cachedOrders.findIndex((o) => o.id === id);
-        if (idx > -1) {
-          cachedOrders[idx] = updatedOrder;
-        } else {
-          cachedOrders.unshift(updatedOrder);
+          cachedOrders = readJsonFile("orders.json", cachedOrders);
+          const idx = cachedOrders.findIndex((o) => o.id === id);
+          if (idx > -1) {
+            cachedOrders[idx] = updatedOrder;
+          } else {
+            cachedOrders.unshift(updatedOrder);
+          }
+          writeJsonFile("orders.json", cachedOrders);
+
+          return updatedOrder;
         }
-        writeJsonFile("orders.json", cachedOrders);
-
-        return updatedOrder;
+      } catch (err) {
+        console.warn("Supabase updateOrderStatus error:", err);
       }
     }
 
@@ -869,8 +934,12 @@ export const db = {
   },
 
   async deleteOrder(id: string): Promise<boolean> {
-    if (isSupabaseConfigured && supabase) {
-      await supabase.from("orders").delete().eq("id", id);
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        await dbClient.from("orders").delete().eq("id", id);
+      } catch (err) {
+        console.warn("Supabase deleteOrder error:", err);
+      }
     }
 
     cachedOrders = readJsonFile("orders.json", cachedOrders);
@@ -882,9 +951,9 @@ export const db = {
   // SETTINGS
   async getSettings(): Promise<SiteSettings> {
     const base = readJsonFile("settings.json", cachedSettings);
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       try {
-        const { data, error } = await supabase.from("site_settings").select("*").eq("id", "primary").single();
+        const { data, error } = await dbClient.from("site_settings").select("*").eq("id", "primary").maybeSingle();
         if (data && !error) {
           const parsedDhaka = data.dhaka_delivery_fee !== null && data.dhaka_delivery_fee !== undefined ? Number(data.dhaka_delivery_fee) : NaN;
           const parsedOutside = data.outside_dhaka_delivery_fee !== null && data.outside_dhaka_delivery_fee !== undefined ? Number(data.outside_dhaka_delivery_fee) : NaN;
@@ -945,9 +1014,9 @@ export const db = {
     };
     writeJsonFile("settings.json", cachedSettings);
 
-    if (isSupabaseConfigured && supabase) {
+    if (isSupabaseConfigured && dbClient) {
       try {
-        await supabase
+        await dbClient
           .from("site_settings")
           .upsert({
             id: "primary",
@@ -1052,10 +1121,10 @@ export const db = {
     cachedMedia = readJsonFile("media.json", cachedMedia);
     const item = cachedMedia.find((m) => m.id === id || m.url === id);
     if (item) {
-      if (isSupabaseConfigured && (supabaseAdmin || supabase) && item.url.includes("/product-images/")) {
+      if (isSupabaseConfigured && dbClient && item.url.includes("/product-images/")) {
         const fileName = item.url.split("/").pop();
         if (fileName) {
-          await (supabaseAdmin || supabase)?.storage.from("product-images").remove([fileName]);
+          await dbClient.storage.from("product-images").remove([fileName]);
         }
       }
       deleteFileFromDisk(item.url);
@@ -1067,10 +1136,10 @@ export const db = {
   },
 
   async deleteFileByUrl(url: string): Promise<boolean> {
-    if (isSupabaseConfigured && (supabaseAdmin || supabase) && url.includes("/product-images/")) {
+    if (isSupabaseConfigured && dbClient && url.includes("/product-images/")) {
       const fileName = url.split("/").pop();
       if (fileName) {
-        await (supabaseAdmin || supabase)?.storage.from("product-images").remove([fileName]);
+        await dbClient.storage.from("product-images").remove([fileName]);
       }
     }
     deleteFileFromDisk(url);
