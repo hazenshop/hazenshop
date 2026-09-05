@@ -3,16 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  CheckCircle,
   Sparkles,
   MessageCircle,
-  LayoutGrid,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import ProductCard from "@/components/product/ProductCard";
 import TrustBadges from "@/components/footer/TrustBadges";
-
-import HomeProductCatalog from "@/components/home/HomeProductCatalog";
 
 export const revalidate = 0; // Fresh dynamic data
 
@@ -25,50 +21,105 @@ export default async function HomePage() {
   const cleanWhatsApp = (settings.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
 
   return (
-    <div className="space-y-8 sm:space-y-12 pb-16 pt-2 sm:pt-4">
-      {/* 1. PRIMARY STORE CATALOG & PRODUCTS SHOWCASE (IMMEDIATELY VISIBLE AT TOP) */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl p-4 sm:p-7 border border-black/[0.06] shadow-subtle space-y-5">
-          {/* Header Title & Trust Highlights */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.05]">
-            <div>
-              <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase text-brand-maroon-700 tracking-widest mb-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>HAZEN EXCLUSIVE COLLECTION</span>
+    <div className="space-y-10 sm:space-y-14 pb-16 pt-2 sm:pt-4">
+      {/* 1. FLASH SALE / LIMITED RELEASE (IF ANY) */}
+      {flashSaleProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-3xl p-4 sm:p-8 border border-black/[0.06] shadow-subtle space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="bg-brand-maroon-700 text-white text-[9px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full">
+                    Flash Deals
+                  </span>
+                  <span className="text-xs text-brand-maroon-700 font-medium">
+                    সীমিত সময়ের বিশেষ মূল্যছাড়
+                  </span>
+                </div>
+                <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  হট ডিল ও স্পেশাল অফার
+                </h2>
               </div>
-              <h1 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                আমাদের সকল প্রিমিয়াম প্রডাক্ট
-              </h1>
+
+              <Link
+                href="/products?filter=flashSale"
+                className="text-xs font-bold text-brand-maroon-700 hover:text-brand-maroon-800 bg-brand-50 border border-brand-200/80 px-4 py-2 rounded-full transition-colors"
+              >
+                সব ডিল দেখুন &rarr;
+              </Link>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] sm:text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                <span>ক্যাশ অন ডেলিভারি (COD)</span>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {flashSaleProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 2. DYNAMIC CATEGORY SHOWCASE SECTIONS */}
+      {categories.map((category) => {
+        const catProducts = allProducts.filter((p) => p.category === category.slug);
+        if (catProducts.length === 0) return null;
+
+        return (
+          <section key={category.id} className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
+                  Collection
+                </span>
+                <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  {category.name}
+                </h2>
+              </div>
+              <Link
+                href={`/category/${category.slug}`}
+                className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1 group transition-colors"
+              >
+                <span>সব দেখুন ({catProducts.length})</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+              {catProducts.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      {/* 3. ALL PRODUCTS FALLBACK IF CATEGORIES HAVE NO PRODUCTS OR EMPTY */}
+      {allProducts.length > 0 && categories.every((c) => allProducts.filter((p) => p.category === c.slug).length === 0) && (
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
+            <div>
+              <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
+                Featured
               </span>
+              <h2 className="font-heading text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                সকল পণ্য
+              </h2>
             </div>
+            <Link
+              href="/products"
+              className="text-xs font-semibold text-slate-600 hover:text-brand-maroon-700 flex items-center gap-1 group transition-colors"
+            >
+              <span>সব দেখুন ({allProducts.length})</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
           </div>
 
-          {/* Dynamic Product Catalog with Clickable Category Pills */}
-          <HomeProductCatalog products={allProducts} categories={categories} />
-
-          {/* Quick trust metrics bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 text-[11px] sm:text-xs text-slate-600 font-medium border-t border-slate-100">
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>১০০% ক্যাশ অন ডেলিভারি</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>প্যাকেট খুলে দেখে মূল্য পরিশোধ</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>১০০% প্রিমিয়াম ফেব্রিক ও অরিজিনাল কোয়ালিটি</span>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
+            {allProducts.slice(0, 8).map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 4. EMPTY CATALOG GRACEFUL STATE */}
       {allProducts.length === 0 && (
