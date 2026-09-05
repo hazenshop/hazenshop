@@ -991,6 +991,7 @@ export const db = {
             pathaoStoreId: data.pathao_store_id || base.pathaoStoreId,
             pathaoSandbox: data.pathao_sandbox ?? base.pathaoSandbox,
             pathaoEnabled: data.pathao_enabled ?? base.pathaoEnabled,
+            blacklistedPhones: Array.isArray(data.blacklisted_phones) ? data.blacklisted_phones : base.blacklistedPhones || [],
           };
           return cachedSettings;
         }
@@ -1048,6 +1049,7 @@ export const db = {
             pathao_store_id: cachedSettings.pathaoStoreId,
             pathao_sandbox: cachedSettings.pathaoSandbox,
             pathao_enabled: cachedSettings.pathaoEnabled,
+            blacklisted_phones: cachedSettings.blacklistedPhones || [],
             updated_at: new Date().toISOString(),
           });
         if (error) {
