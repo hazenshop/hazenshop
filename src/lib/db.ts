@@ -631,7 +631,7 @@ export const db = {
     cachedOrders.unshift(newOrder);
     writeJsonFile("orders.json", cachedOrders);
 
-    // Decrement inventory stock for ordered products
+    // Decrement inventory stock for ordered products (unless marked as unlimited stock)
     try {
       cachedProducts = readJsonFile("products.json", cachedProducts);
       for (const item of newOrder.items) {
@@ -640,10 +640,12 @@ export const db = {
         );
         if (prodIndex > -1) {
           const currentProd = cachedProducts[prodIndex];
-          currentProd.stock = Math.max(0, currentProd.stock - item.quantity);
+          if (!currentProd.isUnlimitedStock) {
+            currentProd.stock = Math.max(0, currentProd.stock - item.quantity);
+          }
           if (item.variantId && currentProd.variants) {
             const vIndex = currentProd.variants.findIndex((v) => v.id === item.variantId);
-            if (vIndex > -1) {
+            if (vIndex > -1 && !currentProd.variants[vIndex].isUnlimitedStock) {
               currentProd.variants[vIndex].stock = Math.max(
                 0,
                 currentProd.variants[vIndex].stock - item.quantity
@@ -745,7 +747,7 @@ export const db = {
 
     writeJsonFile("orders.json", cachedOrders);
 
-    // Auto-restock inventory if an active order gets cancelled/returned
+    // Auto-restock inventory if an active order gets cancelled/returned (only for limited stock)
     if (wasActive && isNowCancelled && cachedOrders[idx].items?.length) {
       try {
         cachedProducts = readJsonFile("products.json", cachedProducts);
@@ -755,10 +757,12 @@ export const db = {
           );
           if (prodIndex > -1) {
             const currentProd = cachedProducts[prodIndex];
-            currentProd.stock += item.quantity;
+            if (!currentProd.isUnlimitedStock) {
+              currentProd.stock += item.quantity;
+            }
             if (item.variantId && currentProd.variants) {
               const vIndex = currentProd.variants.findIndex((v) => v.id === item.variantId);
-              if (vIndex > -1) {
+              if (vIndex > -1 && !currentProd.variants[vIndex].isUnlimitedStock) {
                 currentProd.variants[vIndex].stock += item.quantity;
               }
             }
@@ -900,6 +904,50 @@ export const db = {
   // MEDIA STORAGE CRUD
   async getMediaItems(): Promise<MediaItem[]> {
     cachedMedia = readJsonFile("media.json", cachedMedia);
+
+    // Auto-discover and sync any images stored on disk in public/uploads or public/
+    try {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      let modified = false;
+
+      if (fs.existsSync(uploadsDir)) {
+        const files = fs.readdirSync(uploadsDir);
+        for (const file of files) {
+          if (file.startsWith(".")) continue;
+          const fileUrl = `/uploads/${file}`;
+          const existingIdx = cachedMedia.findIndex((m) => m.url === fileUrl || m.name === file);
+          const filePath = path.join(uploadsDir, file);
+          const stat = fs.statSync(filePath);
+          const ext = path.extname(file).replace(".", "").toLowerCase();
+
+          if (existingIdx === -1) {
+            cachedMedia.unshift({
+              id: `disk-${file}`,
+              name: file,
+              url: fileUrl,
+              sizeBytes: stat.size,
+              originalSizeBytes: stat.size,
+              format: ext === "jpg" ? "jpeg" : ext || "webp",
+              createdAt: stat.mtime.toISOString(),
+            });
+            modified = true;
+          } else if (!cachedMedia[existingIdx].sizeBytes || cachedMedia[existingIdx].sizeBytes === 0) {
+            cachedMedia[existingIdx].sizeBytes = stat.size;
+            if (!cachedMedia[existingIdx].originalSizeBytes) {
+              cachedMedia[existingIdx].originalSizeBytes = stat.size;
+            }
+            modified = true;
+          }
+        }
+      }
+
+      if (modified) {
+        writeJsonFile("media.json", cachedMedia);
+      }
+    } catch (e) {
+      console.warn("Notice during disk media sync:", e);
+    }
+
     return cachedMedia;
   },
 

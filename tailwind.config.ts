@@ -50,8 +50,8 @@ const config: Config = {
       },
 
       fontFamily: {
-        sans: ["var(--font-outfit)", "system-ui", "sans-serif"],
-        heading: ["var(--font-plus-jakarta)", "system-ui", "sans-serif"],
+        sans: ["var(--font-outfit)", "Outfit", "Plus Jakarta Sans", "system-ui", "-apple-system", "sans-serif"],
+        heading: ["var(--font-plus-jakarta)", "Plus Jakarta Sans", "Outfit", "system-ui", "-apple-system", "sans-serif"],
       },
       boxShadow: {
         subtle: "0 2px 10px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.04)",

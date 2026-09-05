@@ -55,6 +55,9 @@ export default function ProductForm({
   const [stock, setStock] = useState(
     initialProduct?.stock !== undefined ? initialProduct.stock.toString() : "20"
   );
+  const [isUnlimitedStock, setIsUnlimitedStock] = useState<boolean>(
+    initialProduct?.isUnlimitedStock ?? false
+  );
   const [badge, setBadge] = useState<Product["badge"]>(initialProduct?.badge || "Best Seller");
   const [featured, setFeatured] = useState(initialProduct?.featured ?? true);
   const [flashSale, setFlashSale] = useState(initialProduct?.flashSale ?? false);
@@ -220,7 +223,8 @@ export default function ProductForm({
       categoryName: catObj?.name || category,
       price: Number(price),
       salePrice: salePrice ? Number(salePrice) : undefined,
-      stock: Number(stock) || 0,
+      stock: isUnlimitedStock ? 999999 : Number(stock) || 0,
+      isUnlimitedStock,
       badge,
       featured,
       flashSale,
@@ -251,14 +255,17 @@ export default function ProductForm({
         });
       }
 
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.error || "পণ্যটি সংরক্ষণ করা যায়নি। দয়া করে তথ্যগুলো পুনরায় চেক করুন। (Failed to save product)");
+      }
 
-      showToast(`Product "${name}" saved successfully!`, "success");
+      showToast(`পণ্য "${name}" সফলভাবে সংরক্ষণ করা হয়েছে! (Product saved)`, "success");
       router.push("/admin/products");
       router.refresh();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      showToast("Error saving product. Please try again.", "error");
+      showToast(err?.message || "পণ্যটি সেভ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", "error");
     } finally {
       setSaving(false);
     }
@@ -653,17 +660,40 @@ export default function ProductForm({
                 />
               </div>
 
-              <div>
-                <label className="block font-bold text-slate-300 mb-1.5">
-                  Total Stock Available
+              <div className="space-y-2 pt-1 border-t border-slate-800">
+                <label className="flex items-center gap-2.5 cursor-pointer bg-slate-950 p-3 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isUnlimitedStock}
+                    onChange={(e) => setIsUnlimitedStock(e.target.checked)}
+                    className="w-4 h-4 rounded text-brand-500 cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-slate-200 font-bold block text-xs">
+                      সীমাহীন স্টক (Unlimited Stock)
+                    </span>
+                    <span className="text-[11px] text-slate-400 block">
+                      কখনো স্টক আউট হবে না, যত খুশি অর্ডার নেওয়া যাবে
+                    </span>
+                  </div>
                 </label>
-                <input
-                  type="number"
-                  value={stock}
-                  onChange={(e) => setStock(e.target.value)}
-                  className="w-full bg-slate-950 text-white font-bold text-sm rounded-xl p-3 border border-slate-800 focus:outline-none focus:border-brand-500"
-                />
               </div>
+
+              {!isUnlimitedStock && (
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1.5">
+                    Total Stock Available (মোট স্টক পরিমাণ)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="20"
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
+                    className="w-full bg-slate-950 text-white font-bold text-sm rounded-xl p-3 border border-slate-800 focus:outline-none focus:border-brand-500"
+                  />
+                </div>
+              )}
             </div>
           </div>
 

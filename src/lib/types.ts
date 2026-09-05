@@ -5,6 +5,7 @@ export type ProductVariant = {
   price: number;
   salePrice?: number;
   stock: number;
+  isUnlimitedStock?: boolean;
   color?: string; // color name e.g. "Royal Maroon", "Golden Hue", "Emerald Green"
   colorCode?: string; // hex e.g. "#800000"
   material?: string; // "100% Combed Cotton", "Pure Wildflower Honey", "Egyptian Cotton"
@@ -47,6 +48,7 @@ export type Product = {
   category: string; // category slug
   categoryName: string;
   stock: number;
+  isUnlimitedStock?: boolean;
   rating: number;
   reviewCount: number;
   badge?: "Hot Deal" | "Best Seller" | "Trending" | "New Arrival" | "Flash Sale" | "Limited Stock" | "Exclusive" | "Popular" | "Eco Blend" | "Limited Edition" | "Smart Fitted" | string;

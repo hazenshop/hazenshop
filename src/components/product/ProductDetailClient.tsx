@@ -277,15 +277,19 @@ export default function ProductDetailClient({
             {/* Stock indicator */}
             <div className="flex items-center gap-2">
               <span
-                className={`w-2 h-2 rounded-full ${
-                  product.stock > 0 ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                className={`w-2.5 h-2.5 rounded-full ${
+                  product.isUnlimitedStock || product.stock > 0
+                    ? "bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50"
+                    : "bg-rose-500"
                 }`}
               />
               <span className="text-xs font-semibold text-slate-700">
-                {product.stock > 0 ? (
+                {product.isUnlimitedStock ? (
+                  <span className="text-emerald-700 font-bold">ইন স্টক (রেডি টু শিপ)</span>
+                ) : product.stock > 0 ? (
                   <>ইন স্টক ({product.stock} সেট রেডি টু শিপ)</>
                 ) : (
-                  <span className="text-rose-600">স্টক আউট</span>
+                  <span className="text-rose-600 font-bold">স্টক আউট (Out of Stock)</span>
                 )}
               </span>
             </div>
@@ -441,18 +445,20 @@ export default function ProductDetailClient({
               {/* Direct 1-Click Order Anchor CTA */}
               <button
                 type="button"
+                disabled={!product.isUnlimitedStock && product.stock <= 0}
                 onClick={handleScrollToOrder}
-                className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider min-h-[48px] group"
+                className="w-full bg-brand-maroon-700 hover:bg-brand-maroon-800 disabled:bg-slate-400 disabled:cursor-not-allowed active:scale-[0.99] text-white font-extrabold py-4 px-6 rounded-full shadow-card hover:shadow-card-hover transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider min-h-[48px] group"
               >
-                <span>সরাসরি অর্ডার করুন (ক্যাশ অন ডেলিভারি)</span>
-                <ArrowRight className="w-4 h-4 text-brand-gold-300 group-hover:translate-x-1 transition-transform" />
+                <span>{!product.isUnlimitedStock && product.stock <= 0 ? "স্টক শেষ (Out of Stock)" : "সরাসরি অর্ডার করুন (ক্যাশ অন ডেলিভারি)"}</span>
+                {(!product.isUnlimitedStock && product.stock <= 0) ? null : <ArrowRight className="w-4 h-4 text-brand-gold-300 group-hover:translate-x-1 transition-transform" />}
               </button>
 
               {/* Add To Cart */}
               <button
                 type="button"
+                disabled={!product.isUnlimitedStock && product.stock <= 0}
                 onClick={handleAddToCart}
-                className="w-full bg-slate-50 hover:bg-slate-100 active:scale-[0.99] text-slate-800 font-bold py-3.5 px-6 rounded-full border border-slate-200 transition-all flex items-center justify-center gap-2 text-xs min-h-[44px]"
+                className="w-full bg-slate-50 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99] text-slate-800 font-bold py-3.5 px-6 rounded-full border border-slate-200 transition-all flex items-center justify-center gap-2 text-xs min-h-[44px]"
               >
                 <ShoppingBag className="w-4 h-4 text-brand-maroon-700" />
                 <span>ব্যাগে যোগ করুন (Add to Cart)</span>
@@ -545,11 +551,12 @@ export default function ProductDetailClient({
 
           <button
             type="button"
+            disabled={!product.isUnlimitedStock && product.stock <= 0}
             onClick={handleScrollToOrder}
-            className="flex-1 bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.98] text-white font-extrabold py-3 px-3.5 rounded-full shadow-card flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider min-h-[46px] truncate"
+            className="flex-1 bg-brand-maroon-700 hover:bg-brand-maroon-800 disabled:bg-slate-400 disabled:cursor-not-allowed active:scale-[0.98] text-white font-extrabold py-3 px-3.5 rounded-full shadow-card flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider min-h-[46px] truncate"
           >
             <CheckCircle2 className="w-4 h-4 text-brand-gold-300 shrink-0" />
-            <span className="truncate">অর্ডার করুন (COD)</span>
+            <span className="truncate">{!product.isUnlimitedStock && product.stock <= 0 ? "স্টক শেষ" : "অর্ডার করুন (COD)"}</span>
           </button>
 
           <a

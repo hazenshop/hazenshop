@@ -49,6 +49,7 @@ export default function AdminOrdersPage() {
       if (setRes.settings) setSettings(setRes.settings);
     } catch (e) {
       console.error(e);
+      showToast("অর্ডার তালিকা লোড করতে সমস্যা হয়েছে। দয়া করে পেজটি রিফ্রেশ করুন। (Failed to load orders)", "error");
     } finally {
       setLoading(false);
     }
