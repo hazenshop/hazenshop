@@ -50,6 +50,7 @@ export async function createSteadfastOrder(
         "Api-Key": apiKey,
         "Secret-Key": secretKey,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(payload),
     });
@@ -106,21 +107,33 @@ export async function getSteadfastBalance(
       headers: {
         "Api-Key": apiKey,
         "Secret-Key": secretKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     });
 
-    const data = await res.json();
-    if (data.status === 200 && typeof data.current_balance !== "undefined") {
+    const text = await res.text();
+    let data: any = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return {
+        success: false,
+        message: `Steadfast Server returned HTTP ${res.status}: ${text.slice(0, 100)}`,
+      };
+    }
+
+    if (res.status === 200 && (data.status === 200 || typeof data.current_balance !== "undefined")) {
       return {
         success: true,
-        currentBalance: Number(data.current_balance),
+        currentBalance: Number(data.current_balance || 0),
         message: "Steadfast connection verified!",
       };
     }
 
     return {
       success: false,
-      message: data.message || "Failed to retrieve balance from Steadfast",
+      message: data.message || data.error || (res.status === 401 ? "Invalid API Key or Secret Key (Unauthorized)" : `Steadfast returned status ${res.status}`),
     };
   } catch (err: unknown) {
     return {
