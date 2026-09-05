@@ -27,6 +27,8 @@ import { formatPrice, getStatusColor } from "@/lib/utils";
 import OrderInvoiceModal from "@/components/admin/OrderInvoiceModal";
 import { useToast } from "@/context/ToastContext";
 
+import { formatBytes } from "@/lib/imageOptimizer";
+
 export default function AdminDashboardPage() {
   const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -35,17 +37,19 @@ export default function AdminDashboardPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
   const [healthData, setHealthData] = useState<any>(null);
+  const [storageData, setStorageData] = useState<any>(null);
   const [pinging, setPinging] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
     try {
-      const [orderRes, setRes, prodRes, catRes, healthRes] = await Promise.all([
+      const [orderRes, setRes, prodRes, catRes, healthRes, storageRes] = await Promise.all([
         fetch("/api/orders").then((r) => r.json()),
         fetch("/api/settings").then((r) => r.json()),
         fetch("/api/products").then((r) => r.json()),
         fetch("/api/categories").then((r) => r.json()).catch(() => ({ categories: [] })),
         fetch("/api/health").then((r) => r.json()).catch(() => null),
+        fetch("/api/storage").then((r) => r.json()).catch(() => null),
       ]);
 
       if (orderRes.orders) setOrders(orderRes.orders);
@@ -53,6 +57,7 @@ export default function AdminDashboardPage() {
       if (prodRes.products) setProducts(prodRes.products);
       if (catRes.categories) setCategoriesCount(catRes.categories.length);
       if (healthRes) setHealthData(healthRes);
+      if (storageRes && !storageRes.error) setStorageData(storageRes);
     } catch (e) {
       console.error(e);
     } finally {
@@ -292,41 +297,102 @@ export default function AdminDashboardPage() {
         </div>
       </section>
 
-      {/* Database & Cloud Connection Health Card */}
-      {healthData && (
-        <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      {/* Database & Cloud Connection Health & Storage Metrics Card */}
+      <div className="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4 shadow-xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
           <div className="flex items-center gap-3">
-            <div className={`p-2.5 rounded-xl ${healthData.status === "healthy" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"}`}>
-              <Database className="w-4 h-4" />
+            <div className="p-2.5 rounded-2xl bg-brand-500/10 text-brand-400 border border-brand-500/20">
+              <Database className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-white">Database Status:</span>
-                <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${healthData.status === "healthy" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/20 text-amber-400"}`}>
-                  {healthData.status === "healthy" ? "● Connected & Active" : "● Degraded"}
-                </span>
-                <span className="text-slate-400 text-[11px]">
-                  Driver: <strong className="text-slate-200">{healthData.database?.activeDriver}</strong>
-                </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-white text-sm">Database & Media Storage Health</h3>
+                {healthData && (
+                  <span className={`px-2.5 py-0.5 rounded-full font-bold text-[10px] ${healthData.status === "healthy" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/20 text-amber-400"}`}>
+                    {healthData.status === "healthy" ? "● Connected & Operational" : "● Connection Degraded"}
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                {healthData.database?.supabase?.configured ? (
-                  <>Supabase Cloud PostgreSQL ({healthData.database?.supabase?.latencyMs ?? healthData.totalLatencyMs}ms ping) • Local dual-mode synchronized</>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {healthData?.database?.supabase?.configured ? (
+                  <>Supabase Cloud PostgreSQL Active • Local synchronization enabled</>
                 ) : (
-                  <>Local disk persistence active (.data/*.json)</>
+                  <>High-performance Local Persistence Store (.data/)</>
                 )}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 self-end sm:self-auto text-[11px] text-slate-400">
-            <span>Ping Latency:</span>
-            <span className="font-mono bg-slate-950 px-2.5 py-1 rounded text-emerald-400 border border-slate-800 font-bold">
-              {healthData.totalLatencyMs ?? 0}ms
+          <div className="flex items-center gap-2 self-stretch sm:self-auto justify-between sm:justify-end">
+            <button
+              type="button"
+              onClick={pingHealth}
+              disabled={pinging}
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-colors flex items-center gap-1.5"
+              title="Ping Database"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-brand-400 ${pinging ? "animate-spin" : ""}`} />
+              <span>Ping ({healthData?.totalLatencyMs ?? 0}ms)</span>
+            </button>
+            <Link
+              href="/admin/storage"
+              className="px-3.5 py-1.5 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 hover:text-brand-300 text-xs font-bold transition-colors border border-brand-500/30 flex items-center gap-1"
+            >
+              <HardDrive className="w-3.5 h-3.5" />
+              <span>Storage Manager &rarr;</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Storage & Database Grid Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          {/* Database Driver */}
+          <div className="bg-slate-950/70 border border-slate-800/80 p-3 rounded-2xl space-y-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">DB Engine</span>
+            <span className="font-bold text-white text-xs truncate block">
+              {healthData?.database?.activeDriver === "supabase_postgresql" ? "Supabase PostgreSQL" : "Local JSON Engine"}
+            </span>
+            <span className="text-[10px] text-slate-500 block">
+              Ping: {healthData?.totalLatencyMs ?? 0}ms
+            </span>
+          </div>
+
+          {/* Records In DB */}
+          <div className="bg-slate-950/70 border border-slate-800/80 p-3 rounded-2xl space-y-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">DB Records</span>
+            <span className="font-bold text-brand-400 text-xs block">
+              {orders.length} Orders • {products.length} Products
+            </span>
+            <span className="text-[10px] text-slate-500 block">
+              {categoriesCount} Categories
+            </span>
+          </div>
+
+          {/* Media Storage Size */}
+          <div className="bg-slate-950/70 border border-slate-800/80 p-3 rounded-2xl space-y-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Media Storage</span>
+            <span className="font-bold text-emerald-400 text-xs block">
+              {storageData ? formatBytes(storageData.totalStorageBytes || 0) : "0 KB"}
+            </span>
+            <span className="text-[10px] text-slate-500 block">
+              {storageData?.totalCount ?? 0} WebP Assets
+            </span>
+          </div>
+
+          {/* WebP Compression Savings */}
+          <div className="bg-slate-950/70 border border-slate-800/80 p-3 rounded-2xl space-y-1">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bandwidth Saved</span>
+            <span className="font-bold text-purple-400 text-xs block">
+              {storageData && storageData.totalSavedBytes > 0
+                ? `${formatBytes(storageData.totalSavedBytes)} Saved`
+                : "Optimized"}
+            </span>
+            <span className="text-[10px] text-slate-500 block">
+              Auto WebP Engine
             </span>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Incomplete / Abandoned Leads Alert (if any) */}
       {incompleteCount > 0 && (
