@@ -230,6 +230,14 @@ export default function ProductDetailClient({
                 >
                   {product.categoryName}
                 </Link>
+                {(product.sku || product.id) && (
+                  <span
+                    className="text-[10px] font-mono font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200"
+                    title="Product ID / Code"
+                  >
+                    কোড: {product.sku || product.id.toUpperCase()}
+                  </span>
+                )}
                 {product.badge && (
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-900 bg-brand-gold-300 px-2.5 py-0.5 rounded-full shadow-sm">
                     {product.badge}

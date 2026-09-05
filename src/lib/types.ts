@@ -36,6 +36,7 @@ export type TrustBadgeItem = {
 
 export type Product = {
   id: string;
+  sku?: string; // Product Code / SKU (Google Merchant / Unique ID)
   slug: string;
   name: string;
   shortDescription: string;

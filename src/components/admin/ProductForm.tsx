@@ -43,6 +43,7 @@ export default function ProductForm({
 
   // Form Fields
   const [name, setName] = useState(initialProduct?.name || "");
+  const [sku, setSku] = useState(initialProduct?.sku || "");
   const [slug, setSlug] = useState(initialProduct?.slug || "");
   const [category, setCategory] = useState(
     initialProduct?.category || (categories[0]?.slug || "mens-panjabi-fashion")
@@ -76,6 +77,8 @@ export default function ProductForm({
     initialProduct?.shortDescription || ""
   );
   const [description, setDescription] = useState(initialProduct?.description || "");
+  const [seoTitle, setSeoTitle] = useState(initialProduct?.seoTitle || "");
+  const [seoDescription, setSeoDescription] = useState(initialProduct?.seoDescription || "");
 
   // Variants list
   const [variants, setVariants] = useState<ProductVariant[]>(
@@ -143,9 +146,6 @@ export default function ProductForm({
   };
 
 
-  // SEO
-  const [seoTitle, setSeoTitle] = useState(initialProduct?.seoTitle || "");
-  const [seoDescription, setSeoDescription] = useState(initialProduct?.seoDescription || "");
 
   // Handlers for images
   const handleAddImage = (e: React.FormEvent) => {
@@ -213,6 +213,7 @@ export default function ProductForm({
     const autoSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
     const payload = {
+      sku: sku.trim() || undefined,
       name: name.trim(),
       slug: autoSlug,
       category,
@@ -334,7 +335,7 @@ export default function ProductForm({
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block font-bold text-slate-300 mb-1.5">
                     Category Department <span className="text-rose-500">*</span>
@@ -350,6 +351,32 @@ export default function ProductForm({
                       </option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block font-bold text-slate-300">
+                      Product ID / SKU (কোড)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const randomNum = Math.floor(1000 + Math.random() * 9000);
+                        const prefix = category.includes("bed") ? "HZN-BED" : category.includes("curtain") ? "HZN-CRT" : "HZN-PRD";
+                        setSku(`${prefix}-${randomNum}`);
+                      }}
+                      className="text-[10px] text-brand-400 hover:text-brand-300 font-bold underline"
+                    >
+                      + Auto ID
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. HZN-BED-1042"
+                    value={sku}
+                    onChange={(e) => setSku(e.target.value.toUpperCase())}
+                    className="w-full bg-slate-950 text-white font-mono font-bold text-xs rounded-xl p-3 border border-slate-800 focus:outline-none focus:border-brand-500 uppercase tracking-wider"
+                  />
                 </div>
 
                 <div>

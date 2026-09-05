@@ -54,6 +54,7 @@ export default function AdminProductsPage() {
   const filtered = products.filter(
     (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.sku && p.sku.toLowerCase().includes(search.toLowerCase())) ||
       p.categoryName.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -85,7 +86,7 @@ export default function AdminProductsPage() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
-            placeholder="Search products by title or category..."
+            placeholder="Search by title, SKU / ID, or category..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-slate-950 text-xs text-white rounded-xl pl-10 pr-4 py-2.5 border border-slate-800 focus:outline-none focus:border-brand-500 min-h-[42px]"
@@ -126,9 +127,16 @@ export default function AdminProductsPage() {
                   <Image src={p.images[0] || "/logo.jpg"} alt={p.name} fill className="object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                    {p.categoryName}
-                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      {p.categoryName}
+                    </span>
+                    {(p.sku || p.id) && (
+                      <span className="text-[9px] font-mono font-bold text-brand-400 bg-slate-950 px-1.5 py-0.2 rounded border border-slate-800">
+                        {p.sku || p.id}
+                      </span>
+                    )}
+                  </div>
                   <h3 className="font-bold text-white text-xs line-clamp-2 mt-0.5 leading-snug">
                     {p.name}
                   </h3>
@@ -245,15 +253,20 @@ export default function AdminProductsPage() {
                           >
                             {p.name}
                           </Link>
-                          <a
-                            href={`/products/${p.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] text-brand-400/80 hover:text-brand-300 font-mono inline-flex items-center gap-1 mt-0.5"
-                          >
-                            <span>/products/{p.slug}</span>
-                            <ExternalLink className="w-2.5 h-2.5" />
-                          </a>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[9px] font-mono font-bold text-slate-300 bg-slate-800 px-1.5 py-0.2 rounded border border-slate-700">
+                              ID: {p.sku || p.id}
+                            </span>
+                            <a
+                              href={`/products/${p.slug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-brand-400/80 hover:text-brand-300 font-mono inline-flex items-center gap-1"
+                            >
+                              <span>/products/{p.slug}</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </td>

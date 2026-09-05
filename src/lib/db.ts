@@ -81,6 +81,7 @@ export const db = {
       if (!error && data) {
         return data.map((item) => ({
           id: item.id,
+          sku: item.sku || item.id,
           slug: item.slug,
           name: item.name,
           shortDescription: item.short_description,
@@ -123,6 +124,7 @@ export const db = {
       result = result.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
+          (p.sku && p.sku.toLowerCase().includes(q)) ||
           p.shortDescription.toLowerCase().includes(q) ||
           p.categoryName.toLowerCase().includes(q)
       );
@@ -135,12 +137,13 @@ export const db = {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .or(`slug.eq.${slug},id.eq.${slug}`)
+        .or(`slug.eq.${slug},id.eq.${slug},sku.eq.${slug}`)
         .limit(1)
         .single();
       if (!error && data) {
         return {
           id: data.id,
+          sku: data.sku || data.id,
           slug: data.slug,
           name: data.name,
           shortDescription: data.short_description,
@@ -168,7 +171,7 @@ export const db = {
     }
 
     cachedProducts = readJsonFile("products.json", cachedProducts);
-    const item = cachedProducts.find((p) => p.slug === slug || p.id === slug);
+    const item = cachedProducts.find((p) => p.slug === slug || p.id === slug || p.sku === slug);
     return item || null;
   },
 
@@ -176,12 +179,14 @@ export const db = {
     const newProduct: Product = {
       ...product,
       id: `prod-${Date.now()}`,
+      sku: product.sku || `HZN-${Date.now().toString().slice(-6)}`,
       createdAt: new Date().toISOString(),
     };
 
     if (isSupabaseConfigured && supabase) {
       await supabase.from("products").insert({
         id: newProduct.id,
+        sku: newProduct.sku,
         slug: newProduct.slug,
         name: newProduct.name,
         short_description: newProduct.shortDescription,
@@ -215,6 +220,7 @@ export const db = {
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
     if (isSupabaseConfigured && supabase) {
       const supabasePayload: Record<string, any> = {};
+      if (updates.sku !== undefined) supabasePayload.sku = updates.sku;
       if (updates.name !== undefined) supabasePayload.name = updates.name;
       if (updates.slug !== undefined) supabasePayload.slug = updates.slug;
       if (updates.shortDescription !== undefined) supabasePayload.short_description = updates.shortDescription;
