@@ -44,7 +44,7 @@ export async function createSteadfastOrder(
   };
 
   try {
-    const res = await fetch("https://portal.steadfast.com.bd/api/v1/create_order", {
+    const res = await fetch("https://portal.packzy.com/api/v1/create_order", {
       method: "POST",
       headers: {
         "Api-Key": apiKey,
@@ -114,7 +114,7 @@ export async function getSteadfastBalance(
   }
 
   try {
-    const res = await fetch("https://portal.steadfast.com.bd/api/v1/get_balance", {
+    const res = await fetch("https://portal.packzy.com/api/v1/get_balance", {
       method: "GET",
       headers: {
         "Api-Key": apiKey,

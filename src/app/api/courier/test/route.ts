@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       if (!apiKey || !secretKey) {
         return NextResponse.json({
           success: false,
-          endpoint: "https://portal.steadfast.com.bd/api/v1/get_balance",
+          endpoint: "https://portal.packzy.com/api/v1/get_balance",
           durationMs: Date.now() - startTime,
           message: "Steadfast API Key অথবা Secret Key খালি রয়েছে। দয়া করে সেটিংস ইনপুটে কিগুলো প্রবেশ করান।",
           diagnostic: "Missing API Credentials: Api-Key and Secret-Key are required.",
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         ...balanceRes,
-        endpoint: "https://portal.steadfast.com.bd/api/v1/get_balance",
+        endpoint: "https://portal.packzy.com/api/v1/get_balance",
         durationMs,
       });
     }

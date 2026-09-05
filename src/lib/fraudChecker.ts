@@ -37,12 +37,14 @@ export async function fetchSteadfastFraudStats(
   }
 
   try {
-    const res = await fetch(`https://portal.steadfast.com.bd/api/v1/fraud_check/${cleanPhone}`, {
+    const res = await fetch(`https://portal.packzy.com/api/v1/fraud_check/${cleanPhone}`, {
       method: "GET",
       headers: {
         "Api-Key": apiKey,
         "Secret-Key": secretKey,
         "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
       },
       next: { revalidate: 300 }, // Cache 5 min
     });
