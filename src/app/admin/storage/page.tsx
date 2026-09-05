@@ -38,7 +38,7 @@ export default function AdminStoragePage() {
   const fetchMedia = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/storage");
+      const res = await fetch("/api/storage", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
       const data = await res.json();
       if (data.mediaItems) {
         setMediaList(data.mediaItems);

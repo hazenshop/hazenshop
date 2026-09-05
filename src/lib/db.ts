@@ -1064,11 +1064,57 @@ export const db = {
   // MEDIA STORAGE CRUD
   async getMediaItems(): Promise<MediaItem[]> {
     cachedMedia = readJsonFile("media.json", cachedMedia);
+    let modified = false;
 
-    // Auto-discover and sync any images stored on disk in public/uploads or public/
+    // 1. Auto-discover and sync images from Supabase Storage bucket
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data: sbFiles, error: sbErr } = await dbClient.storage
+          .from("product-images")
+          .list("", { limit: 1000, sortBy: { column: "created_at", order: "desc" } });
+
+        if (!sbErr && sbFiles && sbFiles.length > 0) {
+          for (const file of sbFiles) {
+            if (!file.name || file.name.startsWith(".")) continue;
+            const { data: urlData } = dbClient.storage
+              .from("product-images")
+              .getPublicUrl(file.name);
+            const publicUrl = urlData?.publicUrl || "";
+            if (!publicUrl) continue;
+
+            const existingIdx = cachedMedia.findIndex(
+              (m) => m.url === publicUrl || m.name === file.name || m.id === file.id
+            );
+            const fileSize = file.metadata?.size || 0;
+
+            if (existingIdx === -1) {
+              cachedMedia.unshift({
+                id: file.id || `sb-${file.name}`,
+                name: file.name,
+                url: publicUrl,
+                sizeBytes: fileSize,
+                originalSizeBytes: fileSize,
+                format: "webp",
+                createdAt: file.created_at || new Date().toISOString(),
+              });
+              modified = true;
+            } else {
+              if (!cachedMedia[existingIdx].sizeBytes && fileSize > 0) {
+                cachedMedia[existingIdx].sizeBytes = fileSize;
+                cachedMedia[existingIdx].originalSizeBytes = fileSize;
+                modified = true;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Notice during Supabase media sync:", err);
+      }
+    }
+
+    // 2. Auto-discover and sync any images stored on disk in public/uploads
     try {
       const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      let modified = false;
 
       if (fs.existsSync(uploadsDir)) {
         const files = fs.readdirSync(uploadsDir);
@@ -1100,12 +1146,30 @@ export const db = {
           }
         }
       }
-
-      if (modified) {
-        writeJsonFile("media.json", cachedMedia);
-      }
     } catch (e) {
       console.warn("Notice during disk media sync:", e);
+    }
+
+    // 3. Match attached product info
+    try {
+      const products = cachedProducts || [];
+      for (const item of cachedMedia) {
+        if (!item.productName) {
+          const matchedProd = products.find((p) => p.images && p.images.some((img) => img === item.url || (item.url && img.includes(item.name))));
+          if (matchedProd) {
+            item.productId = matchedProd.id;
+            item.productName = matchedProd.name;
+            item.categorySlug = matchedProd.category;
+            modified = true;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    if (modified) {
+      writeJsonFile("media.json", cachedMedia);
     }
 
     return cachedMedia;

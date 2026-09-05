@@ -58,7 +58,7 @@ export default function ImageUploader({
   const fetchMediaLibrary = async () => {
     setLoadingMedia(true);
     try {
-      const res = await fetch("/api/storage");
+      const res = await fetch("/api/storage", { cache: "no-store", headers: { "Cache-Control": "no-cache" } });
       const data = await res.json();
       if (data.mediaItems) {
         setMediaList(data.mediaItems);
