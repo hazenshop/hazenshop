@@ -49,7 +49,7 @@ export default async function HomePage() {
 
             {/* Categories Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-              {categories.map((cat) => (
+              {categories.map((cat, idx) => (
                 <Link
                   key={cat.id}
                   href={`/category/${cat.slug}`}
@@ -60,6 +60,8 @@ export default async function HomePage() {
                       src={cat.image || "/logo.jpg"}
                       alt={cat.name}
                       fill
+                      sizes="(max-width: 640px) 33vw, (max-width: 1024px) 20vw, 100px"
+                      priority={idx < 6}
                       className="object-cover"
                     />
                   </div>

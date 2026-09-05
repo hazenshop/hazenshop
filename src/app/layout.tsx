@@ -1,10 +1,25 @@
 import type { Metadata } from "next";
+import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import StorefrontShell from "@/components/layout/StorefrontShell";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import { db } from "@/lib/db";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await db.getSettings();
@@ -35,7 +50,11 @@ export default async function RootLayout({
   const categories = await db.getCategories();
 
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`${outfit.variable} ${plusJakarta.variable} scroll-smooth`}>
+      <head>
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="dns-prefetch" href="https://images.unsplash.com" />
+      </head>
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
         <FacebookPixel
           pixelId={settings.facebookPixelId || "2242388576616945"}
