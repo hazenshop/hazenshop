@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { CourierDeliveryStats, FraudCheckResult, FraudRiskLevel, LocalOrderStats, SiteSettings } from "@/lib/types";
+import { getPathaoToken } from "@/lib/courier/pathao";
 
 export function cleanAndValidateBdPhone(phone: string): {
   isValid: boolean;
@@ -62,7 +63,7 @@ export async function fetchSteadfastFraudStats(
     const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
 
     return {
-      courier: "Steadfast Courier Network",
+      courier: "Steadfast Courier",
       totalParcels,
       delivered,
       cancelled,
@@ -72,6 +73,75 @@ export async function fetchSteadfastFraudStats(
     };
   } catch (err) {
     console.warn("Error checking Steadfast fraud check API:", err);
+    return null;
+  }
+}
+
+export async function fetchPathaoFraudStats(
+  cleanPhone: string,
+  settings: SiteSettings
+): Promise<CourierDeliveryStats | null> {
+  const clientId = (settings.pathaoClientId || process.env.PATHAO_CLIENT_ID || "").trim();
+  const clientSecret = (settings.pathaoClientSecret || process.env.PATHAO_CLIENT_SECRET || "").trim();
+  const username = (settings.pathaoUsername || process.env.PATHAO_USERNAME || "").trim();
+  const password = (settings.pathaoPassword || process.env.PATHAO_PASSWORD || "").trim();
+
+  if (!clientId || !clientSecret || !username || !password) {
+    return null;
+  }
+
+  try {
+    const tokenResult = await getPathaoToken(settings);
+    if (!tokenResult.success || !tokenResult.token) {
+      return null;
+    }
+
+    const baseUrl = settings.pathaoSandbox
+      ? "https://courier-api-sandbox.pathao.com"
+      : "https://api-hermes.pathao.com";
+
+    const res = await fetch(`${baseUrl}/aladdin/api/v1/orders?search=${cleanPhone}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${tokenResult.token}`,
+        Accept: "application/json",
+      },
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const data = await res.json();
+    const ordersList = data.data?.data || (Array.isArray(data.data) ? data.data : []);
+
+    if (!ordersList || ordersList.length === 0) {
+      return null;
+    }
+
+    const totalParcels = ordersList.length;
+    const delivered = ordersList.filter((o: any) =>
+      /delivered/i.test(o.order_status || o.status || "")
+    ).length;
+    const cancelled = ordersList.filter((o: any) =>
+      /cancel|return/i.test(o.order_status || o.status || "")
+    ).length;
+
+    const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
+    const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
+
+    return {
+      courier: "Pathao Courier",
+      totalParcels,
+      delivered,
+      cancelled,
+      fraudReports: 0,
+      successRate,
+      cancelRate,
+    };
+  } catch (err) {
+    console.warn("Error querying Pathao orders history:", err);
     return null;
   }
 }
@@ -133,8 +203,37 @@ export async function performFraudCheck(
     }
   }
 
-  // Courier Network History (Steadfast)
-  const courierStats = await fetchSteadfastFraudStats(cleanPhone, settings);
+  // Fetch Courier Delivery Stats in parallel (Steadfast + Pathao)
+  const [steadfastStats, pathaoStats] = await Promise.all([
+    fetchSteadfastFraudStats(cleanPhone, settings),
+    fetchPathaoFraudStats(cleanPhone, settings),
+  ]);
+
+  // Combined Courier Aggregation
+  let courierStats: CourierDeliveryStats | undefined;
+  const couriersWithData = [steadfastStats, pathaoStats].filter(Boolean) as CourierDeliveryStats[];
+
+  if (couriersWithData.length > 0) {
+    const totalParcels = couriersWithData.reduce((sum, c) => sum + c.totalParcels, 0);
+    const delivered = couriersWithData.reduce((sum, c) => sum + c.delivered, 0);
+    const cancelled = couriersWithData.reduce((sum, c) => sum + c.cancelled, 0);
+    const fraudReports = couriersWithData.reduce((sum, c) => sum + c.fraudReports, 0);
+
+    const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
+    const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
+
+    const names = couriersWithData.map((c) => c.courier.replace(" Courier", "")).join(" & ");
+
+    courierStats = {
+      courier: `${names} Network`,
+      totalParcels,
+      delivered,
+      cancelled,
+      fraudReports,
+      successRate,
+      cancelRate,
+    };
+  }
 
   // Compute Risk Score (0 to 100)
   let riskScore = 0;
@@ -201,7 +300,9 @@ export async function performFraudCheck(
     recommendation,
     recommendationBn,
     isBlacklisted,
-    courierStats: courierStats || undefined,
+    courierStats,
+    steadfastStats: steadfastStats || undefined,
+    pathaoStats: pathaoStats || undefined,
     localStats,
     warnings,
     checkedAt: new Date().toISOString(),

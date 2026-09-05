@@ -316,21 +316,21 @@ export default function FraudCheckerPage() {
 
           {/* Detailed Performance Metrics */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Steadfast Courier Database */}
+            {/* Multi-Courier Database (Steadfast + Pathao) */}
             <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 space-y-4">
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-800/80">
                 <div className="flex items-center gap-2">
                   <Truck className="w-5 h-5 text-brand-400" />
-                  <span className="text-sm font-bold text-white">Steadfast Courier Network</span>
+                  <span className="text-sm font-bold text-white">Courier Networks Record</span>
                 </div>
-                <span className="text-xs text-slate-500 font-mono">BD Courier Data</span>
+                <span className="text-xs text-slate-400 font-mono">Steadfast & Pathao</span>
               </div>
 
               {result.courierStats ? (
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between text-xs font-bold mb-1.5">
-                      <span className="text-slate-400">ডেলিভারি সফলতার হার:</span>
+                      <span className="text-slate-400">ডেলিভারি সফলতার হার ({result.courierStats.courier}):</span>
                       <span
                         className={`font-black text-sm ${
                           result.courierStats.successRate >= 75
@@ -378,6 +378,26 @@ export default function FraudCheckerPage() {
                     </div>
                   </div>
 
+                  {/* Individual Courier Split */}
+                  <div className="grid grid-cols-2 gap-2.5 pt-1">
+                    {result.steadfastStats && (
+                      <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
+                        <span className="font-bold text-white block">Steadfast Courier:</span>
+                        <span className="text-slate-400 block text-[11px]">
+                          {result.steadfastStats.delivered} delivered / {result.steadfastStats.totalParcels} ({result.steadfastStats.successRate}%)
+                        </span>
+                      </div>
+                    )}
+                    {result.pathaoStats && (
+                      <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
+                        <span className="font-bold text-rose-400 block">Pathao Courier:</span>
+                        <span className="text-slate-400 block text-[11px]">
+                          {result.pathaoStats.delivered} delivered / {result.pathaoStats.totalParcels} ({result.pathaoStats.successRate}%)
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                   {result.courierStats.fraudReports > 0 && (
                     <div className="p-2.5 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold border border-rose-500/30 text-center">
                       ⚠️ {result.courierStats.fraudReports}টি ফ্রড/প্রতারণা রিপোর্ট নথিভুক্ত রয়েছে
@@ -387,9 +407,9 @@ export default function FraudCheckerPage() {
               ) : (
                 <div className="py-8 text-center space-y-2 text-slate-400">
                   <Info className="w-6 h-6 mx-auto text-slate-500" />
-                  <p className="text-xs font-bold text-slate-300">No Steadfast Courier History Found</p>
+                  <p className="text-xs font-bold text-slate-300">No Courier History Found</p>
                   <p className="text-[11px] text-slate-500 max-w-xs mx-auto">
-                    Configure your Steadfast API Key and Secret Key in Admin Settings to query real-time courier network records.
+                    Configure your Steadfast and Pathao API keys in Admin Settings to query real-time courier network records.
                   </p>
                 </div>
               )}

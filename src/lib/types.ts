@@ -210,6 +210,8 @@ export type FraudCheckResult = {
   recommendationBn: string;
   isBlacklisted: boolean;
   courierStats?: CourierDeliveryStats;
+  steadfastStats?: CourierDeliveryStats;
+  pathaoStats?: CourierDeliveryStats;
   localStats: LocalOrderStats;
   warnings: string[];
   checkedAt: string;

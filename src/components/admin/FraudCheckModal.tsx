@@ -274,14 +274,14 @@ export default function FraudCheckModal({
 
             {/* Delivery Performance Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {/* Courier Delivery Record (Steadfast) */}
+              {/* Courier Delivery Record (Steadfast + Pathao) */}
               <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
                   <div className="flex items-center gap-2">
                     <Truck className="w-4 h-4 text-brand-400" />
-                    <span className="text-xs font-bold text-white">Courier Network Record</span>
+                    <span className="text-xs font-bold text-white">Courier Networks Record</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-mono">Steadfast BD</span>
+                  <span className="text-[10px] text-slate-400 font-mono">Steadfast & Pathao</span>
                 </div>
 
                 {data.courierStats ? (
@@ -289,7 +289,7 @@ export default function FraudCheckModal({
                     {/* Success Rate Bar */}
                     <div>
                       <div className="flex justify-between text-xs font-bold mb-1">
-                        <span className="text-slate-400">ডেলিভারি সফলতার হার:</span>
+                        <span className="text-slate-400">ডেলিভারি সফলতার হার ({data.courierStats.courier}):</span>
                         <span
                           className={`font-black ${
                             data.courierStats.successRate >= 75
@@ -337,6 +337,26 @@ export default function FraudCheckModal({
                       </div>
                     </div>
 
+                    {/* Detailed Courier Split (Steadfast vs Pathao) */}
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      {data.steadfastStats && (
+                        <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800 text-[11px] space-y-0.5">
+                          <span className="font-bold text-white block">Steadfast BD:</span>
+                          <span className="text-slate-400 block">
+                            {data.steadfastStats.delivered} delivered / {data.steadfastStats.totalParcels} ({data.steadfastStats.successRate}%)
+                          </span>
+                        </div>
+                      )}
+                      {data.pathaoStats && (
+                        <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800 text-[11px] space-y-0.5">
+                          <span className="font-bold text-rose-400 block">Pathao Courier:</span>
+                          <span className="text-slate-400 block">
+                            {data.pathaoStats.delivered} delivered / {data.pathaoStats.totalParcels} ({data.pathaoStats.successRate}%)
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
                     {data.courierStats.fraudReports > 0 && (
                       <div className="p-2 rounded-xl bg-rose-500/20 text-rose-300 text-[11px] font-bold border border-rose-500/30 text-center">
                         ⚠️ {data.courierStats.fraudReports}টি ফ্রড রিপোর্ট নথিভুক্ত
@@ -348,7 +368,7 @@ export default function FraudCheckModal({
                     <Info className="w-5 h-5 mx-auto text-slate-500" />
                     <p className="text-xs font-bold text-slate-300">No Courier History Available</p>
                     <p className="text-[11px] text-slate-500">
-                      Steadfast API keys can be configured in Settings to enable real-time courier verification.
+                      Steadfast & Pathao API keys can be configured in Admin Settings to query real-time delivery behavior.
                     </p>
                   </div>
                 )}
