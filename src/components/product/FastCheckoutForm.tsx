@@ -53,12 +53,12 @@ export default function FastCheckoutForm({
   const itemSubtotal = unitPrice * quantity;
   
   const deliveryFee = getDeliveryFee(deliveryZone, {
-    dhaka: settings.dhakaDeliveryFee,
-    outside_dhaka: settings.outsideDhakaDeliveryFee,
-    suburbs: settings.suburbsDeliveryFee,
+    dhaka: Number(settings?.dhakaDeliveryFee ?? 60),
+    outside_dhaka: Number(settings?.outsideDhakaDeliveryFee ?? 120),
+    suburbs: Number(settings?.suburbsDeliveryFee ?? 100),
   });
 
-  const isFreeDelivery = itemSubtotal >= settings.freeShippingThreshold;
+  const isFreeDelivery = itemSubtotal >= Number(settings?.freeShippingThreshold ?? 2500);
   const appliedDeliveryFee = isFreeDelivery ? 0 : deliveryFee;
   const grandTotal = itemSubtotal + appliedDeliveryFee;
 
@@ -250,9 +250,9 @@ export default function FastCheckoutForm({
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[
-              { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: settings.dhakaDeliveryFee },
-              { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: settings.outsideDhakaDeliveryFee },
-              { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: settings.suburbsDeliveryFee },
+              { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: Number(settings?.dhakaDeliveryFee ?? 60) },
+              { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: Number(settings?.outsideDhakaDeliveryFee ?? 120) },
+              { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: Number(settings?.suburbsDeliveryFee ?? 100) },
             ].map((zone) => (
               <label
                 key={zone.id}

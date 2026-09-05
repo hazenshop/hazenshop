@@ -770,67 +770,111 @@ export const db = {
 
   // SETTINGS
   async getSettings(): Promise<SiteSettings> {
+    const base = readJsonFile("settings.json", cachedSettings);
     if (isSupabaseConfigured && supabase) {
-      const { data } = await supabase.from("site_settings").select("*").eq("id", "primary").single();
-      if (data) {
-        return {
-          siteName: data.site_name || data.store_name || "Hazen",
-          tagline: data.tagline,
-          logoUrl: data.logo_url,
-          hotline: data.hotline,
-          whatsappNumber: data.whatsapp_number,
-          supportEmail: data.support_email,
-          announcementBarText: data.announcement_bar_text,
-          announcementBarActive: data.announcement_bar_active,
-          dhakaDeliveryFee: Number(data.dhaka_delivery_fee),
-          outsideDhakaDeliveryFee: Number(data.outside_dhaka_delivery_fee),
-          suburbsDeliveryFee: Number(data.suburbs_delivery_fee),
-          freeShippingThreshold: Number(data.free_shipping_threshold),
-          heroBanners: data.hero_banners || [],
-          seoTitle: data.seo_title,
-          seoDescription: data.seo_description,
-          seoKeywords: data.seo_keywords || [],
-          facebookPixelId: data.facebook_pixel_id || data.facebookPixelId || "2242388576616945",
-          facebookTestEventCode: data.facebook_test_event_code || data.facebookTestEventCode || "TEST82490",
-          socialLinks: data.social_links || {},
-        };
+      try {
+        const { data, error } = await supabase.from("site_settings").select("*").eq("id", "primary").single();
+        if (data && !error) {
+          const parsedDhaka = data.dhaka_delivery_fee !== null && data.dhaka_delivery_fee !== undefined ? Number(data.dhaka_delivery_fee) : NaN;
+          const parsedOutside = data.outside_dhaka_delivery_fee !== null && data.outside_dhaka_delivery_fee !== undefined ? Number(data.outside_dhaka_delivery_fee) : NaN;
+          const parsedSuburbs = data.suburbs_delivery_fee !== null && data.suburbs_delivery_fee !== undefined ? Number(data.suburbs_delivery_fee) : NaN;
+          const parsedThreshold = data.free_shipping_threshold !== null && data.free_shipping_threshold !== undefined ? Number(data.free_shipping_threshold) : NaN;
+
+          cachedSettings = {
+            ...base,
+            siteName: data.site_name || data.store_name || base.siteName || "HAZENSHOP BD",
+            tagline: data.tagline ?? base.tagline,
+            logoUrl: data.logo_url ?? base.logoUrl,
+            hotline: data.hotline || base.hotline,
+            whatsappNumber: data.whatsapp_number || base.whatsappNumber,
+            supportEmail: data.support_email || base.supportEmail,
+            announcementBarText: data.announcement_bar_text ?? base.announcementBarText,
+            announcementBarActive: data.announcement_bar_active ?? base.announcementBarActive,
+            dhakaDeliveryFee: !isNaN(parsedDhaka) ? parsedDhaka : (base.dhakaDeliveryFee ?? 60),
+            outsideDhakaDeliveryFee: !isNaN(parsedOutside) ? parsedOutside : (base.outsideDhakaDeliveryFee ?? 120),
+            suburbsDeliveryFee: !isNaN(parsedSuburbs) ? parsedSuburbs : (base.suburbsDeliveryFee ?? 100),
+            freeShippingThreshold: !isNaN(parsedThreshold) ? parsedThreshold : (base.freeShippingThreshold ?? 2500),
+            heroBanners: Array.isArray(data.hero_banners) && data.hero_banners.length > 0 ? data.hero_banners : base.heroBanners,
+            seoTitle: data.seo_title || base.seoTitle,
+            seoDescription: data.seo_description || base.seoDescription,
+            seoKeywords: Array.isArray(data.seo_keywords) ? data.seo_keywords : base.seoKeywords,
+            facebookPixelId: data.facebook_pixel_id || base.facebookPixelId,
+            facebookTestEventCode: data.facebook_test_event_code || base.facebookTestEventCode,
+            socialLinks: data.social_links ?? base.socialLinks,
+            steadfastApiKey: data.steadfast_api_key || base.steadfastApiKey,
+            steadfastSecretKey: data.steadfast_secret_key || base.steadfastSecretKey,
+            steadfastEnabled: data.steadfast_enabled ?? base.steadfastEnabled,
+            pathaoClientId: data.pathao_client_id || base.pathaoClientId,
+            pathaoClientSecret: data.pathao_client_secret || base.pathaoClientSecret,
+            pathaoUsername: data.pathao_username || base.pathaoUsername,
+            pathaoPassword: data.pathao_password || base.pathaoPassword,
+            pathaoStoreId: data.pathao_store_id || base.pathaoStoreId,
+            pathaoSandbox: data.pathao_sandbox ?? base.pathaoSandbox,
+            pathaoEnabled: data.pathao_enabled ?? base.pathaoEnabled,
+          };
+          return cachedSettings;
+        }
+      } catch (err) {
+        console.warn("Error fetching Supabase settings, using local fallback:", err);
       }
     }
-    cachedSettings = readJsonFile("settings.json", cachedSettings);
+    cachedSettings = base;
     return cachedSettings;
   },
 
   async updateSettings(updates: Partial<SiteSettings>): Promise<SiteSettings> {
-    cachedSettings = readJsonFile("settings.json", cachedSettings);
-    cachedSettings = { ...cachedSettings, ...updates };
+    const base = readJsonFile("settings.json", cachedSettings);
+    cachedSettings = {
+      ...base,
+      ...updates,
+      dhakaDeliveryFee: updates.dhakaDeliveryFee !== undefined ? Number(updates.dhakaDeliveryFee) : (base.dhakaDeliveryFee ?? 60),
+      outsideDhakaDeliveryFee: updates.outsideDhakaDeliveryFee !== undefined ? Number(updates.outsideDhakaDeliveryFee) : (base.outsideDhakaDeliveryFee ?? 120),
+      suburbsDeliveryFee: updates.suburbsDeliveryFee !== undefined ? Number(updates.suburbsDeliveryFee) : (base.suburbsDeliveryFee ?? 100),
+      freeShippingThreshold: updates.freeShippingThreshold !== undefined ? Number(updates.freeShippingThreshold) : (base.freeShippingThreshold ?? 2500),
+    };
     writeJsonFile("settings.json", cachedSettings);
 
     if (isSupabaseConfigured && supabase) {
-      await supabase
-        .from("site_settings")
-        .upsert({
-          id: "primary",
-          store_name: cachedSettings.siteName,
-          tagline: cachedSettings.tagline,
-          logo_url: cachedSettings.logoUrl,
-          hotline: cachedSettings.hotline,
-          whatsapp_number: cachedSettings.whatsappNumber,
-          support_email: cachedSettings.supportEmail,
-          announcement_bar_text: cachedSettings.announcementBarText,
-          announcement_bar_active: cachedSettings.announcementBarActive,
-          dhaka_delivery_fee: cachedSettings.dhakaDeliveryFee,
-          outside_dhaka_delivery_fee: cachedSettings.outsideDhakaDeliveryFee,
-          suburbs_delivery_fee: cachedSettings.suburbsDeliveryFee,
-          free_shipping_threshold: cachedSettings.freeShippingThreshold,
-          hero_banners: cachedSettings.heroBanners,
-          seo_title: cachedSettings.seoTitle,
-          seo_description: cachedSettings.seoDescription,
-          seo_keywords: cachedSettings.seoKeywords,
-          facebook_pixel_id: cachedSettings.facebookPixelId,
-          facebook_test_event_code: cachedSettings.facebookTestEventCode,
-          social_links: cachedSettings.socialLinks,
-          updated_at: new Date().toISOString(),
-        });
+      try {
+        await supabase
+          .from("site_settings")
+          .upsert({
+            id: "primary",
+            store_name: cachedSettings.siteName,
+            site_name: cachedSettings.siteName,
+            tagline: cachedSettings.tagline,
+            logo_url: cachedSettings.logoUrl,
+            hotline: cachedSettings.hotline,
+            whatsapp_number: cachedSettings.whatsappNumber,
+            support_email: cachedSettings.supportEmail,
+            announcement_bar_text: cachedSettings.announcementBarText,
+            announcement_bar_active: cachedSettings.announcementBarActive,
+            dhaka_delivery_fee: cachedSettings.dhakaDeliveryFee,
+            outside_dhaka_delivery_fee: cachedSettings.outsideDhakaDeliveryFee,
+            suburbs_delivery_fee: cachedSettings.suburbsDeliveryFee,
+            free_shipping_threshold: cachedSettings.freeShippingThreshold,
+            hero_banners: cachedSettings.heroBanners,
+            seo_title: cachedSettings.seoTitle,
+            seo_description: cachedSettings.seoDescription,
+            seo_keywords: cachedSettings.seoKeywords,
+            facebook_pixel_id: cachedSettings.facebookPixelId,
+            facebook_test_event_code: cachedSettings.facebookTestEventCode,
+            social_links: cachedSettings.socialLinks,
+            steadfast_api_key: cachedSettings.steadfastApiKey,
+            steadfast_secret_key: cachedSettings.steadfastSecretKey,
+            steadfast_enabled: cachedSettings.steadfastEnabled,
+            pathao_client_id: cachedSettings.pathaoClientId,
+            pathao_client_secret: cachedSettings.pathaoClientSecret,
+            pathao_username: cachedSettings.pathaoUsername,
+            pathao_password: cachedSettings.pathaoPassword,
+            pathao_store_id: cachedSettings.pathaoStoreId,
+            pathao_sandbox: cachedSettings.pathaoSandbox,
+            pathao_enabled: cachedSettings.pathaoEnabled,
+            updated_at: new Date().toISOString(),
+          });
+      } catch (err) {
+        console.warn("Supabase settings upsert error (saved locally):", err);
+      }
     }
 
     return cachedSettings;

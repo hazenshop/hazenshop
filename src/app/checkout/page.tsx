@@ -37,7 +37,7 @@ export default function CheckoutPage() {
   const [showMobileSummary, setShowMobileSummary] = useState(false);
 
   useEffect(() => {
-    fetch("/api/settings")
+    fetch("/api/settings", { cache: "no-store" })
       .then((res) => res.json())
       .then((data) => {
         if (data.settings) setSettings(data.settings);
@@ -47,13 +47,13 @@ export default function CheckoutPage() {
 
   const deliveryFee = settings
     ? getDeliveryFee(deliveryZone, {
-        dhaka: settings.dhakaDeliveryFee,
-        outside_dhaka: settings.outsideDhakaDeliveryFee,
-        suburbs: settings.suburbsDeliveryFee,
+        dhaka: Number(settings.dhakaDeliveryFee ?? 60),
+        outside_dhaka: Number(settings.outsideDhakaDeliveryFee ?? 120),
+        suburbs: Number(settings.suburbsDeliveryFee ?? 100),
       })
     : 60;
 
-  const isFreeDelivery = settings ? subtotal >= settings.freeShippingThreshold : false;
+  const isFreeDelivery = settings ? subtotal >= Number(settings.freeShippingThreshold ?? 2500) : false;
   const appliedDeliveryFee = isFreeDelivery ? 0 : deliveryFee;
   const grandTotal = subtotal + appliedDeliveryFee;
 
@@ -277,9 +277,9 @@ export default function CheckoutPage() {
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
-                    { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: settings?.dhakaDeliveryFee || 60 },
-                    { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: settings?.outsideDhakaDeliveryFee || 120 },
-                    { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: settings?.suburbsDeliveryFee || 100 },
+                    { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: settings?.dhakaDeliveryFee ?? 60 },
+                    { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: settings?.outsideDhakaDeliveryFee ?? 120 },
+                    { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: settings?.suburbsDeliveryFee ?? 100 },
                   ].map((zone) => (
                     <label
                       key={zone.id}
