@@ -26,7 +26,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    }, 4500);
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -36,47 +36,47 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {/* Toast Notification Container positioned prominently */}
+      {/* Toast Notification Container positioned at top-right */}
       <div
         aria-live="polite"
-        className="fixed top-4 right-4 left-4 sm:left-auto sm:top-6 sm:right-6 z-[99999] flex flex-col gap-2.5 max-w-md w-auto sm:w-full pointer-events-none"
+        className="fixed top-4 right-4 left-4 sm:left-auto sm:top-5 sm:right-5 z-[999999] flex flex-col gap-3 max-w-sm w-auto sm:w-full pointer-events-none"
       >
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role="alert"
-            className={`pointer-events-auto flex items-start sm:items-center justify-between p-3.5 sm:p-4 rounded-2xl shadow-2xl border backdrop-blur-xl transition-all duration-300 animate-in slide-in-from-top-3 fade-in ${
+            className={`pointer-events-auto flex items-center justify-between p-4 rounded-2xl shadow-2xl border transition-all duration-300 transform translate-y-0 ${
               toast.type === "success"
-                ? "bg-slate-900/95 border-emerald-500/50 text-emerald-100 ring-1 ring-emerald-500/20"
+                ? "bg-slate-900 border-emerald-500 text-emerald-100 shadow-emerald-950/50"
                 : toast.type === "error"
-                ? "bg-slate-900/95 border-rose-500/50 text-rose-100 ring-1 ring-rose-500/20"
+                ? "bg-slate-900 border-rose-500 text-rose-100 shadow-rose-950/50"
                 : toast.type === "warning"
-                ? "bg-slate-900/95 border-amber-500/50 text-amber-100 ring-1 ring-amber-500/20"
-                : "bg-slate-900/95 border-slate-700 text-white ring-1 ring-white/10"
+                ? "bg-slate-900 border-amber-500 text-amber-100 shadow-amber-950/50"
+                : "bg-slate-900 border-slate-700 text-white"
             }`}
           >
-            <div className="flex items-start sm:items-center gap-3 pr-2">
+            <div className="flex items-center gap-3 pr-2">
               {toast.type === "success" && (
-                <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5 sm:mt-0">
-                  <CheckCircle2 className="w-4 h-4" />
+                <div className="p-1.5 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
                 </div>
               )}
               {toast.type === "error" && (
-                <div className="p-1 rounded-lg bg-rose-500/20 text-rose-400 shrink-0 mt-0.5 sm:mt-0">
-                  <AlertCircle className="w-4 h-4" />
+                <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 shrink-0">
+                  <AlertCircle className="w-5 h-5" />
                 </div>
               )}
               {toast.type === "warning" && (
-                <div className="p-1 rounded-lg bg-amber-500/20 text-amber-400 shrink-0 mt-0.5 sm:mt-0">
-                  <AlertTriangle className="w-4 h-4" />
+                <div className="p-1.5 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+                  <AlertTriangle className="w-5 h-5" />
                 </div>
               )}
               {toast.type === "info" && (
-                <div className="p-1 rounded-lg bg-blue-500/20 text-blue-400 shrink-0 mt-0.5 sm:mt-0">
-                  <Info className="w-4 h-4" />
+                <div className="p-1.5 rounded-xl bg-blue-500/20 text-blue-400 shrink-0">
+                  <Info className="w-5 h-5" />
                 </div>
               )}
-              <p className="text-xs sm:text-sm font-semibold leading-snug">{toast.message}</p>
+              <p className="text-xs sm:text-sm font-bold leading-snug">{toast.message}</p>
             </div>
             <button
               type="button"

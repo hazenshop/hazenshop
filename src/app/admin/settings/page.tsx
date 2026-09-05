@@ -12,6 +12,7 @@ import {
   Tag,
   Loader2,
   Share2,
+  CheckCircle2,
 } from "lucide-react";
 import { SiteSettings } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
@@ -22,6 +23,7 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [activeTestCourier, setActiveTestCourier] = useState<"steadfast" | "pathao" | null>(null);
 
   useEffect(() => {
@@ -33,8 +35,10 @@ export default function AdminSettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSettings = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
     if (!settings) return;
     setSaving(true);
 
@@ -55,6 +59,7 @@ export default function AdminSettingsPage() {
 
       if (res.ok) {
         showToast("সাইটের সেটিংস সফলভাবে আপডেট করা হয়েছে! (Settings saved)", "success");
+        setSavedModalOpen(true);
       } else {
         const errData = await res.json().catch(() => null);
         throw new Error(errData?.error || "সেটিংস সংরক্ষণ করা যায়নি। দয়া করে ইনপুটগুলো চেক করুন। (Failed to save)");
@@ -528,6 +533,34 @@ export default function AdminSettingsPage() {
             showToast(`Applied Pathao Store ID: ${storeId}`, "success");
           }}
         />
+      )}
+
+      {/* Explicit Success Feedback Modal */}
+      {savedModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        >
+          <div className="bg-slate-900 border border-emerald-500/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl animate-in zoom-in-95">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white">সেটিংস সফলভাবে সংরক্ষিত!</h3>
+              <p className="text-xs text-slate-300 mt-1">
+                Storefront settings & delivery charges have been saved and applied live.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSavedModalOpen(false)}
+              className="w-full bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-black text-xs py-3.5 rounded-xl transition-all shadow-md cursor-pointer"
+            >
+              ঠিক আছে (OK)
+            </button>
+          </div>
+        </div>
       )}
     </form>
   );
