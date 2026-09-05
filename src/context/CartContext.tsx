@@ -19,6 +19,11 @@ interface CartContextType {
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
+  // Quick Order Modal
+  quickOrderProduct: Product | null;
+  quickOrderVariant?: ProductVariant;
+  openQuickOrder: (product: Product, initialVariant?: ProductVariant) => void;
+  closeQuickOrder: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,6 +32,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<OrderItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [quickOrderProduct, setQuickOrderProduct] = useState<Product | null>(null);
+  const [quickOrderVariant, setQuickOrderVariant] = useState<ProductVariant | undefined>(undefined);
+
+  const openQuickOrder = (product: Product, initialVariant?: ProductVariant) => {
+    setQuickOrderProduct(product);
+    setQuickOrderVariant(initialVariant || (product.variants && product.variants.length > 0 ? product.variants[0] : undefined));
+  };
+
+  const closeQuickOrder = () => {
+    setQuickOrderProduct(null);
+    setQuickOrderVariant(undefined);
+  };
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -143,6 +160,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         totalItems,
         subtotal,
+        quickOrderProduct,
+        quickOrderVariant,
+        openQuickOrder,
+        closeQuickOrder,
       }}
     >
       {children}

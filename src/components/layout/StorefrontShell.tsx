@@ -8,6 +8,7 @@ import Navbar from "@/components/header/Navbar";
 import Footer from "@/components/footer/Footer";
 import MobileNav from "@/components/header/MobileNav";
 import CartDrawer from "@/components/cart/CartDrawer";
+import QuickOrderModal from "@/components/product/QuickOrderModal";
 import { Category, SiteSettings } from "@/lib/types";
 
 export default function StorefrontShell({
@@ -40,6 +41,7 @@ export default function StorefrontShell({
       <Footer settings={settings} categories={categories} />
       <MobileNav whatsappNumber={settings.whatsappNumber} />
       <CartDrawer freeShippingThreshold={settings.freeShippingThreshold} />
+      <QuickOrderModal settings={settings} />
 
       {/* Floating WhatsApp Action Button on Desktop & Tablet */}
       <aside aria-label="WhatsApp Support" className="hidden sm:block fixed bottom-6 right-6 z-40">

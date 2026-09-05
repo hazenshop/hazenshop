@@ -12,7 +12,7 @@ import { useToast } from "@/context/ToastContext";
 
 export default function ProductCard({ product }: { product: Product }) {
   const router = useRouter();
-  const { addToCart } = useCart();
+  const { addToCart, openQuickOrder } = useCart();
   const { showToast } = useToast();
   const discountPercent = calculateDiscountPercentage(product.price, product.salePrice);
   const effectivePrice = product.salePrice ?? product.price;
@@ -27,8 +27,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const handleQuickOrder = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addToCart(product, product.variants[0] || undefined, 1, { silent: true });
-    router.push("/checkout");
+    openQuickOrder(product);
   };
 
   return (

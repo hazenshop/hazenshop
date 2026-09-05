@@ -38,7 +38,7 @@ export default function ProductDetailClient({
   relatedProducts: Product[];
 }) {
   const router = useRouter();
-  const { addToCart } = useCart();
+  const { addToCart, openQuickOrder } = useCart();
   const { showToast } = useToast();
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
@@ -76,9 +76,7 @@ export default function ProductDetailClient({
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
     } else {
-      addToCart(product, selectedVariant, quantity, { silent: true });
-      trackFBCart(product, selectedVariant, quantity);
-      router.push("/checkout");
+      openQuickOrder(product, selectedVariant);
     }
   };
 
