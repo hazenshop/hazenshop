@@ -15,12 +15,14 @@ import {
 } from "lucide-react";
 import { SiteSettings } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
+import CourierTestModal from "@/components/admin/CourierTestModal";
 
 export default function AdminSettingsPage() {
   const { showToast } = useToast();
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTestCourier, setActiveTestCourier] = useState<"steadfast" | "pathao" | null>(null);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -317,27 +319,10 @@ export default function AdminSettingsPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={async () => {
-                    showToast("Testing Steadfast connection...");
-                    try {
-                      const res = await fetch("/api/courier/test", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ courier: "steadfast", settings }),
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        showToast(`Steadfast Connected! Balance: ৳${data.currentBalance ?? 0}`, "success");
-                      } else {
-                        showToast(data.message || "Failed to connect to Steadfast", "error");
-                      }
-                    } catch {
-                      showToast("Error testing Steadfast", "error");
-                    }
-                  }}
-                  className="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/80 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0"
+                  onClick={() => setActiveTestCourier("steadfast")}
+                  className="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/80 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0 shadow-sm"
                 >
-                  Test Connection
+                  Test Connection & Balance
                 </button>
               </div>
             </div>
@@ -434,29 +419,8 @@ export default function AdminSettingsPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={async () => {
-                    showToast("Testing Pathao connection & fetching stores...");
-                    try {
-                      const res = await fetch("/api/courier/test", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ courier: "pathao", settings }),
-                      });
-                      const data = await res.json();
-                      if (data.success) {
-                        const storesCount = data.stores?.length || 0;
-                        showToast(`Pathao Connected! Found ${storesCount} stores.`, "success");
-                        if (storesCount > 0 && !settings.pathaoStoreId) {
-                          setSettings({ ...settings, pathaoStoreId: String(data.stores[0].store_id) });
-                        }
-                      } else {
-                        showToast(data.message || "Failed to connect to Pathao", "error");
-                      }
-                    } catch {
-                      showToast("Error testing Pathao", "error");
-                    }
-                  }}
-                  className="bg-rose-950/80 hover:bg-rose-900 text-rose-400 border border-rose-800/80 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0"
+                  onClick={() => setActiveTestCourier("pathao")}
+                  className="bg-rose-950/80 hover:bg-rose-900 text-rose-400 border border-rose-800/80 px-3.5 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0 shadow-sm"
                 >
                   Test &amp; Fetch Stores
                 </button>
@@ -510,6 +474,20 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </form>
+
+      {/* Interactive Courier Live Diagnostic Modal */}
+      {settings && (
+        <CourierTestModal
+          isOpen={Boolean(activeTestCourier)}
+          courier={activeTestCourier}
+          settings={settings}
+          onClose={() => setActiveTestCourier(null)}
+          onApplyStoreId={(storeId) => {
+            setSettings({ ...settings, pathaoStoreId: storeId });
+            showToast(`Applied Pathao Store ID: ${storeId}`, "success");
+          }}
+        />
+      )}
     </div>
   );
 }
