@@ -430,7 +430,7 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
                   placeholder="আপনার পূর্ণ নাম লিখুন"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 min-h-[40px]"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-sm font-medium rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 min-h-[44px]"
                 />
               </div>
             </div>
@@ -449,7 +449,7 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
                   placeholder="01XXXXXXXXX (১১ ডিজিট)"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 font-mono min-h-[40px]"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-sm font-medium rounded-xl pl-9 pr-3 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 font-mono min-h-[44px]"
                 />
               </div>
             </div>
@@ -467,7 +467,7 @@ export default function QuickOrderModal({ settings }: { settings: SiteSettings }
                   placeholder="বাসা নং, রোড নং, এলাকা, থানা ও জেলা"
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-9 pr-3 py-2 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all resize-none placeholder:text-slate-400 min-h-[48px]"
+                  className="w-full bg-slate-50 hover:bg-white focus:bg-white text-base sm:text-sm font-medium rounded-xl pl-9 pr-3 py-2 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all resize-none placeholder:text-slate-400 min-h-[50px]"
                 />
               </div>
             </div>

@@ -117,7 +117,7 @@ export default function ProductDetailClient({
     : defaultTrustBadges;
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-10 sm:space-y-14">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-10 sm:space-y-14 pb-28 md:pb-14">
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
         <Link href="/" className="hover:text-brand-maroon-700 transition-colors">
@@ -530,6 +530,39 @@ export default function ProductDetailClient({
           </div>
         </section>
       )}
+
+      {/* Sticky Mobile Bottom Floating Order Action Bar */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-black/[0.08] p-3 md:hidden shadow-floating pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center gap-2 max-w-lg mx-auto">
+          <div className="flex flex-col min-w-0 pr-1 shrink-0">
+            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider line-clamp-1">
+              ১০০% COD
+            </span>
+            <span className="text-sm font-extrabold text-brand-maroon-700 tracking-tight leading-tight">
+              {formatPrice(unitPrice * quantity)}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleScrollToOrder}
+            className="flex-1 bg-brand-maroon-700 hover:bg-brand-maroon-800 active:scale-[0.98] text-white font-extrabold py-3 px-3.5 rounded-full shadow-card flex items-center justify-center gap-1.5 text-xs uppercase tracking-wider min-h-[46px] truncate"
+          >
+            <CheckCircle2 className="w-4 h-4 text-brand-gold-300 shrink-0" />
+            <span className="truncate">অর্ডার করুন (COD)</span>
+          </button>
+
+          <a
+            href={whatsAppOrderUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-full border border-emerald-200 shrink-0 min-h-[46px] min-w-[46px] flex items-center justify-center active:scale-95 transition-all shadow-subtle"
+            aria-label="Order on WhatsApp"
+          >
+            <MessageCircle className="w-5 h-5 text-emerald-600" />
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

@@ -292,7 +292,7 @@ export default function CheckoutPage() {
                     placeholder="আপনার পূর্ণ নাম লিখুন"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 min-h-[44px]"
+                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-base sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 min-h-[44px]"
                   />
                 </div>
               </div>
@@ -310,7 +310,7 @@ export default function CheckoutPage() {
                     placeholder="01XXXXXXXXX (১১ ডিজিট)"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 font-mono min-h-[44px]"
+                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-base sm:text-sm font-medium rounded-xl pl-10 pr-4 py-3 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all placeholder:text-slate-400 font-mono min-h-[44px]"
                   />
                 </div>
               </div>
@@ -327,7 +327,7 @@ export default function CheckoutPage() {
                     placeholder="বাসা নং, রোড নং, এলাকা, থানা ও জেলা"
                     value={customerAddress}
                     onChange={(e) => setCustomerAddress(e.target.value)}
-                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-xs sm:text-sm font-medium rounded-xl pl-10 pr-4 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all resize-none placeholder:text-slate-400 min-h-[56px]"
+                    className="w-full bg-slate-50/90 hover:bg-slate-50 focus:bg-white text-base sm:text-sm font-medium rounded-xl pl-10 pr-4 py-2.5 border border-slate-200 focus:border-brand-maroon-700 focus:ring-1 focus:ring-brand-maroon-700 focus:outline-none transition-all resize-none placeholder:text-slate-400 min-h-[56px]"
                   />
                 </div>
               </div>
