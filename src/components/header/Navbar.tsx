@@ -337,79 +337,101 @@ export default function Navbar({
         </nav>
       </div>
 
-      {/* Mobile Category Horizontal Pills Bar */}
-      <CategoryPillsBar categories={categories} />
+      {/* Mobile Category Horizontal Pills Bar (Hidden when drawer is open to prevent duplicate clutter) */}
+      {!isMobileMenuOpen && <CategoryPillsBar categories={categories} />}
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-100 bg-white p-4 space-y-4 shadow-card max-h-[80vh] overflow-y-auto">
+        <div className="md:hidden border-t border-slate-100 bg-white/98 backdrop-blur-xl px-4 py-4 space-y-4 shadow-floating max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
           {/* Mobile Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+          <form onSubmit={handleSearchSubmit} className="relative">
             <input
               type="text"
-              placeholder="Search bedsheets & curtains..."
+              placeholder="পণ্য খুঁজুন (Search bedsheets, curtains)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 text-xs rounded-full pl-9 pr-20 py-2.5 border border-slate-200/80 focus:outline-none focus:border-brand-maroon-700 text-slate-900"
+              className="w-full bg-slate-100/90 text-xs rounded-xl pl-9 pr-10 py-2.5 border border-slate-200 focus:outline-none focus:border-brand-maroon-700 text-slate-900 placeholder:text-slate-400 font-medium"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 pointer-events-none" />
-            <button
-              type="submit"
-              className="absolute right-1 bg-brand-maroon-700 text-white font-bold text-xs px-3.5 py-1.5 rounded-full"
-            >
-              Search
-            </button>
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+            {searchQuery.trim() && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </form>
 
-          {/* Navigation Links */}
-          <div className="space-y-1 text-xs font-semibold text-slate-800">
+          {/* Quick Primary Navigation Grid */}
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <Link
               href="/"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 border border-slate-100"
+              className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 font-semibold border border-slate-100 transition-colors"
             >
-              <span>Home Overview</span>
-              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
+              <Sparkles className="w-4 h-4 text-brand-maroon-700 shrink-0" />
+              <span>হোমপেজ (Home)</span>
             </Link>
 
             <Link
               href="/products"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl bg-brand-50/60 hover:bg-brand-50 text-brand-maroon-700 border border-brand-maroon-100 font-bold"
+              className="flex items-center gap-2 p-3 rounded-xl bg-brand-50/80 hover:bg-brand-50 text-brand-maroon-700 font-bold border border-brand-100 transition-colors"
             >
-              <div className="flex items-center gap-2">
-                <Grid className="w-4 h-4 text-brand-maroon-700" />
-                <span>All Collections (সকল পণ্য)</span>
-              </div>
-              <ArrowRight className="w-3.5 h-3.5 text-brand-maroon-700" />
+              <Grid className="w-4 h-4 text-brand-maroon-700 shrink-0" />
+              <span>সকল পণ্য (Shop All)</span>
             </Link>
+          </div>
 
-            {/* Categories in Mobile Drawer */}
-            <div className="pt-2">
-              <span className="text-[10px] uppercase font-bold text-slate-400 px-2 tracking-wider block mb-2">
-                Categories (বিভাগসমূহ)
-              </span>
-              <div className="grid grid-cols-1 gap-2">
+          {/* Categories Grid (2 Columns Compact & Clean) */}
+          {categories.length > 0 && (
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[11px] font-extrabold uppercase text-slate-400 tracking-wider">
+                  কালেকশন ও বিভাগসমূহ
+                </span>
+                <Link
+                  href="/products"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-[11px] font-bold text-brand-maroon-700 hover:underline"
+                >
+                  সব দেখুন &rarr;
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
                 {categories.map((c) => (
                   <Link
                     key={c.id}
                     href={`/category/${c.slug}`}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-2.5 rounded-2xl hover:bg-slate-50 border border-slate-100"
+                    className="flex items-center gap-2.5 p-2 rounded-xl bg-slate-50 hover:bg-white border border-slate-100 hover:border-slate-200 transition-all group"
                   >
-                    <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                      <Image src={c.image || "/logo.jpg"} alt={c.name} fill className="object-cover" />
+                    <div className="relative w-8 h-8 rounded-lg overflow-hidden bg-slate-200 shrink-0 border border-black/5">
+                      <Image
+                        src={c.image || "/logo.jpg"}
+                        alt={c.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform"
+                      />
                     </div>
-                    <span className="text-xs font-bold text-slate-800">{c.name}</span>
+                    <span className="text-xs font-semibold text-slate-800 line-clamp-1 group-hover:text-brand-maroon-700">
+                      {c.name}
+                    </span>
                   </Link>
                 ))}
               </div>
             </div>
+          )}
 
+          {/* Quick Utility Links */}
+          <div className="pt-2 border-t border-slate-100 space-y-2 text-xs">
             <Link
               href="/track-order"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-between p-3 rounded-2xl text-slate-800 hover:bg-slate-50 border border-slate-100 mt-2"
+              className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium border border-slate-100 transition-colors"
             >
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-brand-maroon-700" />
@@ -419,14 +441,35 @@ export default function Navbar({
             </Link>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 text-xs text-center">
-            <a
-              href={`tel:${settings.hotline}`}
-              className="inline-flex items-center gap-2 bg-slate-100 px-4 py-2.5 rounded-full text-slate-800 font-bold"
-            >
-              <PhoneCall className="w-3.5 h-3.5 text-brand-maroon-700" />
-              <span>হেল্পলাইন: {settings.hotline}</span>
-            </a>
+          {/* Customer Support Contact */}
+          <div className="pt-2 border-t border-slate-100">
+            <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-maroon-700 flex items-center justify-center shrink-0">
+                  <PhoneCall className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 block font-medium">কাস্টমার হেল্পলাইন</span>
+                  <a
+                    href={`tel:${settings.hotline}`}
+                    className="text-xs font-bold text-slate-900 hover:text-brand-maroon-700"
+                  >
+                    {settings.hotline}
+                  </a>
+                </div>
+              </div>
+
+              {settings.whatsappNumber && (
+                <a
+                  href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg transition-colors shrink-0"
+                >
+                  WhatsApp
+                </a>
+              )}
+            </div>
           </div>
         </div>
       )}
