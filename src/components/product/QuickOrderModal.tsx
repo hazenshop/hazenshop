@@ -27,7 +27,9 @@ export default function QuickOrderModal({ settings }: { settings?: SiteSettings 
     return null;
   }
 
-  const handleOrderVariant = (variant?: ProductVariant) => {
+  const handleOrderVariant = (e: React.MouseEvent, variant?: ProductVariant) => {
+    e.preventDefault();
+    e.stopPropagation();
     addToCart(quickOrderProduct, variant, 1, { silent: true });
     trackAddToCart(quickOrderProduct, variant, 1);
     closeQuickOrder();
@@ -38,7 +40,7 @@ export default function QuickOrderModal({ settings }: { settings?: SiteSettings 
     quickOrderProduct.variants && quickOrderProduct.variants.length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-[2px] animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-[2px] animate-in fade-in duration-150">
       {/* Backdrop click dismiss */}
       <div
         className="fixed inset-0"
@@ -47,13 +49,20 @@ export default function QuickOrderModal({ settings }: { settings?: SiteSettings 
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-10 my-auto flex flex-col animate-in zoom-in-95 duration-150">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden z-10 my-auto flex flex-col animate-in zoom-in-95 duration-150"
+      >
         {/* Top Bar with Close 'x' */}
-        <div className="flex items-center justify-end px-4 py-3 border-b border-slate-200">
+        <div className="flex items-center justify-end px-4 py-3 border-b border-slate-200 bg-white">
           <button
             type="button"
-            onClick={closeQuickOrder}
-            className="text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-md"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeQuickOrder();
+            }}
+            className="text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-md cursor-pointer"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 stroke-[2.5]" />
@@ -84,8 +93,8 @@ export default function QuickOrderModal({ settings }: { settings?: SiteSettings 
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleOrderVariant(v)}
-                      className="bg-[#1e40af] hover:bg-[#1d4ed8] active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-1.5 rounded flex items-center gap-1 shadow-sm transition-all"
+                      onClick={(e) => handleOrderVariant(e, v)}
+                      className="bg-[#1e40af] hover:bg-[#1d4ed8] active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-1.5 rounded flex items-center gap-1 shadow-sm transition-all cursor-pointer"
                     >
                       <Zap className="w-3.5 h-3.5 fill-white" />
                       <span>Order Now</span>
@@ -107,8 +116,8 @@ export default function QuickOrderModal({ settings }: { settings?: SiteSettings 
                 </span>
                 <button
                   type="button"
-                  onClick={() => handleOrderVariant(undefined)}
-                  className="bg-[#1e40af] hover:bg-[#1d4ed8] active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-1.5 rounded flex items-center gap-1 shadow-sm transition-all"
+                  onClick={(e) => handleOrderVariant(e, undefined)}
+                  className="bg-[#1e40af] hover:bg-[#1d4ed8] active:scale-95 text-white font-bold text-xs sm:text-sm px-4 py-1.5 rounded flex items-center gap-1 shadow-sm transition-all cursor-pointer"
                 >
                   <Zap className="w-3.5 h-3.5 fill-white" />
                   <span>Order Now</span>
@@ -122,8 +131,12 @@ export default function QuickOrderModal({ settings }: { settings?: SiteSettings 
         <div className="flex items-center justify-end px-4 sm:px-6 py-3 border-t border-slate-200 bg-white">
           <button
             type="button"
-            onClick={closeQuickOrder}
-            className="border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm px-5 py-1.5 rounded transition-colors shadow-sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeQuickOrder();
+            }}
+            className="border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs sm:text-sm px-5 py-1.5 rounded transition-colors shadow-sm cursor-pointer"
           >
             Close
           </button>

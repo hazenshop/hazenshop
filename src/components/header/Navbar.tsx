@@ -226,14 +226,19 @@ export default function Navbar({
 
             {/* Mobile Menu Button */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-full text-slate-700 hover:bg-slate-100 md:hidden transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMobileMenuOpen((prev) => !prev);
+              }}
+              className="p-2 rounded-full text-slate-700 hover:bg-slate-100 md:hidden transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer z-20"
               aria-label="Toggle Menu"
             >
               {isMobileMenuOpen ? (
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 stroke-[2.5]" />
               ) : (
-                <Menu className="w-5 h-5" />
+                <Menu className="w-5 h-5 stroke-[2.5]" />
               )}
             </button>
           </div>
@@ -259,7 +264,7 @@ export default function Navbar({
               <button
                 type="button"
                 onClick={() => setIsMegaMenuOpen(!isMegaMenuOpen)}
-                className="flex items-center gap-1 hover:text-brand-maroon-700 font-semibold transition-colors py-1"
+                className="flex items-center gap-1 hover:text-brand-maroon-700 font-semibold transition-colors py-1 cursor-pointer"
               >
                 <span>All Collections</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isMegaMenuOpen ? "rotate-180 text-brand-maroon-700" : ""}`} />
@@ -287,9 +292,9 @@ export default function Navbar({
                       key={c.id}
                       href={`/category/${c.slug}`}
                       onClick={() => setIsMegaMenuOpen(false)}
-                      className="flex items-center gap-3.5 p-3 rounded-2xl hover:bg-brand-50/70 border border-slate-100 hover:border-brand-maroon-200 transition-all group"
+                      className="flex items-start gap-3 p-3 rounded-2xl hover:bg-slate-50 border border-slate-100/80 transition-all group"
                     >
-                      <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
                         <Image
                           src={c.image || "/logo.jpg"}
                           alt={c.name}
@@ -336,9 +341,6 @@ export default function Navbar({
           </div>
         </nav>
       </div>
-
-      {/* Mobile Category Horizontal Pills Bar (Hidden when drawer is open to prevent duplicate clutter) */}
-      {!isMobileMenuOpen && <CategoryPillsBar categories={categories} />}
 
       {/* Mobile Drawer Menu */}
       {isMobileMenuOpen && (
