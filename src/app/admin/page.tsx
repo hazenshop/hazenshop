@@ -25,6 +25,7 @@ import {
 import { Order, OrderStatus, Product, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor } from "@/lib/utils";
 import OrderInvoiceModal from "@/components/admin/OrderInvoiceModal";
+import HelpGuideModal from "@/components/admin/HelpGuideModal";
 import { useToast } from "@/context/ToastContext";
 
 import { formatBytes } from "@/lib/imageOptimizer";
@@ -40,6 +41,7 @@ export default function AdminDashboardPage() {
   const [storageData, setStorageData] = useState<any>(null);
   const [pinging, setPinging] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const loadData = async () => {
     try {
@@ -101,7 +103,13 @@ export default function AdminDashboardPage() {
     }
   };
 
-  // Metrics
+  // Metrics & Daily Cash Flow
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayOrders = orders.filter((o) => o.createdAt.startsWith(todayStr) && o.status !== "incomplete");
+  const todayRevenue = todayOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const inTransitOrders = orders.filter((o) => o.status === "shipped" || o.status === "packaging");
+  const inTransitAmount = inTransitOrders.reduce((sum, o) => sum + o.totalAmount, 0);
+  const deliveredAmount = orders.filter((o) => o.status === "delivered").reduce((sum, o) => sum + o.totalAmount, 0);
   const completedOrders = orders.filter((o) => o.status !== "incomplete");
   const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalAmount, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
@@ -110,7 +118,24 @@ export default function AdminDashboardPage() {
   const incompleteOrders = orders.filter((o) => o.status === "incomplete");
   const incompleteCount = incompleteOrders.length;
   const incompleteValue = incompleteOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-  const lowStockProducts = products.filter((p) => p.stock <= 3);
+  const lowStockProducts = products.filter((p) => !p.isUnlimitedStock && p.stock <= 5);
+
+  // Top Selling Products
+  const productSalesMap: Record<string, { name: string; qty: number; total: number }> = {};
+  orders
+    .filter((o) => o.status !== "cancelled" && o.status !== "incomplete")
+    .forEach((o) => {
+      o.items.forEach((it) => {
+        if (!productSalesMap[it.productId]) {
+          productSalesMap[it.productId] = { name: it.productName, qty: 0, total: 0 };
+        }
+        productSalesMap[it.productId].qty += it.quantity;
+        productSalesMap[it.productId].total += it.total;
+      });
+    });
+  const topSellingProducts = Object.values(productSalesMap)
+    .sort((a, b) => b.qty - a.qty)
+    .slice(0, 3);
 
   // Admin Nav Cards Configuration
   const adminNavCards = [
@@ -226,6 +251,15 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
+            onClick={() => setIsHelpOpen(true)}
+            className="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-purple-500/30 transition-all flex items-center gap-1.5 min-h-[40px]"
+            title="সহজ নির্দেশিকা দেখুন"
+          >
+            <span>💡 শপ ওনার গাইড</span>
+          </button>
+
+          <button
+            type="button"
             onClick={pingHealth}
             disabled={pinging}
             className="bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs px-3.5 py-2.5 rounded-xl border border-slate-800 transition-all flex items-center gap-1.5 min-h-[40px]"
@@ -244,6 +278,83 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* DAILY CASH FLOW & QUICK METRICS BANNER (Non-tech Shop Owner Overview)     */}
+      {/* ========================================================================= */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+            <span>দৈনিক ক্যাশ ও হিসাব সামারি (Daily Cash Flow)</span>
+          </h2>
+          <span className="text-[11px] text-slate-500">লাইভ আপডেট</span>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Today's Sales */}
+          <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
+            <div className="text-[11px] font-bold text-slate-400">আজকের নতুন সেলস</div>
+            <div className="text-lg sm:text-xl font-black text-emerald-400 mt-1">
+              {formatPrice(todayRevenue)}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{todayOrders.length} টি নতুন অর্ডার আজ</div>
+          </div>
+
+          {/* In-Transit Amount */}
+          <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
+            <div className="text-[11px] font-bold text-slate-400">কুরিয়ারে পথিমধ্যে (In-Transit)</div>
+            <div className="text-lg sm:text-xl font-black text-amber-400 mt-1">
+              {formatPrice(inTransitAmount)}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{inTransitOrders.length} টি পার্সেল কুরিয়ারে আছে</div>
+          </div>
+
+          {/* Delivered Cash Collection */}
+          <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-2xl relative overflow-hidden">
+            <div className="text-[11px] font-bold text-slate-400">সফল ডেলিভারি ও ক্যাশ</div>
+            <div className="text-lg sm:text-xl font-black text-blue-400 mt-1">
+              {formatPrice(deliveredAmount)}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">{deliveredOrders} টি সফল ডেলিভারি</div>
+          </div>
+
+          {/* Low Stock Alert */}
+          <div className={`p-4 rounded-2xl relative overflow-hidden border ${lowStockProducts.length > 0 ? "bg-rose-950/20 border-rose-500/30" : "bg-slate-900/90 border-slate-800"}`}>
+            <div className="text-[11px] font-bold text-slate-400">স্টক সতর্কতা (Low Stock)</div>
+            <div className={`text-lg sm:text-xl font-black mt-1 ${lowStockProducts.length > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+              {lowStockProducts.length > 0 ? `${lowStockProducts.length} টি প্রোডাক্ট` : "সব ঠিক আছে"}
+            </div>
+            <div className="text-[10px] text-slate-500 mt-0.5">
+              {lowStockProducts.length > 0 ? (
+                <Link href="/admin/products" className="text-rose-400 hover:underline font-bold">
+                  দ্রুত রিস্টক করুন →
+                </Link>
+              ) : (
+                "স্টক পর্যাপ্ত আছে"
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Top 3 Selling Products Strip */}
+        {topSellingProducts.length > 0 && (
+          <div className="bg-slate-900/60 border border-slate-800/80 px-4 py-3 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-1.5 font-bold text-slate-300">
+              <span className="text-amber-400">🔥 সর্বাধিক বিক্রিত:</span>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              {topSellingProducts.map((p, i) => (
+                <span key={i} className="inline-flex items-center gap-1 bg-slate-800/80 px-2.5 py-1 rounded-lg text-slate-300 text-[11px]">
+                  <span className="font-extrabold text-amber-400">#{i + 1}</span>
+                  <span className="truncate max-w-[140px]">{p.name}</span>
+                  <span className="text-emerald-400 font-bold">({p.qty} বিক্রি)</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* ========================================================================= */}
       {/* PRIMARY ADMIN NAVIGATION CARDS GRID (Requested Card Navigation Module) */}
@@ -588,6 +699,8 @@ export default function AdminDashboardPage() {
           onClose={() => setSelectedInvoiceOrder(null)}
         />
       )}
+      {/* Help Guide Modal */}
+      <HelpGuideModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </div>
   );
 }

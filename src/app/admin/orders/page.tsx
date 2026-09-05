@@ -16,11 +16,16 @@ import {
   X,
   Loader2,
   ShieldAlert,
+  MessageCircle,
+  HelpCircle,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 import { Order, OrderStatus, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor, generateOrdersCSV, getCourierTrackingUrl } from "@/lib/utils";
 import OrderInvoiceModal from "@/components/admin/OrderInvoiceModal";
 import FraudCheckModal from "@/components/admin/FraudCheckModal";
+import HelpGuideModal from "@/components/admin/HelpGuideModal";
 import { useToast } from "@/context/ToastContext";
 
 export default function AdminOrdersPage() {
@@ -31,13 +36,16 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
-  // Modals state
+  // Modals & bulk state
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
   const [selectedFraudCheckOrder, setSelectedFraudCheckOrder] = useState<Order | null>(null);
   const [editingCourierOrder, setEditingCourierOrder] = useState<Order | null>(null);
   const [courierName, setCourierName] = useState("");
   const [trackingCode, setTrackingCode] = useState("");
   const [sendingCourier, setSendingCourier] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -137,21 +145,77 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    if (filteredOrders.length === 0) {
-      showToast("No orders to export", "error");
-      return;
+  const handleBulkStatusChange = async (newStatus: OrderStatus) => {
+    if (selectedIds.length === 0) return;
+    setBulkLoading(true);
+    let count = 0;
+    try {
+      for (const id of selectedIds) {
+        const res = await fetch(`/api/orders/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (res.ok) count++;
+      }
+      showToast(`${count} টি অর্ডারের স্ট্যাটাস "${newStatus}" করা হয়েছে!`, "success");
+      setOrders((prev) =>
+        prev.map((o) => (selectedIds.includes(o.id) ? { ...o, status: newStatus } : o))
+      );
+      setSelectedIds([]);
+    } catch {
+      showToast("Error updating orders", "error");
+    } finally {
+      setBulkLoading(false);
     }
-    const csvContent = generateOrdersCSV(filteredOrders);
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `hazen-orders-${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast(`Exported ${filteredOrders.length} orders to CSV!`);
+  };
+
+  const handleBulkSendCourier = async (courier: "steadfast" | "pathao") => {
+    if (selectedIds.length === 0) return;
+    setBulkLoading(true);
+    let successCount = 0;
+    try {
+      for (const orderId of selectedIds) {
+        const res = await fetch("/api/courier/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, courier }),
+        });
+        const data = await res.json();
+        if (data.success && data.order) {
+          successCount++;
+          setOrders((prev) => prev.map((o) => (o.id === orderId ? data.order : o)));
+        }
+      }
+      showToast(`সফলভাবে ${successCount} টি পার্সেল ${courier === "steadfast" ? "Steadfast" : "Pathao"}-এ পাঠানো হয়েছে!`, "success");
+      setSelectedIds([]);
+    } catch {
+      showToast("Error sending some parcels", "error");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
+  const getWhatsAppConfirmationLink = (order: Order) => {
+    const raw = order.customerPhone.replace(/[^0-9]/g, "");
+    const phone = raw.startsWith("88") ? raw : `88${raw}`;
+    const itemsText = order.items.map((i) => `${i.quantity}x ${i.productName}`).join(", ");
+    const msg = `আসসালামু আলাইকুম ${order.customerName}! 🌸\nHAZENSHOP BD থেকে আপনার #${order.id} অর্ডারের জন্য যোগাযোগ করছি।\n\n📦 পণ্যের বিবরণ: ${itemsText}\n💰 মোট বিল (COD): ৳${order.totalAmount}\n📍 ডেলিভারি ঠিকানা: ${order.customerAddress}\n\nআপনার অর্ডারটি কি কনফার্ম করব? ধন্যবাদ!`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredOrders.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredOrders.map((o) => o.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -180,30 +244,53 @@ export default function AdminOrdersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+          <button
+            onClick={() => setIsHelpOpen(true)}
+            className="bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 font-bold text-xs px-3.5 py-2 rounded-xl border border-brand-500/40 flex items-center gap-1.5 transition-colors"
+          >
+            <HelpCircle className="w-4 h-4 text-brand-400" />
+            <span>নির্দেশিকা (Guide)</span>
+          </button>
+
           <Link
             href="/admin/fraud-checker"
-            className="w-full sm:w-auto bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-rose-500/30 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
-            title="Check Customer Fraud History & Delivery Rate"
+            className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-xs px-3.5 py-2 rounded-xl border border-rose-500/30 transition-colors flex items-center gap-1.5"
+            title="Check Customer Fraud History"
           >
             <ShieldAlert className="w-4 h-4" />
-            <span>Fraud Checker</span>
+            <span>Fraud Check</span>
           </Link>
 
           <Link
             href="/admin/incomplete-orders"
-            className="w-full sm:w-auto bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-amber-500/30 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+            className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-bold text-xs px-3.5 py-2 rounded-xl border border-amber-500/30 transition-colors flex items-center gap-1.5"
           >
             <Clock className="w-4 h-4" />
-            <span>Incomplete Orders ({incompleteCount})</span>
+            <span>Incomplete ({incompleteCount})</span>
           </Link>
 
           <button
-            onClick={handleExportCSV}
-            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-brand-400 hover:text-brand-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+            onClick={() => {
+              if (filteredOrders.length === 0) {
+                showToast("No orders to export", "error");
+                return;
+              }
+              const csvContent = generateOrdersCSV(filteredOrders);
+              const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.setAttribute("href", url);
+              link.setAttribute("download", `hazen-orders-${new Date().toISOString().slice(0, 10)}.csv`);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              showToast(`Exported ${filteredOrders.length} orders!`);
+            }}
+            className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5"
           >
-            <Download className="w-4 h-4" />
-            <span>Export CSV ({filteredOrders.length})</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>CSV</span>
           </button>
         </div>
       </div>
@@ -267,17 +354,32 @@ export default function AdminOrdersPage() {
             return (
               <div
                 key={order.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3.5 shadow-md"
+                className={`bg-slate-900 border rounded-2xl p-4 space-y-3.5 shadow-md transition-all ${
+                  selectedIds.includes(order.id) ? "border-brand-500 ring-1 ring-brand-500" : "border-slate-800"
+                }`}
               >
-                {/* Top Header: ID, Date, Amount */}
+                {/* Top Header: Checkbox, ID, Date, Amount */}
                 <div className="flex items-center justify-between pb-2.5 border-b border-slate-800">
-                  <div>
-                    <span className="font-mono font-black text-brand-400 text-sm block">
-                      #{order.id}
-                    </span>
-                    <span className="text-[10px] text-slate-400">
-                      {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleSelect(order.id)}
+                      className="p-1 text-slate-400 hover:text-white"
+                    >
+                      {selectedIds.includes(order.id) ? (
+                        <CheckSquare className="w-4 h-4 text-brand-400" />
+                      ) : (
+                        <Square className="w-4 h-4 text-slate-600" />
+                      )}
+                    </button>
+                    <div>
+                      <span className="font-mono font-black text-brand-400 text-sm block">
+                        #{order.id}
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        {new Date(order.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
                   </div>
                   <div className="text-right">
                     <span className="font-black text-white text-sm block">
@@ -349,7 +451,16 @@ export default function AdminOrdersPage() {
                     <option value="returned" className="bg-slate-900 text-slate-400">Returned</option>
                   </select>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <a
+                      href={getWhatsAppConfirmationLink(order)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      title="1-Click WhatsApp Order Confirmation"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </a>
                     <button
                       onClick={() => setSelectedFraudCheckOrder(order)}
                       className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 min-h-[40px] min-w-[40px] flex items-center justify-center"
@@ -389,6 +500,19 @@ export default function AdminOrdersPage() {
           <table className="w-full text-left text-xs min-w-[750px]">
             <thead className="bg-slate-950 text-slate-400 uppercase font-bold border-b border-slate-800">
               <tr>
+                <th className="p-4 w-10 text-center">
+                  <button
+                    type="button"
+                    onClick={toggleSelectAll}
+                    className="p-1 text-slate-400 hover:text-white"
+                  >
+                    {selectedIds.length === filteredOrders.length && filteredOrders.length > 0 ? (
+                      <CheckSquare className="w-4 h-4 text-brand-400" />
+                    ) : (
+                      <Square className="w-4 h-4 text-slate-600" />
+                    )}
+                  </button>
+                </th>
                 <th className="p-4">Order ID & Date</th>
                 <th className="p-4">Customer & Phone</th>
                 <th className="p-4">Address & Zone</th>
@@ -422,7 +546,27 @@ export default function AdminOrdersPage() {
                   const trackingUrl = getCourierTrackingUrl(order.courierName, order.trackingCode);
 
                   return (
-                    <tr key={order.id} className="hover:bg-slate-800/40 transition-colors">
+                    <tr
+                      key={order.id}
+                      className={`hover:bg-slate-800/40 transition-colors ${
+                        selectedIds.includes(order.id) ? "bg-brand-500/5" : ""
+                      }`}
+                    >
+                      {/* Checkbox */}
+                      <td className="p-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => toggleSelect(order.id)}
+                          className="p-1 text-slate-400 hover:text-white"
+                        >
+                          {selectedIds.includes(order.id) ? (
+                            <CheckSquare className="w-4 h-4 text-brand-400" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-600" />
+                          )}
+                        </button>
+                      </td>
+
                       {/* ID */}
                       <td className="p-4">
                         <span className="font-mono font-black text-brand-400 block">{order.id}</span>
@@ -522,6 +666,15 @@ export default function AdminOrdersPage() {
                       {/* Actions */}
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <a
+                            href={getWhatsAppConfirmationLink(order)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors"
+                            title="1-Click WhatsApp Order Confirmation"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </a>
                           <button
                             onClick={() => setSelectedFraudCheckOrder(order)}
                             className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
@@ -736,6 +889,45 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+      {/* Sticky Bulk Action Toolbar */}
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-4 inset-x-4 max-w-2xl mx-auto z-40 bg-slate-900/95 backdrop-blur-md border border-brand-500/50 p-3.5 rounded-2xl shadow-2xl flex flex-wrap items-center justify-between gap-2.5 animate-in slide-in-from-bottom-4 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-brand-500 text-brand-dark font-black flex items-center justify-center text-xs">
+              {selectedIds.length}
+            </span>
+            <span className="font-bold text-white">অর্ডার সিলেক্টেড</span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              disabled={bulkLoading}
+              onClick={() => handleBulkStatusChange("confirmed")}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded-xl disabled:opacity-50"
+            >
+              Mark Confirmed
+            </button>
+            <button
+              disabled={bulkLoading}
+              onClick={() => handleBulkSendCourier("steadfast")}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl disabled:opacity-50 flex items-center gap-1"
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <span>Send to Steadfast</span>
+            </button>
+            <button
+              disabled={bulkLoading}
+              onClick={() => setSelectedIds([])}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1.5 rounded-xl"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Help Guide Modal */}
+      <HelpGuideModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </div>
   );
 }

@@ -10,9 +10,12 @@ import {
   Edit2,
   Search,
   ExternalLink,
+  AlertTriangle,
+  HelpCircle,
 } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
+import HelpGuideModal from "@/components/admin/HelpGuideModal";
 import { useToast } from "@/context/ToastContext";
 
 export default function AdminProductsPage() {
@@ -20,6 +23,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -36,6 +40,25 @@ export default function AdminProductsPage() {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleQuickStock = async (id: string, currentStock: number, delta: number) => {
+    const newStock = Math.max(0, currentStock + delta);
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stock: newStock }),
+      });
+      if (res.ok) {
+        showToast(`স্টক আপডেট হয়ে ${newStock} টি হয়েছে!`, "success");
+        setProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, stock: newStock } : p))
+        );
+      }
+    } catch {
+      showToast("স্টক আপডেট করা যায়নি", "error");
+    }
+  };
 
   const handleDeleteProduct = async (id: string, pName: string) => {
     if (!confirm(`Are you sure you want to delete "${pName}"?`)) return;
@@ -71,13 +94,23 @@ export default function AdminProductsPage() {
           </p>
         </div>
 
-        <Link
-          href="/admin/products/new"
-          className="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-black text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Product</span>
-        </Link>
+        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <button
+            onClick={() => setIsHelpOpen(true)}
+            className="bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-brand-500/40 flex items-center gap-1.5 transition-colors"
+          >
+            <HelpCircle className="w-4 h-4 text-brand-400" />
+            <span>নির্দেশিকা (Guide)</span>
+          </button>
+
+          <Link
+            href="/admin/products/new"
+            className="w-full sm:w-auto bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-black text-xs px-5 py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 min-h-[44px]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Product</span>
+          </Link>
+        </div>
       </div>
 
       {/* Search Bar & Count */}
@@ -149,15 +182,21 @@ export default function AdminProductsPage() {
                         {formatPrice(p.price)}
                       </span>
                     )}
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.2 rounded-full ${
-                        p.stock > 5
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                      }`}
-                    >
-                      {p.stock} in stock
-                    </span>
+                    {p.isUnlimitedStock ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        সীমাহীন স্টক
+                      </span>
+                    ) : (
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          p.stock > 5
+                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                            : "bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse"
+                        }`}
+                      >
+                        {p.stock <= 5 ? `মাত্র ${p.stock} টি আছে!` : `${p.stock} in stock`}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -288,13 +327,40 @@ export default function AdminProductsPage() {
 
                     {/* Stock */}
                     <td className="p-4">
-                      <span
-                        className={`font-bold px-2.5 py-1 rounded-lg ${
-                          p.stock > 5 ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
-                        }`}
-                      >
-                        {p.stock} sets
-                      </span>
+                      {p.isUnlimitedStock ? (
+                        <span className="bg-emerald-500/10 text-emerald-400 font-bold px-2.5 py-1 rounded-lg border border-emerald-500/20">
+                          সীমাহীন স্টক
+                        </span>
+                      ) : (
+                        <div className="space-y-1">
+                          <span
+                            className={`font-bold px-2.5 py-1 rounded-lg block w-fit ${
+                              p.stock > 5 ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400 font-black"
+                            }`}
+                          >
+                            {p.stock <= 5 ? `⚠️ মাত্র ${p.stock} টি` : `${p.stock} sets`}
+                          </span>
+                          {/* Inline Fast Restock Buttons */}
+                          <div className="flex items-center gap-1 pt-0.5">
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStock(p.id, p.stock, 5)}
+                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-slate-300 hover:text-white"
+                              title="Add 5 units"
+                            >
+                              +5
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleQuickStock(p.id, p.stock, 10)}
+                              className="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-[10px] font-bold text-brand-400 hover:text-white"
+                              title="Add 10 units"
+                            >
+                              +10
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </td>
 
                     {/* Variants */}
@@ -339,6 +405,8 @@ export default function AdminProductsPage() {
           </table>
         </div>
       </div>
+      {/* Help Guide Modal */}
+      <HelpGuideModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </div>
   );
 }
