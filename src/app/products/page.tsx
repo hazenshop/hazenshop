@@ -1,10 +1,39 @@
 import React from "react";
+import { Metadata } from "next";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import ProductCard from "@/components/product/ProductCard";
 import { Sparkles, Filter } from "lucide-react";
 
 export const revalidate = 0;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { category?: string; filter?: string; search?: string };
+}): Promise<Metadata> {
+  const categories = await db.getCategories();
+  const currentCategory = categories.find((c) => c.slug === searchParams.category);
+
+  if (currentCategory) {
+    return {
+      title: `${currentCategory.name} Collection | HAZENSHOP BD`,
+      description: currentCategory.description || `Explore our ${currentCategory.name} collection. Cash on Delivery across Bangladesh.`,
+    };
+  }
+
+  if (searchParams.search) {
+    return {
+      title: `Search: "${searchParams.search}" | HAZENSHOP BD`,
+      description: `Browse product results for "${searchParams.search}" on HAZENSHOP BD.`,
+    };
+  }
+
+  return {
+    title: "All Collections | HAZENSHOP BD (hazenshopbd.com)",
+    description: "Browse export-quality Egyptian cotton bedsheets, luxury curtains, quilts, and comforters with Cash on Delivery across Bangladesh.",
+  };
+}
 
 export default async function ProductsPage({
   searchParams,

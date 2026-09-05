@@ -26,8 +26,9 @@ export async function middleware(req: NextRequest) {
   // 2. ADMIN API MUTATION PROTECTION
   // Automatically block unauthorized POST, PATCH, PUT, DELETE requests on administrative API routes
   if (pathname.startsWith("/api/")) {
-    // Exceptions: Allow public customer actions
-    const isPublicOrderSubmission = pathname === "/api/orders" && method === "POST";
+    // Exceptions: Allow public customer order & draft capture actions
+    const isPublicOrderSubmission =
+      (pathname === "/api/orders" || pathname === "/api/orders/draft") && method === "POST";
     const isAuthLoginEndpoint = pathname === "/api/admin/auth";
     const isPublicRead = method === "GET" || method === "HEAD" || method === "OPTIONS";
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -7,6 +8,30 @@ import ProductCard from "@/components/product/ProductCard";
 import { ArrowLeft } from "lucide-react";
 
 export const revalidate = 0;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const categories = await db.getCategories();
+  const category = categories.find((c) => c.slug === params.slug);
+  if (!category) {
+    return { title: "Category Not Found" };
+  }
+
+  return {
+    title: `${category.name} | HAZENSHOP BD (hazenshopbd.com)`,
+    description:
+      category.description ||
+      `Shop premium handcrafted ${category.name} with 100% Cash on Delivery across Bangladesh.`,
+    openGraph: {
+      title: `${category.name} Collection | HAZENSHOP BD`,
+      description: category.description,
+      images: category.image ? [category.image] : ["/logo.jpg"],
+    },
+  };
+}
 
 export default async function CategoryDetailPage({ params }: { params: { slug: string } }) {
   const categories = await db.getCategories();
@@ -18,8 +43,39 @@ export default async function CategoryDetailPage({ params }: { params: { slug: s
 
   const products = await db.getProducts({ category: category.slug });
 
+  // Schema.org BreadcrumbList
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://hazenshopbd.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Collections",
+        item: "https://hazenshopbd.com/products",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: category.name,
+        item: `https://hazenshopbd.com/category/${category.slug}`,
+      },
+    ],
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-16">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-16">
       {/* Category Banner */}
       <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white p-5 sm:p-10 border border-white/10 shadow-card flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6">
         <div className="space-y-2.5 sm:space-y-3 max-w-xl">
@@ -56,6 +112,7 @@ export default async function CategoryDetailPage({ params }: { params: { slug: s
         </div>
       )}
     </div>
+    </>
   );
 }
 
