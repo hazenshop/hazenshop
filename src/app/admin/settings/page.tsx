@@ -342,6 +342,217 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Courier Automation APIs (Steadfast & Pathao) */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-lg">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2 text-white font-bold text-sm">
+              <Truck className="w-4 h-4 text-emerald-400" />
+              <span>🚚 কুরিয়ার অটোমেশন এপিআই (Steadfast & Pathao Courier APIs)</span>
+            </div>
+            <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-0.5 rounded-full font-bold">
+              1-Click Send to Courier
+            </span>
+          </div>
+
+          <div className="space-y-6">
+            {/* 1. Steadfast Courier */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="font-bold text-sm text-white">Steadfast Courier Integration</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="steadfastActive"
+                    checked={settings.steadfastEnabled ?? true}
+                    onChange={(e) => setSettings({ ...settings, steadfastEnabled: e.target.checked })}
+                    className="w-4 h-4 rounded text-emerald-500"
+                  />
+                  <label htmlFor="steadfastActive" className="text-slate-300 font-bold text-xs cursor-pointer">
+                    Enabled
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Steadfast API Key</label>
+                  <input
+                    type="text"
+                    placeholder="Enter Steadfast API Key"
+                    value={settings.steadfastApiKey || ""}
+                    onChange={(e) => setSettings({ ...settings, steadfastApiKey: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Steadfast Secret Key</label>
+                  <input
+                    type="password"
+                    placeholder="Enter Steadfast Secret Key"
+                    value={settings.steadfastSecretKey || ""}
+                    onChange={(e) => setSettings({ ...settings, steadfastSecretKey: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[11px] text-slate-400">
+                  Steadfast Merchant Portal &gt; API Credentials থেকে এপিআই ও সিক্রেট কি সংগ্রহ করুন।
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    showToast("Testing Steadfast connection...");
+                    try {
+                      const res = await fetch("/api/courier/test", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ courier: "steadfast", settings }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        showToast(`Steadfast Connected! Balance: ৳${data.currentBalance ?? 0}`, "success");
+                      } else {
+                        showToast(data.message || "Failed to connect to Steadfast", "error");
+                      }
+                    } catch {
+                      showToast("Error testing Steadfast", "error");
+                    }
+                  }}
+                  className="bg-emerald-950/80 hover:bg-emerald-900 text-emerald-400 border border-emerald-800/80 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0"
+                >
+                  Test Connection
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Pathao Courier */}
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                  <span className="font-bold text-sm text-white">Pathao Courier Integration</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="pathaoActive"
+                    checked={settings.pathaoEnabled ?? true}
+                    onChange={(e) => setSettings({ ...settings, pathaoEnabled: e.target.checked })}
+                    className="w-4 h-4 rounded text-rose-500"
+                  />
+                  <label htmlFor="pathaoActive" className="text-slate-300 font-bold text-xs cursor-pointer">
+                    Enabled
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Pathao Client ID</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 1234"
+                    value={settings.pathaoClientId || ""}
+                    onChange={(e) => setSettings({ ...settings, pathaoClientId: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Pathao Client Secret</label>
+                  <input
+                    type="password"
+                    placeholder="Enter Pathao Client Secret"
+                    value={settings.pathaoClientSecret || ""}
+                    onChange={(e) => setSettings({ ...settings, pathaoClientSecret: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Pathao Registered Email / Username</label>
+                  <input
+                    type="email"
+                    placeholder="merchant@example.com"
+                    value={settings.pathaoUsername || ""}
+                    onChange={(e) => setSettings({ ...settings, pathaoUsername: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 text-xs focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Pathao Password</label>
+                  <input
+                    type="password"
+                    placeholder="Enter Pathao account password"
+                    value={settings.pathaoPassword || ""}
+                    onChange={(e) => setSettings({ ...settings, pathaoPassword: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-300 mb-1">Pathao Store ID (Pickup Hub)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 5678"
+                    value={settings.pathaoStoreId || ""}
+                    onChange={(e) => setSettings({ ...settings, pathaoStoreId: e.target.value.trim() })}
+                    className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="pathaoSandbox"
+                    checked={settings.pathaoSandbox ?? false}
+                    onChange={(e) => setSettings({ ...settings, pathaoSandbox: e.target.checked })}
+                    className="w-4 h-4 rounded text-amber-500"
+                  />
+                  <label htmlFor="pathaoSandbox" className="text-slate-300 font-bold text-xs cursor-pointer">
+                    Use Pathao Sandbox (Test Environment)
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-[11px] text-slate-400">
+                  Pathao Developer / Merchant Portal &gt; API Credentials থেকে ক্লায়েন্ট আইডি ও সিক্রেট সংগ্রহ করুন।
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    showToast("Testing Pathao connection & fetching stores...");
+                    try {
+                      const res = await fetch("/api/courier/test", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ courier: "pathao", settings }),
+                      });
+                      const data = await res.json();
+                      if (data.success) {
+                        const storesCount = data.stores?.length || 0;
+                        showToast(`Pathao Connected! Found ${storesCount} stores.`, "success");
+                        if (storesCount > 0 && !settings.pathaoStoreId) {
+                          setSettings({ ...settings, pathaoStoreId: String(data.stores[0].store_id) });
+                        }
+                      } else {
+                        showToast(data.message || "Failed to connect to Pathao", "error");
+                      }
+                    } catch {
+                      showToast("Error testing Pathao", "error");
+                    }
+                  }}
+                  className="bg-rose-950/80 hover:bg-rose-900 text-rose-400 border border-rose-800/80 px-3 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0"
+                >
+                  Test &amp; Fetch Stores
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Global SEO Configuration */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">

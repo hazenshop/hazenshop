@@ -100,6 +100,18 @@ export const initialSiteSettings: SiteSettings = {
   ],
   facebookPixelId: "2242388576616945",
   facebookTestEventCode: "TEST82490",
+  // Steadfast Courier API
+  steadfastApiKey: "",
+  steadfastSecretKey: "",
+  steadfastEnabled: true,
+  // Pathao Courier API
+  pathaoClientId: "",
+  pathaoClientSecret: "",
+  pathaoUsername: "",
+  pathaoPassword: "",
+  pathaoStoreId: "",
+  pathaoSandbox: false,
+  pathaoEnabled: true,
   heroBanners: [
     {
       id: "hero-1",

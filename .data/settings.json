@@ -29,6 +29,16 @@
   ],
   "facebookPixelId": "2242388576616945",
   "facebookTestEventCode": "TEST82490",
+  "steadfastApiKey": "",
+  "steadfastSecretKey": "",
+  "steadfastEnabled": true,
+  "pathaoClientId": "",
+  "pathaoClientSecret": "",
+  "pathaoUsername": "",
+  "pathaoPassword": "",
+  "pathaoStoreId": "",
+  "pathaoSandbox": false,
+  "pathaoEnabled": true,
   "heroBanners": [
     {
       "id": "hero-1",

@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Edit2,
   X,
+  Loader2,
 } from "lucide-react";
 import { Order, OrderStatus, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor, generateOrdersCSV, getCourierTrackingUrl } from "@/lib/utils";
@@ -33,6 +34,7 @@ export default function AdminOrdersPage() {
   const [editingCourierOrder, setEditingCourierOrder] = useState<Order | null>(null);
   const [courierName, setCourierName] = useState("");
   const [trackingCode, setTrackingCode] = useState("");
+  const [sendingCourier, setSendingCourier] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -69,6 +71,36 @@ export default function AdminOrdersPage() {
       }
     } catch (e) {
       showToast("Failed to update status", "error");
+    }
+  };
+
+  const handleSendToCourier = async (courier: "steadfast" | "pathao") => {
+    if (!editingCourierOrder) return;
+    setSendingCourier(courier);
+    try {
+      const res = await fetch("/api/courier/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: editingCourierOrder.id,
+          courier,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.order) {
+        showToast(`Sent to ${data.order.courierName}! Tracking: ${data.trackingCode}`, "success");
+        setOrders((prev) =>
+          prev.map((o) => (o.id === editingCourierOrder.id ? data.order : o))
+        );
+        setEditingCourierOrder(null);
+      } else {
+        showToast(data.message || "Failed to dispatch to courier", "error");
+      }
+    } catch (e) {
+      showToast("Error communicating with courier API", "error");
+    } finally {
+      setSendingCourier(null);
     }
   };
 
@@ -498,70 +530,157 @@ export default function AdminOrdersPage() {
       {/* Courier Assignment Modal */}
       {editingCourierOrder && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-lg w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <div className="flex items-center gap-2 text-white font-bold">
                 <Truck className="w-5 h-5 text-brand-400" />
-                <span>Assign Courier for #{editingCourierOrder.id}</span>
+                <span>Courier Dispatch for Order #{editingCourierOrder.id}</span>
               </div>
               <button
                 onClick={() => setEditingCourierOrder(null)}
-                className="text-slate-400 hover:text-white p-1"
+                className="text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                  Courier Company
-                </label>
-                <select
-                  value={courierName}
-                  onChange={(e) => setCourierName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-xl p-3 focus:outline-none focus:border-brand-500"
-                >
-                  <option value="">Select courier partner...</option>
-                  <option value="Steadfast Courier">Steadfast Courier</option>
-                  <option value="Pathao Courier">Pathao Courier</option>
-                  <option value="RedX Logistics">RedX Logistics</option>
-                  <option value="Paperfly">Paperfly</option>
-                  <option value="Sundarban Courier">Sundarban Courier</option>
-                  <option value="SA Paribahan">SA Paribahan</option>
-                  <option value="eCourier">eCourier</option>
-                </select>
+            {/* Order Brief */}
+            <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-1">
+              <div className="flex justify-between font-bold text-white">
+                <span>{editingCourierOrder.customerName} ({editingCourierOrder.customerPhone})</span>
+                <span className="text-brand-400">COD: {formatPrice(editingCourierOrder.totalAmount)}</span>
               </div>
+              <p className="text-slate-400 truncate">{editingCourierOrder.customerAddress}</p>
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
-                  Consignment / Tracking Number
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. ST-88991204"
-                  value={trackingCode}
-                  onChange={(e) => setTrackingCode(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-xl p-3 focus:outline-none focus:border-brand-500 font-mono"
-                />
+            {/* SECTION 1: 1-CLICK AUTOMATED API DISPATCH */}
+            <div className="space-y-3">
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-emerald-400 block">
+                ⚡ 1-Click Automated Courier API Dispatch
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Steadfast 1-Click Dispatch */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="font-bold text-xs text-white">Steadfast Courier</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {settings?.steadfastApiKey ? "API Connected & Ready" : "Requires API Key in Settings"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={sendingCourier !== null}
+                    onClick={() => handleSendToCourier("steadfast")}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:opacity-50 text-white font-black text-xs py-2.5 px-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 min-h-[38px]"
+                  >
+                    {sendingCourier === "steadfast" ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Sending to Steadfast...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Truck className="w-3.5 h-3.5" />
+                        <span>Send to Steadfast API</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Pathao 1-Click Dispatch */}
+                <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-rose-500" />
+                      <span className="font-bold text-xs text-white">Pathao Courier</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      {settings?.pathaoClientId ? "API Connected & Ready" : "Requires API Keys in Settings"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={sendingCourier !== null}
+                    onClick={() => handleSendToCourier("pathao")}
+                    className="w-full bg-rose-600 hover:bg-rose-700 active:scale-95 disabled:opacity-50 text-white font-black text-xs py-2.5 px-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 min-h-[38px]"
+                  >
+                    {sendingCourier === "pathao" ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Sending to Pathao...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Truck className="w-3.5 h-3.5" />
+                        <span>Send to Pathao API</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setEditingCourierOrder(null)}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveCourier}
-                className="px-5 py-2.5 rounded-xl text-xs font-black bg-brand-500 hover:bg-brand-600 text-brand-dark"
-              >
-                Save & Dispatch
-              </button>
+            {/* SECTION 2: MANUAL COURIER INPUT / OVERRIDE */}
+            <div className="space-y-3 pt-3 border-t border-slate-800">
+              <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-400 block">
+                ✍️ Manual Courier Assignment &amp; Tracking Code
+              </span>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    Courier Company
+                  </label>
+                  <select
+                    value={courierName}
+                    onChange={(e) => setCourierName(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-xl p-3 focus:outline-none focus:border-brand-500"
+                  >
+                    <option value="">Select courier partner...</option>
+                    <option value="Steadfast Courier">Steadfast Courier</option>
+                    <option value="Pathao Courier">Pathao Courier</option>
+                    <option value="RedX Logistics">RedX Logistics</option>
+                    <option value="Paperfly">Paperfly</option>
+                    <option value="Sundarban Courier">Sundarban Courier</option>
+                    <option value="SA Paribahan">SA Paribahan</option>
+                    <option value="eCourier">eCourier</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                    Consignment / Tracking Number
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ST-88991204 or Pathao CID"
+                    value={trackingCode}
+                    onChange={(e) => setTrackingCode(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 text-xs text-white rounded-xl p-3 focus:outline-none focus:border-brand-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingCourierOrder(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveCourier}
+                  className="px-5 py-2.5 rounded-xl text-xs font-black bg-brand-500 hover:bg-brand-600 text-brand-dark transition-all"
+                >
+                  Save Manual Info
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -138,6 +138,18 @@ export type SiteSettings = {
   logoUrl?: string;
   facebookPixelId?: string;
   facebookTestEventCode?: string;
+  // Steadfast Courier API
+  steadfastApiKey?: string;
+  steadfastSecretKey?: string;
+  steadfastEnabled?: boolean;
+  // Pathao Courier API
+  pathaoClientId?: string;
+  pathaoClientSecret?: string;
+  pathaoUsername?: string;
+  pathaoPassword?: string;
+  pathaoStoreId?: string;
+  pathaoSandbox?: boolean;
+  pathaoEnabled?: boolean;
   socialLinks?: Record<string, string>;
   heroBanners?: {
     id: string;
