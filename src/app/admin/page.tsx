@@ -164,7 +164,7 @@ export default function AdminDashboardPage() {
       subtitle: "হটলাইন, হোয়াটসঅ্যাপ, ডেলিভারি চার্জ ও ব্যানার নোটিশ",
       icon: Settings,
       href: "/admin/settings",
-      badge: "hazenshop.com Config",
+      badge: "hazenshopbd.com Config",
       badgeColor: "bg-rose-500/20 text-rose-400 border-rose-500/30",
       accentBg: "from-rose-500/10 to-rose-950/20 border-rose-500/30 hover:border-rose-400/60",
       iconColor: "text-rose-400 bg-rose-500/10",
@@ -179,7 +179,7 @@ export default function AdminDashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-brand-400 uppercase tracking-widest bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">
-              hazenshop.com
+              hazenshopbd.com
             </span>
             <span className="text-xs text-slate-500">Live Control Center</span>
           </div>
@@ -406,7 +406,7 @@ export default function AdminDashboardPage() {
             </div>
             <p className="text-sm font-bold text-white">No Customer Orders Yet</p>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              When customers complete Cash on Delivery checkout on hazenshop.com, their orders will appear here in real-time.
+              When customers complete Cash on Delivery checkout on hazenshopbd.com, their orders will appear here in real-time.
             </p>
           </div>
         ) : (

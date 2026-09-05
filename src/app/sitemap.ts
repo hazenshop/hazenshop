@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://hazenshop.com";
+  const baseUrl = "https://hazenshopbd.com";
 
   const products = await db.getProducts();
   const categories = await db.getCategories();

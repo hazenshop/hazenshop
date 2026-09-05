@@ -108,10 +108,10 @@ export default function Navbar({
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-extrabold text-lg sm:text-2xl tracking-tight text-brand-dark leading-none">
-                HAZENSHOP<span className="text-brand-maroon-700">.</span>
+                HAZENSHOP BD<span className="text-brand-maroon-700">.</span>
               </span>
               <span className="text-[8px] sm:text-[9px] font-bold tracking-widest text-slate-400 uppercase mt-0.5">
-                hazenshop.com
+                hazenshopbd.com
               </span>
             </div>
           </Link>

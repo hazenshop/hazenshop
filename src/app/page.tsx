@@ -174,7 +174,7 @@ export default async function HomePage() {
             </p>
             <div className="pt-2">
               <a
-                href={`https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent("আসসালামু আলাইকুম HAZENSHOP! আমি আপনাদের নতুন কালেকশন সম্পর্কে জানতে চাই।")}`}
+                href={`https://wa.me/${cleanWhatsApp}?text=${encodeURIComponent("আসসালামু আলাইকুম HAZENSHOP BD! আমি আপনাদের নতুন কালেকশন সম্পর্কে জানতে চাই।")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-6 py-3.5 rounded-full shadow-card transition-all min-h-[44px]"

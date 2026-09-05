@@ -28,10 +28,10 @@ export default function Footer({
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-extrabold text-xl tracking-tight text-white leading-none">
-                  HAZENSHOP<span className="text-brand-400">.</span>
+                  HAZENSHOP BD<span className="text-brand-400">.</span>
                 </span>
                 <span className="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
-                  hazenshop.com
+                  hazenshopbd.com
                 </span>
               </div>
             </Link>
@@ -133,7 +133,7 @@ export default function Footer({
         </div>
 
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} HAZENSHOP (hazenshop.com). সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>© {new Date().getFullYear()} HAZENSHOP BD (hazenshopbd.com). সর্বস্বত্ব সংরক্ষিত।</p>
           <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-slate-400 text-center sm:text-right">
             <span>১০০% অথেনটিক কোয়ালিটি ও ক্যাশ অন ডেলিভারি</span>
             <span className="hidden sm:inline text-slate-700">•</span>

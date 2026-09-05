@@ -56,9 +56,9 @@ export default function OrderInvoiceModal({
                 <Image src="/logo.jpg" alt="Hazen" fill className="object-cover" />
               </div>
               <div>
-                <h1 className="text-xl font-black tracking-tight">HAZENSHOP</h1>
+                <h1 className="text-xl font-black tracking-tight">HAZENSHOP BD</h1>
                 <p className="text-slate-500">Luxury Bedsheets & Designer Window Curtains</p>
-                <p className="text-slate-500">Hotline: {settings?.hotline || "+880 1700-000000"} • www.hazenshop.com</p>
+                <p className="text-slate-500">Hotline: {settings?.hotline || "+880 1700-000000"} • www.hazenshopbd.com</p>
               </div>
             </div>
 
@@ -150,7 +150,7 @@ export default function OrderInvoiceModal({
 
           {/* Footer Note */}
           <div className="border-t pt-4 text-[10px] text-slate-500 text-center space-y-1">
-            <p className="font-bold text-slate-700">Thank you for choosing HAZENSHOP (hazenshop.com)!</p>
+            <p className="font-bold text-slate-700">Thank you for choosing HAZENSHOP BD (hazenshopbd.com)!</p>
             <p>For any inquiries or customer support, please reach out to our hotline: {settings?.hotline || "+880 1700-000000"}</p>
           </div>
         </div>

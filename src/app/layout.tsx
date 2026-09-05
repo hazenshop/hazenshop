@@ -9,10 +9,10 @@ import { db } from "@/lib/db";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await db.getSettings();
   return {
-    metadataBase: new URL("https://hazenshop.com"),
+    metadataBase: new URL("https://hazenshopbd.com"),
     title: {
-      template: "%s | HAZENSHOP (hazenshop.com)",
-      default: settings.seoTitle || "HAZENSHOP (hazenshop.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
+      template: "%s | HAZENSHOP BD (hazenshopbd.com)",
+      default: settings.seoTitle || "HAZENSHOP BD (hazenshopbd.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
     },
     description:
       settings.seoDescription ||
