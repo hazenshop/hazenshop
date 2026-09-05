@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Order, SiteSettings } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
+import { trackPurchase } from "@/lib/pixel";
 
 export default function OrderSuccessPage() {
   const params = useParams();
@@ -42,7 +43,19 @@ export default function OrderSuccessPage() {
       fetch("/api/settings").then((r) => r.json()),
     ])
       .then(([orderData, setData]) => {
-        if (orderData.order) setOrder(orderData.order);
+        if (orderData.order) {
+          setOrder(orderData.order);
+          trackPurchase({
+            id: orderData.order.id,
+            totalAmount: orderData.order.totalAmount,
+            items: orderData.order.items?.map((it: any) => ({
+              productId: it.productId,
+              productName: it.productName,
+              quantity: it.quantity,
+              price: it.price,
+            })),
+          });
+        }
         if (setData.settings) setSettings(setData.settings);
       })
       .catch(console.error)

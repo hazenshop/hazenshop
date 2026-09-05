@@ -774,6 +774,17 @@ export const db = {
     return cachedOrders[idx];
   },
 
+  async deleteOrder(id: string): Promise<boolean> {
+    if (isSupabaseConfigured && supabase) {
+      await supabase.from("orders").delete().eq("id", id);
+    }
+
+    cachedOrders = readJsonFile("orders.json", cachedOrders);
+    cachedOrders = cachedOrders.filter((o) => o.id !== id);
+    writeJsonFile("orders.json", cachedOrders);
+    return true;
+  },
+
   // SETTINGS
   async getSettings(): Promise<SiteSettings> {
     const base = readJsonFile("settings.json", cachedSettings);
