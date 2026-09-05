@@ -20,9 +20,11 @@ import {
   RefreshCw,
   Send,
   Sparkles,
+  ShieldAlert,
 } from "lucide-react";
 import { Order, SiteSettings } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
+import FraudCheckModal from "@/components/admin/FraudCheckModal";
 import { useToast } from "@/context/ToastContext";
 
 export default function IncompleteOrdersPage() {
@@ -32,6 +34,7 @@ export default function IncompleteOrdersPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedFraudCheckOrder, setSelectedFraudCheckOrder] = useState<Order | null>(null);
 
   const fetchData = async () => {
     try {
@@ -385,6 +388,15 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
 
                   {/* Action Buttons */}
                   <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
+                    <button
+                      onClick={() => setSelectedFraudCheckOrder(order)}
+                      className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 min-h-[40px] border border-rose-500/30 transition-colors"
+                      title="Check Fraud Risk & Courier Delivery History"
+                    >
+                      <ShieldAlert className="w-4 h-4" />
+                      <span>Fraud Check</span>
+                    </button>
+
                     <a
                       href={waLink}
                       target="_blank"
@@ -415,10 +427,10 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
                     <button
                       onClick={() => handleDeleteDraft(order.id)}
                       disabled={actionLoading === order.id}
-                      className="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 min-h-[40px] border border-rose-800/40 transition-colors"
+                      className="col-span-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 min-h-[40px] border border-rose-800/40 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
-                      <span>Delete</span>
+                      <span>Delete Lead</span>
                     </button>
                   </div>
                 </div>
@@ -513,6 +525,15 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
                       <td className="p-4 align-top text-right">
                         <div className="flex flex-col items-end gap-1.5">
                           <div className="flex items-center gap-1.5">
+                            <button
+                              onClick={() => setSelectedFraudCheckOrder(order)}
+                              className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 border border-rose-500/30 transition-colors"
+                              title="Check Fraud Risk"
+                            >
+                              <ShieldAlert className="w-3.5 h-3.5" />
+                              <span>Fraud Check</span>
+                            </button>
+
                             <a
                               href={waLink}
                               target="_blank"
@@ -563,6 +584,17 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
             </table>
           </div>
         </div>
+      )}
+
+      {/* Fraud Verification Modal */}
+      {selectedFraudCheckOrder && (
+        <FraudCheckModal
+          phone={selectedFraudCheckOrder.customerPhone}
+          customerName={selectedFraudCheckOrder.customerName}
+          customerAddress={selectedFraudCheckOrder.customerAddress}
+          orderId={selectedFraudCheckOrder.id}
+          onClose={() => setSelectedFraudCheckOrder(null)}
+        />
       )}
     </div>
   );

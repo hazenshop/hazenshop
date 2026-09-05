@@ -20,6 +20,7 @@ import {
   PlusCircle,
   Sparkles,
   ExternalLink,
+  ShieldAlert,
 } from "lucide-react";
 import { Order, OrderStatus, Product, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor } from "@/lib/utils";
@@ -129,6 +130,17 @@ export default function AdminDashboardPage() {
       accentBg: "from-amber-500/10 to-orange-950/20 border-amber-500/30 hover:border-amber-400/60",
       iconColor: "text-amber-400 bg-amber-500/10",
       cta: "লিড রিকভার করুন",
+    },
+    {
+      title: "ফেক অর্ডার ও ফ্রড চেকার (Fraud Checker)",
+      subtitle: "কুরিয়ার ডেলিভারি সাকসেস রেট ও ভুয়া কাস্টমার যাচাই",
+      icon: ShieldAlert,
+      href: "/admin/fraud-checker",
+      badge: "Steadfast & DB History",
+      badgeColor: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+      accentBg: "from-rose-500/10 to-red-950/20 border-rose-500/30 hover:border-rose-400/60",
+      iconColor: "text-rose-400 bg-rose-500/10",
+      cta: "কাস্টমার ভেরিফাই করুন",
     },
     {
       title: "পণ্য ও স্টক (Products)",

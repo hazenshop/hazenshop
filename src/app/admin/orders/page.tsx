@@ -15,10 +15,12 @@ import {
   Edit2,
   X,
   Loader2,
+  ShieldAlert,
 } from "lucide-react";
 import { Order, OrderStatus, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor, generateOrdersCSV, getCourierTrackingUrl } from "@/lib/utils";
 import OrderInvoiceModal from "@/components/admin/OrderInvoiceModal";
+import FraudCheckModal from "@/components/admin/FraudCheckModal";
 import { useToast } from "@/context/ToastContext";
 
 export default function AdminOrdersPage() {
@@ -31,6 +33,7 @@ export default function AdminOrdersPage() {
 
   // Modals state
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
+  const [selectedFraudCheckOrder, setSelectedFraudCheckOrder] = useState<Order | null>(null);
   const [editingCourierOrder, setEditingCourierOrder] = useState<Order | null>(null);
   const [courierName, setCourierName] = useState("");
   const [trackingCode, setTrackingCode] = useState("");
@@ -176,7 +179,16 @@ export default function AdminOrdersPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+          <Link
+            href="/admin/fraud-checker"
+            className="w-full sm:w-auto bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-rose-500/30 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
+            title="Check Customer Fraud History & Delivery Rate"
+          >
+            <ShieldAlert className="w-4 h-4" />
+            <span>Fraud Checker</span>
+          </Link>
+
           <Link
             href="/admin/incomplete-orders"
             className="w-full sm:w-auto bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300 font-bold text-xs px-4 py-2.5 rounded-xl border border-amber-500/30 transition-colors flex items-center justify-center gap-2 min-h-[44px]"
@@ -337,6 +349,13 @@ export default function AdminOrdersPage() {
                   </select>
 
                   <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setSelectedFraudCheckOrder(order)}
+                      className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      title="Check Fraud & Delivery Success Rate"
+                    >
+                      <ShieldAlert className="w-4 h-4" />
+                    </button>
                     <button
                       onClick={() => {
                         setEditingCourierOrder(order);
@@ -503,6 +522,13 @@ export default function AdminOrdersPage() {
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
+                            onClick={() => setSelectedFraudCheckOrder(order)}
+                            className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 transition-colors"
+                            title="Check Fraud & Courier Delivery Rate"
+                          >
+                            <ShieldAlert className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => setSelectedInvoiceOrder(order)}
                             className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-400 hover:text-white transition-colors"
                             title="Print Customer Invoice"
@@ -537,6 +563,17 @@ export default function AdminOrdersPage() {
           order={selectedInvoiceOrder}
           settings={settings}
           onClose={() => setSelectedInvoiceOrder(null)}
+        />
+      )}
+
+      {/* Fraud Verification Modal */}
+      {selectedFraudCheckOrder && (
+        <FraudCheckModal
+          phone={selectedFraudCheckOrder.customerPhone}
+          customerName={selectedFraudCheckOrder.customerName}
+          customerAddress={selectedFraudCheckOrder.customerAddress}
+          orderId={selectedFraudCheckOrder.id}
+          onClose={() => setSelectedFraudCheckOrder(null)}
         />
       )}
 

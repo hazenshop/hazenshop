@@ -144,6 +144,8 @@ export type SiteSettings = {
   steadfastSecretKey?: string;
   steadfastEnabled?: boolean;
   // Pathao Courier API
+  pathaoApiKey?: string;
+  pathaoSecretKey?: string;
   pathaoClientId?: string;
   pathaoClientSecret?: string;
   pathaoUsername?: string;
@@ -151,6 +153,7 @@ export type SiteSettings = {
   pathaoStoreId?: string;
   pathaoSandbox?: boolean;
   pathaoEnabled?: boolean;
+  blacklistedPhones?: string[];
   socialLinks?: Record<string, string>;
   heroBanners?: {
     id: string;
@@ -177,4 +180,39 @@ export type MediaItem = {
   categorySlug?: string;
   createdAt: string;
 };
+
+export type FraudRiskLevel = "low" | "medium" | "high";
+
+export type CourierDeliveryStats = {
+  courier: string;
+  totalParcels: number;
+  delivered: number;
+  cancelled: number;
+  fraudReports: number;
+  successRate: number;
+  cancelRate: number;
+};
+
+export type LocalOrderStats = {
+  totalOrders: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  incompleteOrders: number;
+};
+
+export type FraudCheckResult = {
+  phone: string;
+  formattedPhone: string;
+  isValidPhone: boolean;
+  riskLevel: FraudRiskLevel;
+  riskScore: number; // 0 (safest) to 100 (highest risk)
+  recommendation: string;
+  recommendationBn: string;
+  isBlacklisted: boolean;
+  courierStats?: CourierDeliveryStats;
+  localStats: LocalOrderStats;
+  warnings: string[];
+  checkedAt: string;
+};
+
 

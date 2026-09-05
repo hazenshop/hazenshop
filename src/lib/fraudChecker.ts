@@ -1,0 +1,209 @@
+import { db } from "@/lib/db";
+import { CourierDeliveryStats, FraudCheckResult, FraudRiskLevel, LocalOrderStats, SiteSettings } from "@/lib/types";
+
+export function cleanAndValidateBdPhone(phone: string): {
+  isValid: boolean;
+  cleanPhone: string;
+  formattedPhone: string;
+} {
+  let cleaned = phone.replace(/[^0-9]/g, "");
+  
+  if (cleaned.startsWith("880")) {
+    cleaned = cleaned.substring(2);
+  } else if (cleaned.startsWith("88") && cleaned.length === 13) {
+    cleaned = cleaned.substring(2);
+  }
+
+  // BD phone numbers are 11 digits starting with 01[3-9]
+  const isValid = /^01[3-9][0-9]{8}$/.test(cleaned);
+
+  return {
+    isValid,
+    cleanPhone: cleaned,
+    formattedPhone: isValid ? `+88${cleaned}` : cleaned,
+  };
+}
+
+export async function fetchSteadfastFraudStats(
+  cleanPhone: string,
+  settings: SiteSettings
+): Promise<CourierDeliveryStats | null> {
+  const apiKey = (settings.steadfastApiKey || process.env.STEADFAST_API_KEY || "").trim();
+  const secretKey = (settings.steadfastSecretKey || process.env.STEADFAST_SECRET_KEY || "").trim();
+
+  if (!apiKey || !secretKey) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`https://portal.steadfast.com.bd/api/v1/fraud_check/${cleanPhone}`, {
+      method: "GET",
+      headers: {
+        "Api-Key": apiKey,
+        "Secret-Key": secretKey,
+        "Content-Type": "application/json",
+      },
+      next: { revalidate: 300 }, // Cache 5 min
+    });
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const data = await res.json();
+    
+    // Steadfast structure: total_parcels, total_delivered, total_cancelled, total_fraud_reports
+    const totalParcels = Number(data.total_parcels || data.Total_parcels || 0);
+    const delivered = Number(data.total_delivered || data.Total_delivered || 0);
+    const cancelled = Number(data.total_cancelled || data.Total_cancelled || 0);
+    const fraudReports = Number(data.total_fraud_reports || data.Total_fraud_reports || 0);
+
+    const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
+    const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
+
+    return {
+      courier: "Steadfast Courier Network",
+      totalParcels,
+      delivered,
+      cancelled,
+      fraudReports,
+      successRate,
+      cancelRate,
+    };
+  } catch (err) {
+    console.warn("Error checking Steadfast fraud check API:", err);
+    return null;
+  }
+}
+
+export async function performFraudCheck(
+  phone: string,
+  options?: {
+    customerName?: string;
+    customerAddress?: string;
+  }
+): Promise<FraudCheckResult> {
+  const { isValid, cleanPhone, formattedPhone } = cleanAndValidateBdPhone(phone);
+  const settings = await db.getSettings();
+  const warnings: string[] = [];
+
+  const isBlacklisted = Boolean(
+    settings.blacklistedPhones &&
+      settings.blacklistedPhones.some((p) => {
+        const c = p.replace(/[^0-9]/g, "");
+        return c.includes(cleanPhone) || cleanPhone.includes(c);
+      })
+  );
+
+  if (isBlacklisted) {
+    warnings.push("এই নাম্বারটি আপনার স্টোরের ব্ল্যাকলিস্টে (Blocklist) রয়েছে!");
+  }
+
+  if (!isValid) {
+    warnings.push("মোবাইল নাম্বারটি সঠিক বাংলাদেশী ১১-ডিজিট ফরম্যাটে নেই।");
+  }
+
+  // Local Store Order History
+  const localOrders = await db.getOrdersByPhone(cleanPhone);
+  const localStats: LocalOrderStats = {
+    totalOrders: localOrders.length,
+    completedOrders: localOrders.filter((o) => o.status === "delivered").length,
+    cancelledOrders: localOrders.filter((o) => o.status === "cancelled" || o.status === "returned").length,
+    incompleteOrders: localOrders.filter((o) => o.status === "incomplete").length,
+  };
+
+  // Check for duplicate recent orders (spammer behavior)
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  const recentDuplicates = localOrders.filter(
+    (o) => o.createdAt >= fifteenMinutesAgo && o.status !== "cancelled"
+  );
+  if (recentDuplicates.length >= 2) {
+    warnings.push(`গত ১৫ মিনিটে একই নাম্বার থেকে ${recentDuplicates.length}টি অর্ডার সাবমিট করা হয়েছে (সম্ভাব্য স্প্যাম)।`);
+  }
+
+  // Check address quality
+  if (options?.customerAddress) {
+    const addr = options.customerAddress.trim().toLowerCase();
+    const isJunkAddress =
+      addr.length < 6 ||
+      /^(asdf|test|fake|xxx|1234|aaaa|bbbb|none|dhaka|bd)+$/i.test(addr) ||
+      /(.)\1{4,}/.test(addr);
+    if (isJunkAddress) {
+      warnings.push("ঠিকানাটি অসম্পূর্ণ বা সন্দেহজনক মনে হচ্ছে (Suspicious Address Text)।");
+    }
+  }
+
+  // Courier Network History (Steadfast)
+  const courierStats = await fetchSteadfastFraudStats(cleanPhone, settings);
+
+  // Compute Risk Score (0 to 100)
+  let riskScore = 0;
+
+  if (isBlacklisted) {
+    riskScore += 90;
+  }
+
+  if (!isValid) {
+    riskScore += 40;
+  }
+
+  if (courierStats) {
+    if (courierStats.fraudReports > 0) {
+      riskScore += 50;
+      warnings.push(`অন্যান্য মার্চেন্টরা এই নাম্বারে ${courierStats.fraudReports}টি ফ্রড/প্রতারণা রিপোর্ট করেছে!`);
+    }
+
+    if (courierStats.totalParcels >= 2) {
+      if (courierStats.successRate < 40) {
+        riskScore += 50;
+        warnings.push(`কুরিয়ারে ডেলিভারি সফলতার হার মাত্র ${courierStats.successRate}% (${courierStats.cancelled}টি পার্সেল রিটার্ন/বাতিল)।`);
+      } else if (courierStats.successRate < 65) {
+        riskScore += 30;
+        warnings.push(`কুরিয়ারে ডেলিভারি সফলতার হার ${courierStats.successRate}% (মাঝারি ঝুঁকি)।`);
+      } else if (courierStats.successRate >= 85) {
+        riskScore = Math.max(0, riskScore - 15);
+      }
+    }
+  }
+
+  if (localStats.cancelledOrders >= 2) {
+    riskScore += 35;
+    warnings.push(`আপনার দোকানে পূর্বে ${localStats.cancelledOrders}টি অর্ডার বাতিল বা রিটার্ন হয়েছে।`);
+  }
+
+  if (recentDuplicates.length >= 2) {
+    riskScore += 25;
+  }
+
+  // Clamp risk score
+  riskScore = Math.min(100, Math.max(0, riskScore));
+
+  let riskLevel: FraudRiskLevel = "low";
+  let recommendation = "Safe Order - Recommended for regular COD dispatch";
+  let recommendationBn = "নিরাপদ কাস্টমার - ক্যাশ অন ডেলিভারিতে পার্সেল পাঠাতে পারেন";
+
+  if (riskScore >= 60 || isBlacklisted) {
+    riskLevel = "high";
+    recommendation = "High Return Risk / Fake Order - Require advance courier charge or cancel";
+    recommendationBn = "উচ্চ ঝুঁকি / ভুয়া অর্ডার সতর্কতা - ডেলিভারি চার্জ অগ্রিম নিন অথবা অর্ডার বাতিল করুন";
+  } else if (riskScore >= 30) {
+    riskLevel = "medium";
+    recommendation = "Moderate Risk - Call customer to verify address and intent before packing";
+    recommendationBn = "মাঝারি ঝুঁকি - পার্সেল প্যাক করার আগে কাস্টমারকে কল দিয়ে ঠিকানা নিশ্চিত করুন";
+  }
+
+  return {
+    phone: cleanPhone,
+    formattedPhone,
+    isValidPhone: isValid,
+    riskLevel,
+    riskScore,
+    recommendation,
+    recommendationBn,
+    isBlacklisted,
+    courierStats: courierStats || undefined,
+    localStats,
+    warnings,
+    checkedAt: new Date().toISOString(),
+  };
+}
