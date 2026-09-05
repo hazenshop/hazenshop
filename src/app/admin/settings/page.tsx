@@ -169,46 +169,112 @@ export default function AdminSettingsPage() {
 
         {/* Delivery Charges Configuration */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
-            <Truck className="w-4 h-4 text-brand-400" />
-            <span>Delivery Tariffs & Complimentary Shipping Rule</span>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2 text-white font-bold text-sm">
+              <Truck className="w-4 h-4 text-brand-400" />
+              <span>ডেলিভারি চার্জ ও ফ্রি শিপিং সেটিংস (Delivery Charges & Free Shipping)</span>
+            </div>
+            {/* Quick Presets */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    dhakaDeliveryFee: 0,
+                    outsideDhakaDeliveryFee: 0,
+                    suburbsDeliveryFee: 0,
+                  })
+                }
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 font-bold text-[11px] border border-emerald-500/30 transition-colors"
+                title="Set all delivery to 0 (Free nationwide delivery)"
+              >
+                🎉 সব ফ্রি ডেলিভারি (৳0)
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    dhakaDeliveryFee: 60,
+                    outsideDhakaDeliveryFee: 120,
+                    suburbsDeliveryFee: 100,
+                  })
+                }
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[11px] border border-slate-700 transition-colors"
+                title="Reset to default standard rates"
+              >
+                স্ট্যান্ডার্ড (৳৬০/১২০/১০০)
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Inside Dhaka (৳)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-300">Inside Dhaka (৳)</label>
+                {settings.dhakaDeliveryFee === 0 && (
+                  <span className="text-[10px] font-bold text-emerald-400">ফ্রি</span>
+                )}
+              </div>
               <input
                 type="number"
-                value={settings.dhakaDeliveryFee}
-                onChange={(e) => setSettings({ ...settings, dhakaDeliveryFee: Number(e.target.value) })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold"
+                min="0"
+                value={settings.dhakaDeliveryFee !== undefined ? settings.dhakaDeliveryFee : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSettings({ ...settings, dhakaDeliveryFee: val === "" ? 0 : Number(val) });
+                }}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold text-sm focus:border-brand-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Outside Dhaka (৳)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-300">Outside Dhaka (৳)</label>
+                {settings.outsideDhakaDeliveryFee === 0 && (
+                  <span className="text-[10px] font-bold text-emerald-400">ফ্রি</span>
+                )}
+              </div>
               <input
                 type="number"
-                value={settings.outsideDhakaDeliveryFee}
-                onChange={(e) => setSettings({ ...settings, outsideDhakaDeliveryFee: Number(e.target.value) })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold"
+                min="0"
+                value={settings.outsideDhakaDeliveryFee !== undefined ? settings.outsideDhakaDeliveryFee : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSettings({ ...settings, outsideDhakaDeliveryFee: val === "" ? 0 : Number(val) });
+                }}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold text-sm focus:border-brand-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Suburbs / Surrounding (৳)</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-bold text-slate-300">Suburbs / Gazipur (৳)</label>
+                {settings.suburbsDeliveryFee === 0 && (
+                  <span className="text-[10px] font-bold text-emerald-400">ফ্রি</span>
+                )}
+              </div>
               <input
                 type="number"
-                value={settings.suburbsDeliveryFee}
-                onChange={(e) => setSettings({ ...settings, suburbsDeliveryFee: Number(e.target.value) })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold"
+                min="0"
+                value={settings.suburbsDeliveryFee !== undefined ? settings.suburbsDeliveryFee : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSettings({ ...settings, suburbsDeliveryFee: val === "" ? 0 : Number(val) });
+                }}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold text-sm focus:border-brand-500 focus:outline-none"
               />
             </div>
             <div>
-              <label className="block font-bold text-slate-300 mb-1">Free Delivery on (৳)</label>
+              <label className="block font-bold text-slate-300 mb-1">Free Shipping Above (৳)</label>
               <input
                 type="number"
-                value={settings.freeShippingThreshold}
-                onChange={(e) => setSettings({ ...settings, freeShippingThreshold: Number(e.target.value) })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold text-emerald-400"
+                min="0"
+                value={settings.freeShippingThreshold !== undefined ? settings.freeShippingThreshold : ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSettings({ ...settings, freeShippingThreshold: val === "" ? 0 : Number(val) });
+                }}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-bold text-sm text-emerald-400 focus:border-emerald-500 focus:outline-none"
               />
             </div>
           </div>

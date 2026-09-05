@@ -53,10 +53,14 @@ export default function ProductForm({
     initialProduct?.salePrice ? initialProduct.salePrice.toString() : ""
   );
   const [stock, setStock] = useState(
-    initialProduct?.stock !== undefined ? initialProduct.stock.toString() : "20"
+    initialProduct?.stock !== undefined && initialProduct.stock < 9999
+      ? initialProduct.stock.toString()
+      : "20"
   );
   const [isUnlimitedStock, setIsUnlimitedStock] = useState<boolean>(
-    initialProduct?.isUnlimitedStock ?? false
+    initialProduct?.isUnlimitedStock ||
+      (initialProduct?.stock !== undefined && initialProduct.stock >= 9999) ||
+      false
   );
   const [badge, setBadge] = useState<Product["badge"]>(initialProduct?.badge || "Best Seller");
   const [featured, setFeatured] = useState(initialProduct?.featured ?? true);

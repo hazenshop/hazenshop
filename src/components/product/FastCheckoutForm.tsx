@@ -54,9 +54,9 @@ export default function FastCheckoutForm({
   const itemSubtotal = unitPrice * quantity;
   
   const deliveryFee = getDeliveryFee(deliveryZone, {
-    dhaka: Number(settings?.dhakaDeliveryFee ?? 60),
-    outside_dhaka: Number(settings?.outsideDhakaDeliveryFee ?? 120),
-    suburbs: Number(settings?.suburbsDeliveryFee ?? 100),
+    dhaka: settings?.dhakaDeliveryFee !== undefined ? Number(settings.dhakaDeliveryFee) : 60,
+    outside_dhaka: settings?.outsideDhakaDeliveryFee !== undefined ? Number(settings.outsideDhakaDeliveryFee) : 120,
+    suburbs: settings?.suburbsDeliveryFee !== undefined ? Number(settings.suburbsDeliveryFee) : 100,
   });
 
   const isFreeDelivery = itemSubtotal >= Number(settings?.freeShippingThreshold ?? 2500);
@@ -303,9 +303,24 @@ export default function FastCheckoutForm({
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {[
-              { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: Number(settings?.dhakaDeliveryFee ?? 60) },
-              { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: Number(settings?.outsideDhakaDeliveryFee ?? 120) },
-              { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: Number(settings?.suburbsDeliveryFee ?? 100) },
+              {
+                id: "dhaka" as const,
+                label: "ঢাকা সিটির ভেতর",
+                sub: "Inside Dhaka",
+                fee: settings?.dhakaDeliveryFee !== undefined ? Number(settings.dhakaDeliveryFee) : 60,
+              },
+              {
+                id: "outside_dhaka" as const,
+                label: "ঢাকার বাইরে",
+                sub: "Outside Dhaka",
+                fee: settings?.outsideDhakaDeliveryFee !== undefined ? Number(settings.outsideDhakaDeliveryFee) : 120,
+              },
+              {
+                id: "suburbs" as const,
+                label: "ঢাকা উপশহর",
+                sub: "Gazipur/Savar",
+                fee: settings?.suburbsDeliveryFee !== undefined ? Number(settings.suburbsDeliveryFee) : 100,
+              },
             ].map((zone) => (
               <button
                 key={zone.id}
@@ -331,7 +346,7 @@ export default function FastCheckoutForm({
                   </div>
                 </div>
                 <span className="text-xs font-extrabold text-brand-maroon-700 mt-1">
-                  {isFreeDelivery ? "FREE" : formatPrice(zone.fee)}
+                  {isFreeDelivery || zone.fee === 0 ? "ফ্রি (FREE)" : formatPrice(zone.fee)}
                 </span>
               </button>
             ))}

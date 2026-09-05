@@ -20,6 +20,7 @@ import {
   HelpCircle,
   CheckSquare,
   Square,
+  Trash2,
 } from "lucide-react";
 import { Order, OrderStatus, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor, generateOrdersCSV, getCourierTrackingUrl } from "@/lib/utils";
@@ -196,6 +197,44 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!window.confirm(`Are you sure you want to permanently delete order #${orderId}? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        showToast(`Order #${orderId} deleted successfully!`, "success");
+        setOrders((prev) => prev.filter((o) => o.id !== orderId));
+        setSelectedIds((prev) => prev.filter((id) => id !== orderId));
+      } else {
+        showToast("Failed to delete order", "error");
+      }
+    } catch {
+      showToast("Network error deleting order", "error");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to permanently delete ${selectedIds.length} selected orders?`)) return;
+    setBulkLoading(true);
+    let deletedCount = 0;
+    try {
+      for (const id of selectedIds) {
+        const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+        if (res.ok) deletedCount++;
+      }
+      showToast(`Successfully deleted ${deletedCount} orders`, "success");
+      setOrders((prev) => prev.filter((o) => !selectedIds.includes(o.id)));
+      setSelectedIds([]);
+    } catch {
+      showToast("Error deleting some orders", "error");
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   const getWhatsAppConfirmationLink = (order: Order) => {
     const raw = order.customerPhone.replace(/[^0-9]/g, "");
     const phone = raw.startsWith("88") ? raw : `88${raw}`;
@@ -333,6 +372,63 @@ export default function AdminOrdersPage() {
           ))}
         </div>
       </div>
+
+      {/* Floating / Sticky Bulk Actions Bar */}
+      {selectedIds.length > 0 && (
+        <div className="bg-brand-500/10 border border-brand-500/30 p-3 sm:p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-200 shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="bg-brand-500 text-brand-dark font-black text-xs px-2.5 py-1 rounded-lg">
+              {selectedIds.length} Selected
+            </span>
+            <span className="text-xs text-slate-300 font-bold hidden sm:inline">
+              অর্ডার এক সাথে আপডেট বা ডিলিট করুন
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              disabled={bulkLoading}
+              onClick={() => handleBulkStatusChange("confirmed")}
+              className="bg-blue-600/80 hover:bg-blue-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 min-h-[36px]"
+            >
+              Confirm All
+            </button>
+            <button
+              type="button"
+              disabled={bulkLoading}
+              onClick={() => handleBulkStatusChange("shipped")}
+              className="bg-indigo-600/80 hover:bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 min-h-[36px]"
+            >
+              Ship All
+            </button>
+            <button
+              type="button"
+              disabled={bulkLoading}
+              onClick={() => handleBulkSendCourier("steadfast")}
+              className="bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 min-h-[36px]"
+            >
+              Send Steadfast
+            </button>
+            <button
+              type="button"
+              disabled={bulkLoading}
+              onClick={handleBulkDelete}
+              className="bg-rose-600/80 hover:bg-rose-600 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 min-h-[36px]"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedIds([])}
+              className="text-xs text-slate-400 hover:text-white px-2 py-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MOBILE ORDERS CARD LIST (Touch-Friendly Phone View) */}
       <div className="space-y-3 md:hidden">
@@ -485,6 +581,13 @@ export default function AdminOrdersPage() {
                       title="Print Invoice"
                     >
                       <Printer className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteOrder(order.id)}
+                      className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      title="Delete Order"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -699,6 +802,13 @@ export default function AdminOrdersPage() {
                             title="Update Courier Info"
                           >
                             <Truck className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteOrder(order.id)}
+                            className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors"
+                            title="Delete Order"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>

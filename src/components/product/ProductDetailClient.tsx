@@ -284,7 +284,7 @@ export default function ProductDetailClient({
                 }`}
               />
               <span className="text-xs font-semibold text-slate-700">
-                {product.isUnlimitedStock ? (
+                {product.isUnlimitedStock || product.stock >= 9999 ? (
                   <span className="text-emerald-700 font-bold">ইন স্টক (রেডি টু শিপ)</span>
                 ) : product.stock > 0 ? (
                   <>ইন স্টক ({product.stock} সেট রেডি টু শিপ)</>

@@ -182,7 +182,7 @@ export default function AdminProductsPage() {
                         {formatPrice(p.price)}
                       </span>
                     )}
-                    {p.isUnlimitedStock ? (
+                    {p.isUnlimitedStock || p.stock >= 9999 ? (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                         সীমাহীন স্টক
                       </span>
@@ -327,7 +327,7 @@ export default function AdminProductsPage() {
 
                     {/* Stock */}
                     <td className="p-4">
-                      {p.isUnlimitedStock ? (
+                      {p.isUnlimitedStock || p.stock >= 9999 ? (
                         <span className="bg-emerald-500/10 text-emerald-400 font-bold px-2.5 py-1 rounded-lg border border-emerald-500/20">
                           সীমাহীন স্টক
                         </span>

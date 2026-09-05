@@ -118,7 +118,9 @@ export default function AdminDashboardPage() {
   const incompleteOrders = orders.filter((o) => o.status === "incomplete");
   const incompleteCount = incompleteOrders.length;
   const incompleteValue = incompleteOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-  const lowStockProducts = products.filter((p) => !p.isUnlimitedStock && p.stock <= 5);
+  const lowStockProducts = products.filter(
+    (p) => !p.isUnlimitedStock && p.stock <= 5 && p.stock < 9999
+  );
 
   // Top Selling Products
   const productSalesMap: Record<string, { name: string; qty: number; total: number }> = {};

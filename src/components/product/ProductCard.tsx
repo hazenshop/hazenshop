@@ -57,7 +57,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* Low Stock Indicator */}
-        {product.stock <= 5 && product.stock > 0 && (
+        {!product.isUnlimitedStock && product.stock <= 5 && product.stock > 0 && product.stock < 9999 && (
           <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-white/95 backdrop-blur-md text-slate-800 text-[8px] sm:text-[9px] font-medium px-2 py-0.5 rounded-full border border-black/5 shadow-subtle flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
             <span>{product.stock} left</span>
