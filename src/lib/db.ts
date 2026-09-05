@@ -176,40 +176,66 @@ export const db = {
   },
 
   async createProduct(product: Omit<Product, "id" | "createdAt">): Promise<Product> {
+    cachedProducts = readJsonFile("products.json", cachedProducts);
+
+    // Ensure slug is clean and unique
+    let finalSlug = product.slug?.trim() || product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!finalSlug) finalSlug = `product-${Date.now().toString().slice(-6)}`;
+
+    // Collision check against existing products
+    if (cachedProducts.some((p) => p.slug === finalSlug)) {
+      finalSlug = `${finalSlug}-${Math.floor(100 + Math.random() * 900)}`;
+    }
+
     const newProduct: Product = {
       ...product,
-      id: `prod-${Date.now()}`,
+      id: `prod-${Date.now()}-${Math.floor(10 + Math.random() * 90)}`,
       sku: product.sku || `HZN-${Date.now().toString().slice(-6)}`,
+      slug: finalSlug,
+      price: Number(product.price) || 0,
+      salePrice: product.salePrice !== undefined && product.salePrice !== null ? Number(product.salePrice) : undefined,
+      stock: product.isUnlimitedStock ? 999999 : (product.stock !== undefined ? Number(product.stock) : 20),
+      isUnlimitedStock: product.isUnlimitedStock ?? false,
+      rating: Number(product.rating || 5),
+      reviewCount: Number(product.reviewCount || 42),
+      images: Array.isArray(product.images) && product.images.length > 0 ? product.images : ["/logo.jpg"],
+      variants: Array.isArray(product.variants) ? product.variants : [],
+      features: Array.isArray(product.features) ? product.features : [],
+      specifications: product.specifications || {},
       createdAt: new Date().toISOString(),
     };
 
     if (isSupabaseConfigured && supabase) {
-      await supabase.from("products").insert({
-        id: newProduct.id,
-        sku: newProduct.sku,
-        slug: newProduct.slug,
-        name: newProduct.name,
-        short_description: newProduct.shortDescription,
-        description: newProduct.description,
-        price: newProduct.price,
-        sale_price: newProduct.salePrice,
-        images: newProduct.images,
-        category: newProduct.category,
-        category_name: newProduct.categoryName,
-        stock: newProduct.stock,
-        rating: newProduct.rating,
-        review_count: newProduct.reviewCount,
-        badge: newProduct.badge,
-        featured: newProduct.featured,
-        flash_sale: newProduct.flashSale,
-        variants: newProduct.variants,
-        bundle_offers: newProduct.bundleOffers,
-        features: newProduct.features,
-        specifications: newProduct.specifications,
-        seo_title: newProduct.seoTitle,
-        seo_description: newProduct.seoDescription,
-        created_at: newProduct.createdAt,
-      });
+      try {
+        await supabase.from("products").insert({
+          id: newProduct.id,
+          sku: newProduct.sku,
+          slug: newProduct.slug,
+          name: newProduct.name,
+          short_description: newProduct.shortDescription || newProduct.name,
+          description: newProduct.description || newProduct.name,
+          price: newProduct.price,
+          sale_price: newProduct.salePrice,
+          images: newProduct.images,
+          category: newProduct.category,
+          category_name: newProduct.categoryName,
+          stock: newProduct.stock,
+          rating: newProduct.rating,
+          review_count: newProduct.reviewCount,
+          badge: newProduct.badge,
+          featured: newProduct.featured,
+          flash_sale: newProduct.flashSale,
+          variants: newProduct.variants,
+          bundle_offers: newProduct.bundleOffers,
+          features: newProduct.features,
+          specifications: newProduct.specifications,
+          seo_title: newProduct.seoTitle,
+          seo_description: newProduct.seoDescription,
+          created_at: newProduct.createdAt,
+        });
+      } catch (sbErr) {
+        console.warn("Supabase insert product warning, persisting to disk fallback:", sbErr);
+      }
     }
 
     cachedProducts.unshift(newProduct);
@@ -376,6 +402,31 @@ export const db = {
   },
 
   async getCategoryById(id: string): Promise<Category | null> {
+    if (isSupabaseConfigured && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from("categories")
+          .select("*")
+          .or(`id.eq.${id},slug.eq.${id}`)
+          .maybeSingle();
+
+        if (!error && data) {
+          return {
+            id: data.id,
+            slug: data.slug,
+            name: data.name,
+            description: data.description,
+            image: data.image,
+            featured: data.featured,
+            productCount: data.product_count || 0,
+            createdAt: data.created_at || new Date().toISOString(),
+          };
+        }
+      } catch (err) {
+        console.warn("Supabase getCategoryById warning:", err);
+      }
+    }
+
     cachedCategories = readJsonFile("categories.json", cachedCategories);
     const item = cachedCategories.find((c) => c.id === id || c.slug === id);
     return item || null;
@@ -389,16 +440,20 @@ export const db = {
       createdAt: new Date().toISOString(),
     };
     if (isSupabaseConfigured && supabase) {
-      await supabase.from("categories").insert({
-        id: newCategory.id,
-        slug: newCategory.slug,
-        name: newCategory.name,
-        description: newCategory.description,
-        image: newCategory.image,
-        featured: newCategory.featured,
-        product_count: 0,
-        created_at: newCategory.createdAt,
-      });
+      try {
+        await supabase.from("categories").insert({
+          id: newCategory.id,
+          slug: newCategory.slug,
+          name: newCategory.name,
+          description: newCategory.description,
+          image: newCategory.image,
+          featured: newCategory.featured,
+          product_count: 0,
+          created_at: newCategory.createdAt,
+        });
+      } catch (err) {
+        console.warn("Supabase createCategory warning:", err);
+      }
     }
     cachedCategories.push(newCategory);
     writeJsonFile("categories.json", cachedCategories);
@@ -406,53 +461,88 @@ export const db = {
   },
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category | null> {
+    let updatedCat: Category | null = null;
+    let oldCategorySlug: string | undefined;
+
+    cachedCategories = readJsonFile("categories.json", cachedCategories);
+    const localIdx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
+    if (localIdx > -1) {
+      oldCategorySlug = cachedCategories[localIdx].slug;
+    }
+
     if (isSupabaseConfigured && supabase) {
-      const updatePayload: Record<string, any> = {};
-      if (updates.name !== undefined) updatePayload.name = updates.name;
-      if (updates.slug !== undefined) updatePayload.slug = updates.slug;
-      if (updates.description !== undefined) updatePayload.description = updates.description;
-      if (updates.image !== undefined) updatePayload.image = updates.image;
-      if (updates.featured !== undefined) updatePayload.featured = updates.featured;
+      try {
+        const updatePayload: Record<string, any> = {};
+        if (updates.name !== undefined) updatePayload.name = updates.name;
+        if (updates.slug !== undefined) updatePayload.slug = updates.slug;
+        if (updates.description !== undefined) updatePayload.description = updates.description;
+        if (updates.image !== undefined) updatePayload.image = updates.image;
+        if (updates.featured !== undefined) updatePayload.featured = updates.featured;
 
-      const { data, error } = await supabase
-        .from("categories")
-        .update(updatePayload)
-        .eq("id", id)
-        .select()
-        .single();
+        // Try update by id first, then by slug
+        let { data, error } = await supabase
+          .from("categories")
+          .update(updatePayload)
+          .eq("id", id)
+          .select()
+          .maybeSingle();
 
-      if (!error && data) {
-        const updatedCat: Category = {
-          id: data.id,
-          slug: data.slug,
-          name: data.name,
-          description: data.description,
-          image: data.image,
-          featured: data.featured,
-          productCount: data.product_count || 0,
-          createdAt: data.created_at || new Date().toISOString(),
-        };
-
-        cachedCategories = readJsonFile("categories.json", cachedCategories);
-        const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
-        if (idx > -1) {
-          cachedCategories[idx] = updatedCat;
-        } else {
-          cachedCategories.push(updatedCat);
+        if (!data) {
+          const res = await supabase
+            .from("categories")
+            .update(updatePayload)
+            .eq("slug", id)
+            .select()
+            .maybeSingle();
+          data = res.data;
+          error = res.error;
         }
-        writeJsonFile("categories.json", cachedCategories);
 
-        return updatedCat;
+        if (!error && data) {
+          updatedCat = {
+            id: data.id,
+            slug: data.slug,
+            name: data.name,
+            description: data.description,
+            image: data.image,
+            featured: data.featured,
+            productCount: data.product_count || 0,
+            createdAt: data.created_at || new Date().toISOString(),
+          };
+        }
+      } catch (err) {
+        console.warn("Supabase updateCategory warning:", err);
       }
     }
 
-    cachedCategories = readJsonFile("categories.json", cachedCategories);
-    const idx = cachedCategories.findIndex((c) => c.id === id || c.slug === id);
-    if (idx === -1) return null;
+    if (localIdx > -1) {
+      cachedCategories[localIdx] = {
+        ...cachedCategories[localIdx],
+        ...updates,
+        ...(updatedCat || {}),
+      };
+      writeJsonFile("categories.json", cachedCategories);
+      return cachedCategories[localIdx];
+    } else if (updatedCat) {
+      cachedCategories.push(updatedCat);
+      writeJsonFile("categories.json", cachedCategories);
+      return updatedCat;
+    }
 
-    cachedCategories[idx] = { ...cachedCategories[idx], ...updates };
+    // If neither existed yet, create it as fallback
+    const fallbackCat: Category = {
+      id: id.startsWith("cat-") ? id : `cat-${Date.now()}`,
+      slug: updates.slug || id,
+      name: updates.name || id,
+      description: updates.description || "",
+      image: updates.image || "/logo.jpg",
+      featured: updates.featured ?? true,
+      productCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    cachedCategories.push(fallbackCat);
     writeJsonFile("categories.json", cachedCategories);
-    return cachedCategories[idx];
+    return fallbackCat;
   },
 
   async deleteCategory(id: string): Promise<boolean> {

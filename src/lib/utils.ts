@@ -26,8 +26,17 @@ const ZONE_LABELS: Record<DeliveryZone, string> = {
   suburbs: "Suburbs / Dhaka Surrounding (৳100)",
 };
 
-export function getDeliveryFee(zone: DeliveryZone, fees = { dhaka: 60, outside_dhaka: 120, suburbs: 100 }): number {
-  return fees[zone] ?? fees.dhaka;
+export function getDeliveryFee(
+  zone: DeliveryZone,
+  fees?: { dhaka?: number; outside_dhaka?: number; suburbs?: number }
+): number {
+  const dFee = fees?.dhaka !== undefined && !isNaN(Number(fees.dhaka)) ? Number(fees.dhaka) : 60;
+  const oFee = fees?.outside_dhaka !== undefined && !isNaN(Number(fees.outside_dhaka)) ? Number(fees.outside_dhaka) : 120;
+  const sFee = fees?.suburbs !== undefined && !isNaN(Number(fees.suburbs)) ? Number(fees.suburbs) : 100;
+
+  if (zone === "outside_dhaka") return oFee;
+  if (zone === "suburbs") return sFee;
+  return dFee;
 }
 
 export function getDeliveryZoneLabel(zone: DeliveryZone): string {

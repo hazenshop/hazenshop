@@ -556,9 +556,9 @@ export default function ProductForm({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                     <div>
-                      <label className="block text-slate-400 font-bold mb-1">Color / Flavor & Hex</label>
+                      <label className="block text-slate-400 font-bold mb-1">Color / Design & Hex</label>
                       <div className="flex items-center gap-2">
                         <input
                           type="color"
@@ -570,30 +570,20 @@ export default function ProductForm({
                           type="text"
                           value={v.color || ""}
                           onChange={(e) => handleUpdateVariant(idx, "color", e.target.value)}
-                          placeholder="Royal Maroon"
+                          placeholder="e.g. Signature Gold / Royal Maroon"
                           className="w-full bg-slate-900 text-white rounded-lg p-2 border border-slate-800 text-xs"
                         />
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-slate-400 font-bold mb-1">Material / Quality</label>
-                      <input
-                        type="text"
-                        value={v.material || ""}
-                        onChange={(e) => handleUpdateVariant(idx, "material", e.target.value)}
-                        placeholder="100% Combed Cotton"
-                        className="w-full bg-slate-900 text-white rounded-lg p-2 border border-slate-800 text-xs"
-                      />
-                    </div>
-
                     <div className="flex items-end justify-between gap-2">
                       <div className="flex-1">
-                        <label className="block text-slate-400 font-bold mb-1">Stock Units</label>
+                        <label className="block text-slate-400 font-bold mb-1">Material / Fabric Spec</label>
                         <input
-                          type="number"
-                          value={v.stock}
-                          onChange={(e) => handleUpdateVariant(idx, "stock", Number(e.target.value))}
+                          type="text"
+                          value={v.material || ""}
+                          onChange={(e) => handleUpdateVariant(idx, "material", e.target.value)}
+                          placeholder="e.g. 100% Combed Cotton / 350 TC"
                           className="w-full bg-slate-900 text-white rounded-lg p-2 border border-slate-800 text-xs"
                         />
                       </div>
@@ -601,7 +591,8 @@ export default function ProductForm({
                         <button
                           type="button"
                           onClick={() => handleRemoveVariant(idx)}
-                          className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg shrink-0 mb-0.5"
+                          className="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg shrink-0 mb-0.5 min-h-[36px]"
+                          title="Remove Variant"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

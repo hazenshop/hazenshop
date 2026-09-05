@@ -301,22 +301,23 @@ export default function FastCheckoutForm({
           <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
             ডেলিভারি এরিয়া (Delivery Zone)
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {[
               { id: "dhaka" as const, label: "ঢাকা সিটির ভেতর", sub: "Inside Dhaka", fee: Number(settings?.dhakaDeliveryFee ?? 60) },
               { id: "outside_dhaka" as const, label: "ঢাকার বাইরে", sub: "Outside Dhaka", fee: Number(settings?.outsideDhakaDeliveryFee ?? 120) },
               { id: "suburbs" as const, label: "ঢাকা উপশহর", sub: "Gazipur/Savar", fee: Number(settings?.suburbsDeliveryFee ?? 100) },
             ].map((zone) => (
-              <label
+              <button
                 key={zone.id}
+                type="button"
                 onClick={() => setDeliveryZone(zone.id)}
-                className={`p-3 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all min-h-[64px] ${
+                className={`p-3 rounded-2xl border text-left cursor-pointer flex flex-col justify-between transition-all min-h-[68px] ${
                   deliveryZone === zone.id
-                    ? "border-brand-maroon-700 bg-brand-maroon-50/50 shadow-subtle ring-1 ring-brand-maroon-700"
+                    ? "border-brand-maroon-700 bg-brand-maroon-50/60 shadow-subtle ring-2 ring-brand-maroon-700"
                     : "border-slate-200 hover:border-slate-300 bg-white"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between w-full">
                   <div>
                     <span className="text-xs font-bold text-slate-900 block leading-tight">{zone.label}</span>
                     <span className="text-[10px] text-slate-400">{zone.sub}</span>
@@ -332,7 +333,7 @@ export default function FastCheckoutForm({
                 <span className="text-xs font-extrabold text-brand-maroon-700 mt-1">
                   {isFreeDelivery ? "FREE" : formatPrice(zone.fee)}
                 </span>
-              </label>
+              </button>
             ))}
           </div>
         </div>
