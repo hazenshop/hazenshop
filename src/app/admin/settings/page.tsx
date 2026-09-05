@@ -71,7 +71,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl pb-16">
+    <form onSubmit={handleSaveSettings} className="space-y-6 max-w-4xl pb-16 text-xs">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -84,17 +84,17 @@ export default function AdminSettingsPage() {
         </div>
 
         <button
-          form="settings-form"
           type="submit"
+          onClick={handleSaveSettings}
           disabled={saving}
-          className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 min-h-[44px]"
+          className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-6 py-3 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 min-h-[44px] cursor-pointer"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          <span>Save All Settings</span>
+          <span>{saving ? "Saving Changes..." : "Save All Settings"}</span>
         </button>
       </div>
 
-      <form id="settings-form" onSubmit={handleSaveSettings} className="space-y-6 text-xs">
+      <div className="space-y-6">
         {/* Contact & Social Communication */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
@@ -501,7 +501,20 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         </div>
-      </form>
+
+        {/* Bottom Save Action Bar */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <button
+            type="submit"
+            onClick={handleSaveSettings}
+            disabled={saving}
+            className="bg-brand-500 hover:bg-brand-600 text-brand-dark font-black text-xs px-8 py-3.5 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 min-h-[44px] cursor-pointer"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>{saving ? "Saving Changes..." : "Save All Settings"}</span>
+          </button>
+        </div>
+      </div>
 
       {/* Interactive Courier Live Diagnostic Modal */}
       {settings && (
@@ -516,6 +529,6 @@ export default function AdminSettingsPage() {
           }}
         />
       )}
-    </div>
+    </form>
   );
 }
