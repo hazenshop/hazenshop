@@ -29,9 +29,10 @@ export async function POST(req: NextRequest) {
   const rateLimit = checkRateLimit(ip);
 
   if (!rateLimit.allowed) {
+    const minutes = Math.ceil((rateLimit.retryAfterSec || 900) / 60);
     return NextResponse.json(
       {
-        error: `Too many failed login attempts. Please try again in ${rateLimit.retryAfterSec} seconds.`,
+        error: `অ্যাকাউন্ট সাময়িকভাবে লক রয়েছে। দয়া করে ${minutes} মিনিট পর আবার চেষ্টা করুন। (Account locked. Please try again in ${minutes} minutes.)`,
         locked: true,
         retryAfter: rateLimit.retryAfterSec,
       },
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
       if (failure.isLockedOut) {
         return NextResponse.json(
           {
-            error: `Maximum login attempts exceeded. Account locked for 15 minutes.`,
+            error: `অতিরিক্ত ভুল পাসওয়ার্ড দেওয়ার কারণে অ্যাকাউন্ট ১৫ মিনিটের জন্য সাময়িকভাবে লক করা হয়েছে। (Maximum attempts exceeded. Account locked for 15 minutes.)`,
             locked: true,
             retryAfter: failure.retryAfterSec,
           },
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         {
-          error: `Invalid admin password. (${failure.remainingAttempts} attempts remaining)`,
+          error: `ভুল পাসওয়ার্ড! আর মাত্র ${failure.remainingAttempts} বার চেষ্টা করা যাবে। (Invalid password. ${failure.remainingAttempts} attempts remaining)`,
           remainingAttempts: failure.remainingAttempts,
         },
         { status: 401 }

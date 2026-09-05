@@ -14,6 +14,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +39,9 @@ function LoginForm() {
         router.refresh();
       } else {
         setError(data.error || "Invalid credentials. Try again.");
+        if (data.locked || res.status === 429) {
+          setIsLocked(true);
+        }
       }
     } catch {
       setError("Network error. Please try again.");
