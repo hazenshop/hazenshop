@@ -75,7 +75,7 @@ export default function ProductForm({
     initialProduct?.images && initialProduct.images.length > 0
       ? initialProduct.images
       : [
-          "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
         ]
   );
   const [newImageUrl, setNewImageUrl] = useState("");
@@ -205,6 +205,29 @@ export default function ProductForm({
 
   const [createdProduct, setCreatedProduct] = useState<Product | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!initialProduct) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/products/${initialProduct.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        showToast(`পণ্য "${initialProduct.name}" সফলভাবে মুছে ফেলা হয়েছে`);
+        setShowDeleteModal(false);
+        router.push("/admin/products");
+      } else {
+        showToast("পণ্যটি মোছা যায়নি", "error");
+      }
+    } catch {
+      showToast("Error deleting product", "error");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Submit Handler
   const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
@@ -309,9 +332,21 @@ export default function ProductForm({
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={isDeleting || saving}
+              className="bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/80 font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 min-h-[44px]"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete</span>
+            </button>
+          )}
+
           <Link
             href="/admin/products"
-            className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+            className="flex-1 sm:flex-none text-center px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-800 transition-colors flex items-center justify-center min-h-[44px]"
           >
             Discard
           </Link>
@@ -798,6 +833,18 @@ export default function ProductForm({
         </div>
 
         <div className="flex items-center gap-3">
+          {isEditing && (
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+              disabled={isDeleting || saving}
+              className="px-4 py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-800/80 text-xs font-bold transition-colors flex items-center gap-1.5"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Delete</span>
+            </button>
+          )}
+
           <Link
             href="/admin/products"
             className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-colors"
@@ -922,6 +969,54 @@ export default function ProductForm({
                   <span>আরও পণ্য যোগ করুন</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Danger Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative">
+            <div className="w-16 h-16 bg-rose-500/20 border border-rose-500/40 rounded-2xl flex items-center justify-center mx-auto text-rose-400">
+              <Trash2 className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-black text-white">Delete Product?</h2>
+              <p className="text-xs text-slate-400">
+                Are you sure you want to permanently delete <strong className="text-rose-400 font-bold">{name}</strong>?
+                This action will remove the product and clean up all its uploaded images from storage.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 px-4 rounded-xl transition-colors border border-slate-700 min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 px-4 rounded-xl transition-colors shadow-lg shadow-rose-900/30 flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Product</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

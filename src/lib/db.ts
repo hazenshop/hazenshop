@@ -47,12 +47,19 @@ function writeJsonFile<T>(filename: string, data: T) {
 }
 
 function deleteFileFromDisk(fileUrl: string) {
-  if (!fileUrl || !fileUrl.startsWith("/uploads/")) return;
+  if (!fileUrl) return;
   try {
-    const filename = path.basename(fileUrl);
-    const diskPath = path.join(process.cwd(), "public", "uploads", filename);
-    if (fs.existsSync(diskPath)) {
-      fs.unlinkSync(diskPath);
+    let filename = "";
+    if (fileUrl.includes("/uploads/")) {
+      filename = fileUrl.split("/uploads/").pop()?.split("?")[0] || "";
+    } else if (fileUrl.startsWith("/uploads/")) {
+      filename = path.basename(fileUrl.split("?")[0]);
+    }
+    if (filename) {
+      const diskPath = path.join(process.cwd(), "public", "uploads", filename);
+      if (fs.existsSync(diskPath)) {
+        fs.unlinkSync(diskPath);
+      }
     }
   } catch (err) {
     console.error("Error deleting file from disk:", fileUrl, err);
@@ -375,14 +382,14 @@ export const db = {
         const { data } = await dbClient.from("products").select("images, variants").eq("id", id).maybeSingle();
         if (data?.images && Array.isArray(data.images)) {
           data.images.forEach((img: string) => {
-            if (img && typeof img === "string" && img.startsWith("/uploads/")) {
+            if (img && typeof img === "string" && (img.startsWith("/uploads/") || img.includes("/product-images/"))) {
               imagesToDelete.add(img);
             }
           });
         }
         if (data?.variants && Array.isArray(data.variants)) {
           data.variants.forEach((v: any) => {
-            if (v?.image && typeof v.image === "string" && v.image.startsWith("/uploads/")) {
+            if (v?.image && typeof v.image === "string" && (v.image.startsWith("/uploads/") || v.image.includes("/product-images/"))) {
               imagesToDelete.add(v.image);
             }
           });
@@ -399,30 +406,33 @@ export const db = {
     if (prodToDelete) {
       if (prodToDelete.images && Array.isArray(prodToDelete.images)) {
         prodToDelete.images.forEach((img) => {
-          if (img && typeof img === "string" && img.startsWith("/uploads/")) {
+          if (img && typeof img === "string" && (img.startsWith("/uploads/") || img.includes("/product-images/"))) {
             imagesToDelete.add(img);
           }
         });
       }
       if (prodToDelete.variants && Array.isArray(prodToDelete.variants)) {
         prodToDelete.variants.forEach((v) => {
-          if (v.image && typeof v.image === "string" && v.image.startsWith("/uploads/")) {
+          if (v.image && typeof v.image === "string" && (v.image.startsWith("/uploads/") || v.image.includes("/product-images/"))) {
             imagesToDelete.add(v.image);
           }
         });
       }
     }
 
-    imagesToDelete.forEach((imgUrl) => {
-      deleteFileFromDisk(imgUrl);
+    cachedMedia = readJsonFile("media.json", cachedMedia);
+    cachedMedia.forEach((m) => {
+      if (m.productId === id && m.url) {
+        imagesToDelete.add(m.url);
+      }
     });
+
+    for (const imgUrl of Array.from(imagesToDelete)) {
+      await db.deleteFileByUrl(imgUrl);
+    }
 
     cachedProducts = cachedProducts.filter((p) => p.id !== id);
     writeJsonFile("products.json", cachedProducts);
-
-    cachedMedia = readJsonFile("media.json", cachedMedia);
-    cachedMedia = cachedMedia.filter((m) => !imagesToDelete.has(m.url));
-    writeJsonFile("media.json", cachedMedia);
 
     return true;
   },
@@ -1191,9 +1201,13 @@ export const db = {
     const item = cachedMedia.find((m) => m.id === id || m.url === id);
     if (item) {
       if (isSupabaseConfigured && dbClient && item.url.includes("/product-images/")) {
-        const fileName = item.url.split("/").pop();
-        if (fileName) {
-          await dbClient.storage.from("product-images").remove([fileName]);
+        try {
+          const fileName = item.url.split("/product-images/").pop()?.split("?")[0];
+          if (fileName) {
+            await dbClient.storage.from("product-images").remove([fileName]);
+          }
+        } catch (e) {
+          console.warn("Notice: supabase deleteMediaItem remove:", e);
         }
       }
       deleteFileFromDisk(item.url);
@@ -1206,9 +1220,13 @@ export const db = {
 
   async deleteFileByUrl(url: string): Promise<boolean> {
     if (isSupabaseConfigured && dbClient && url.includes("/product-images/")) {
-      const fileName = url.split("/").pop();
-      if (fileName) {
-        await dbClient.storage.from("product-images").remove([fileName]);
+      try {
+        const fileName = url.split("/product-images/").pop()?.split("?")[0];
+        if (fileName) {
+          await dbClient.storage.from("product-images").remove([fileName]);
+        }
+      } catch (e) {
+        console.warn("Notice: supabase deleteFileByUrl remove:", e);
       }
     }
     deleteFileFromDisk(url);

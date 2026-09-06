@@ -149,8 +149,8 @@ export default function ImageUploader({
     const newImages = images.filter((_, idx) => idx !== index);
     onChange(newImages);
 
-    // If it's a local upload, delete it from storage
-    if (urlToRemove && urlToRemove.startsWith("/uploads/")) {
+    // If it's an uploaded file (local /uploads/ or Supabase /product-images/), delete it from storage
+    if (urlToRemove && (urlToRemove.startsWith("/uploads/") || urlToRemove.includes("/product-images/"))) {
       try {
         await fetch(`/api/storage?url=${encodeURIComponent(urlToRemove)}`, {
           method: "DELETE",
