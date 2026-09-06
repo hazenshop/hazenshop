@@ -170,8 +170,10 @@ export default function ImageUploader({
     showToast("Main cover image updated!");
   };
 
-  const handleAddManualUrl = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddManualUrl = (e?: React.FormEvent | React.MouseEvent | React.KeyboardEvent) => {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
     if (!manualUrl.trim()) return;
     onChange([...images, manualUrl.trim()]);
     setManualUrl("");
@@ -251,22 +253,29 @@ export default function ImageUploader({
             </button>
           </div>
 
-          <form onSubmit={handleAddManualUrl} className="space-y-1.5 pt-1">
+          <div className="space-y-1.5 pt-1">
             <input
               type="url"
               placeholder="Paste image URL (https://...)"
               value={manualUrl}
               onChange={(e) => setManualUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddManualUrl(e);
+                }
+              }}
               className="w-full bg-slate-950 text-xs rounded-xl px-3 py-2 border border-slate-800 text-white focus:outline-none focus:border-brand-500 placeholder:text-slate-500"
             />
             <button
-              type="submit"
+              type="button"
+              onClick={handleAddManualUrl}
               disabled={!manualUrl.trim()}
               className="w-full bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 font-semibold py-1.5 px-3 rounded-xl text-xs transition-colors"
             >
               + Add URL
             </button>
-          </form>
+          </div>
         </div>
       </div>
 
