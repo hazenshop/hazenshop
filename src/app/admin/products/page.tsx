@@ -12,6 +12,8 @@ import {
   ExternalLink,
   AlertTriangle,
   HelpCircle,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
@@ -27,11 +29,16 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch("/api/products");
+      setLoading(true);
+      const res = await fetch("/api/products", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+      });
       const data = await res.json();
       if (data.products) setProducts(data.products);
     } catch (e) {
       console.error(e);
+      showToast("পণ্যের তালিকা লোড করা যায়নি", "error");
     } finally {
       setLoading(false);
     }
@@ -95,6 +102,15 @@ export default function AdminProductsPage() {
         </div>
 
         <div className="flex items-center gap-2.5 w-full sm:w-auto">
+          <button
+            onClick={fetchProducts}
+            disabled={loading}
+            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+            title="Refresh products list"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          </button>
+
           <button
             onClick={() => setIsHelpOpen(true)}
             className="bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 font-bold text-xs px-3.5 py-2.5 rounded-xl border border-brand-500/40 flex items-center gap-1.5 transition-colors"

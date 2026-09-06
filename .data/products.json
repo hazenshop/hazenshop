@@ -1,5 +1,46 @@
 [
   {
+    "name": "100% Egyptian Cotton Duvet Cover Set",
+    "slug": "egyptian-cotton-duvet-set-2516",
+    "price": 3200,
+    "salePrice": 2450,
+    "category": "luxury-bedsheets",
+    "categoryName": "Luxury Bedsheets",
+    "stock": 25,
+    "isUnlimitedStock": false,
+    "badge": "Exclusive",
+    "featured": true,
+    "flashSale": false,
+    "images": [
+      "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800&auto=format&fit=crop"
+    ],
+    "shortDescription": "Super soft 400 thread count Egyptian Cotton Duvet Set with 2 Pillowcases",
+    "description": "Super soft 400 thread count Egyptian Cotton Duvet Set with 2 Pillowcases. Machine washable.",
+    "variants": [
+      {
+        "id": "v-king-1788662432516",
+        "name": "King Duvet (90x100 in) + 2 Pillowcases",
+        "price": 3200,
+        "salePrice": 2450,
+        "stock": 15,
+        "color": "Signature Gold",
+        "colorCode": "#b8873f",
+        "material": "100% Egyptian Cotton"
+      }
+    ],
+    "id": "prod-1788662435623-20",
+    "sku": "HZN-435623",
+    "variantType": "dimension",
+    "rating": 5,
+    "reviewCount": 42,
+    "bundleOffers": [],
+    "features": [],
+    "specifications": {},
+    "seoTitle": "100% Egyptian Cotton Duvet Cover Set",
+    "seoDescription": "Super soft 400 thread count Egyptian Cotton Duvet Set with 2 Pillowcases",
+    "createdAt": "2026-09-06T02:40:35.623Z"
+  },
+  {
     "id": "prod-1788174520192",
     "slug": "l",
     "name": "Luxury Bedsheets",

@@ -264,9 +264,11 @@ export const db = {
 
         if (error) {
           console.error("Supabase insert product error:", error);
+          throw new Error(`Database error: ${error.message}`);
         }
-      } catch (sbErr) {
-        console.warn("Supabase insert product warning, persisting to disk fallback:", sbErr);
+      } catch (sbErr: any) {
+        console.warn("Supabase insert product error:", sbErr);
+        throw sbErr;
       }
     }
 

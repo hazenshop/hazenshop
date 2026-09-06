@@ -21,6 +21,7 @@ import {
   Shirt,
   Leaf,
   BedDouble,
+  ExternalLink,
 } from "lucide-react";
 import { Category, Product, ProductVariant } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
@@ -202,6 +203,9 @@ export default function ProductForm({
     setVariants((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const [createdProduct, setCreatedProduct] = useState<Product | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
   // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -263,14 +267,16 @@ export default function ProductForm({
         });
       }
 
+      const resData = await res.json().catch(() => null);
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.error || "Failed to save product. Please check your data.");
+        throw new Error(resData?.error || "Failed to save product. Please check your data.");
       }
 
+      const savedItem = resData?.product || payload;
+      setCreatedProduct(savedItem);
+      setShowSuccessModal(true);
       showToast(`পণ্য "${name}" সফলভাবে সংরক্ষণ করা হয়েছে! (Product saved)`, "success");
-      router.push("/admin/products");
-      router.refresh();
     } catch (err: any) {
       console.error("Product save error:", err);
       showToast(err?.message || "পণ্যটি সেভ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", "error");
@@ -776,6 +782,116 @@ export default function ProductForm({
           </div>
         </div>
       </div>
+
+      {/* Success Confirmation Modal Dialog */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10">
+              <CheckCircle2 className="w-9 h-9" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl sm:text-2xl font-black text-white">
+                {isEditing ? "পণ্য সফলভাবে আপডেট করা হয়েছে!" : "নতুন পণ্য সফলভাবে প্রকাশিত হয়েছে!"}
+              </h3>
+              <p className="text-xs text-slate-300">
+                {isEditing
+                  ? "Product has been successfully updated and live on storefront."
+                  : "New product has been added to catalog and live on your store."}
+              </p>
+            </div>
+
+            {/* Product Quick Snapshot */}
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center gap-4 text-left">
+              <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 shrink-0">
+                <Image
+                  src={
+                    (createdProduct?.images && createdProduct.images[0]) ||
+                    (images && images[0]) ||
+                    "/logo.jpg"
+                  }
+                  alt={createdProduct?.name || name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1 space-y-1">
+                <h4 className="text-xs font-bold text-white truncate">
+                  {createdProduct?.name || name}
+                </h4>
+                <div className="flex items-center gap-2 text-[11px]">
+                  <span className="text-emerald-400 font-extrabold font-mono">
+                    ৳{createdProduct?.salePrice || salePrice || createdProduct?.price || price}
+                  </span>
+                  {(createdProduct?.salePrice || salePrice) && (
+                    <span className="text-slate-500 line-through text-[10px]">
+                      ৳{createdProduct?.price || price}
+                    </span>
+                  )}
+                  <span className="text-slate-500">•</span>
+                  <span className="text-slate-400 text-[10px] truncate">
+                    {createdProduct?.categoryName || "Bedsheet"}
+                  </span>
+                </div>
+                <p className="text-[10px] font-mono text-slate-500">
+                  Slug: /{createdProduct?.slug || slug}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-2.5 pt-2">
+              <a
+                href={`/products/${createdProduct?.slug || slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>Live Storefront এ দেখুন (View Live Product)</span>
+              </a>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    router.push("/admin/products");
+                  }}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors border border-slate-700 flex items-center justify-center gap-1.5"
+                >
+                  <Package className="w-3.5 h-3.5 text-brand-400" />
+                  <span>সকল পণ্য তালিকা</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    if (!isEditing) {
+                      setName("");
+                      setSku("");
+                      setSlug("");
+                      setPrice("");
+                      setSalePrice("");
+                      setShortDescription("");
+                      setDescription("");
+                      window.location.href = "/admin/products/new";
+                    } else {
+                      router.push("/admin/products");
+                    }
+                  }}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors border border-slate-700 flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>আরও পণ্য যোগ করুন</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
