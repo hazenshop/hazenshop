@@ -207,8 +207,10 @@ export default function ProductForm({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Submit Handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
 
     if (!name.trim()) {
       showToast("Product name is required (পণ্যের নাম দিন)", "error");
@@ -286,7 +288,7 @@ export default function ProductForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto pb-24">
+    <form onSubmit={handleSubmit} noValidate className="space-y-8 max-w-5xl mx-auto pb-24">
       {/* Top Breadcrumb & Action Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div className="flex items-center gap-3">
@@ -316,8 +318,9 @@ export default function ProductForm({
 
           <button
             type="submit"
+            onClick={handleSubmit}
             disabled={saving}
-            className="flex-1 sm:flex-none bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-extrabold text-xs px-6 py-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 sm:flex-none bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-extrabold text-xs px-6 py-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 min-h-[44px] cursor-pointer"
           >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             <span>{isEditing ? "Update Product" : "Publish Product"}</span>
@@ -780,6 +783,37 @@ export default function ProductForm({
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Bottom Sticky Action Bar */}
+      <div className="sticky bottom-4 z-40 bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-slate-300 truncate max-w-[200px] sm:max-w-xs">
+            {name ? name : "Untitled Product"}
+          </span>
+          {price && (
+            <span className="text-xs font-mono font-bold text-emerald-400">৳{salePrice || price}</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/products"
+            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-colors"
+          >
+            Discard
+          </Link>
+
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            disabled={saving}
+            className="bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-extrabold text-xs px-6 py-2.5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 min-h-[42px] cursor-pointer"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>{isEditing ? "Update Product" : "Publish Product"}</span>
+          </button>
         </div>
       </div>
 
