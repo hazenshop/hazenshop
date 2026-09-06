@@ -157,3 +157,69 @@ export async function getSteadfastBalance(
     };
   }
 }
+
+export async function getSteadfastStatusByCid(
+  cid: string | number,
+  settings: SiteSettings
+): Promise<{ success: boolean; deliveryStatus?: string; message: string; data?: any }> {
+  const apiKey = (settings.steadfastApiKey || process.env.STEADFAST_API_KEY || "").trim();
+  const secretKey = (settings.steadfastSecretKey || process.env.STEADFAST_SECRET_KEY || "").trim();
+
+  if (!apiKey || !secretKey) {
+    return { success: false, message: "Steadfast API Key or Secret Key is missing" };
+  }
+
+  try {
+    const res = await fetch(`https://portal.packzy.com/api/v1/status_by_cid/${cid}`, {
+      method: "GET",
+      headers: getSteadfastHeaders(apiKey, secretKey),
+    });
+
+    const data = await res.json();
+    if (res.status === 200 && data.status === 200) {
+      return {
+        success: true,
+        deliveryStatus: data.delivery_status,
+        message: "Status fetched successfully",
+        data,
+      };
+    }
+    return { success: false, message: data.message || "Failed to fetch status", data };
+  } catch (err: unknown) {
+    return { success: false, message: err instanceof Error ? err.message : "Network error" };
+  }
+}
+
+export async function getSteadfastTrackingsByInvoice(
+  invoice: string,
+  settings: SiteSettings
+): Promise<{ success: boolean; deliveryStatus?: string; trackingCode?: string; message: string; data?: any }> {
+  const apiKey = (settings.steadfastApiKey || process.env.STEADFAST_API_KEY || "").trim();
+  const secretKey = (settings.steadfastSecretKey || process.env.STEADFAST_SECRET_KEY || "").trim();
+
+  if (!apiKey || !secretKey) {
+    return { success: false, message: "Steadfast API Key or Secret Key is missing" };
+  }
+
+  try {
+    const res = await fetch(`https://portal.packzy.com/api/v1/trackings_by_invoice/${encodeURIComponent(invoice)}`, {
+      method: "GET",
+      headers: getSteadfastHeaders(apiKey, secretKey),
+    });
+
+    const data = await res.json();
+    if (res.status === 200 && data.status === 200) {
+      return {
+        success: true,
+        deliveryStatus: data.delivery_status,
+        trackingCode: data.tracking_code,
+        message: "Tracking fetched successfully",
+        data,
+      };
+    }
+    return { success: false, message: data.message || "Failed to fetch tracking", data };
+  } catch (err: unknown) {
+    return { success: false, message: err instanceof Error ? err.message : "Network error" };
+  }
+}
+

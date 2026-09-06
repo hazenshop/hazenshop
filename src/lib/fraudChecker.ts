@@ -66,7 +66,10 @@ export async function fetchSteadfastFraudStats(
     const totalParcels = Number(d.total_parcels ?? d.Total_parcels ?? 0);
     const delivered = Number(d.total_delivered ?? d.Total_delivered ?? 0);
     const cancelled = Number(d.total_cancelled ?? d.Total_cancelled ?? 0);
-    const fraudReports = Number(d.total_fraud_reports ?? d.Total_fraud_reports ?? 0);
+    
+    // Steadfast docs indicate total_fraud_reports can be an array [] or number
+    const rawFraud = d.total_fraud_reports ?? d.Total_fraud_reports;
+    const fraudReports = Array.isArray(rawFraud) ? rawFraud.length : (Number(rawFraud) || 0);
 
     const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
     const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
