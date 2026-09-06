@@ -61,30 +61,44 @@ export async function createSteadfastOrder(
     });
 
     const text = await res.text();
-    let data: SteadfastCreateOrderResponse | any = {};
+    let data: any = {};
     try {
       data = JSON.parse(text);
     } catch {
+      let friendlyError = text.trim();
+      if (/account is not active/i.test(text)) {
+        friendlyError = "Steadfast একাউন্ট এখনো সক্রিয় নয় (Account is not active in Steadfast merchant portal)। দয়া করে Steadfast মার্চেন্ট প্যানেলে একাউন্ট সক্রিয় আছে কিনা চেক করুন।";
+      } else if (res.status === 401) {
+        friendlyError = "Steadfast API Key অথবা Secret Key সঠিক নয় (Unauthorized 401)। দয়া করে এডমিন সেটিংসে সঠিক কী বসান।";
+      } else {
+        friendlyError = `Steadfast Server Error (${res.status}): ${text.slice(0, 150)}`;
+      }
       return {
         success: false,
-        message: `Steadfast Server error (${res.status}): ${text.slice(0, 150)}`,
+        message: friendlyError,
         raw: text,
       };
     }
 
-    if (data.status === 200 && data.consignment) {
+    if ((data.status === 200 || res.status === 200) && (data.consignment || data.tracking_code)) {
+      const consignment = data.consignment || data;
+      const trackingCode = consignment.tracking_code || data.tracking_code;
+      const consignmentId = consignment.consignment_id ? String(consignment.consignment_id) : undefined;
       return {
         success: true,
-        trackingCode: data.consignment.tracking_code,
-        consignmentId: String(data.consignment.consignment_id),
-        message: data.message || "Order sent to Steadfast Courier successfully!",
+        trackingCode,
+        consignmentId,
+        message: data.message || "Steadfast কুরিয়ারে অর্ডার সফলভাবে বুকিং হয়েছে!",
         raw: data,
       };
     }
 
     // Format error message
-    let errorMsg = data.message || "Failed to create order on Steadfast";
-    if (data.errors) {
+    let errorMsg = data.message || data.error || (res.status === 401 ? "Steadfast API Key বা Secret Key ভুল (401 Unauthorized)" : "Failed to create order on Steadfast");
+    if (/account is not active/i.test(errorMsg)) {
+      errorMsg = "Steadfast একাউন্ট এখনো সক্রিয় নয় (Account is not active in Steadfast merchant portal)।";
+    }
+    if (data.errors && typeof data.errors === "object") {
       const errorList = Object.values(data.errors).flat().join(", ");
       if (errorList) errorMsg += `: ${errorList}`;
     }

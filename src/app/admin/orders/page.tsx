@@ -11,6 +11,7 @@ import {
   Download,
   Clock,
   CheckCircle2,
+  AlertCircle,
   ExternalLink,
   Edit2,
   X,
@@ -44,6 +45,12 @@ export default function AdminOrdersPage() {
   const [courierName, setCourierName] = useState("");
   const [trackingCode, setTrackingCode] = useState("");
   const [sendingCourier, setSendingCourier] = useState<string | null>(null);
+  const [courierFeedback, setCourierFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+    trackingCode?: string;
+    consignmentId?: string;
+  } | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -90,6 +97,7 @@ export default function AdminOrdersPage() {
   const handleSendToCourier = async (courier: "steadfast" | "pathao") => {
     if (!editingCourierOrder) return;
     setSendingCourier(courier);
+    setCourierFeedback(null);
     try {
       const res = await fetch("/api/courier/send", {
         method: "POST",
@@ -102,16 +110,33 @@ export default function AdminOrdersPage() {
 
       const data = await res.json();
       if (data.success && data.order) {
-        showToast(`Sent to ${data.order.courierName}! Tracking: ${data.trackingCode}`, "success");
+        const successMsg = data.message || `Sent to ${data.order.courierName}! Tracking: ${data.trackingCode}`;
+        setCourierFeedback({
+          type: "success",
+          message: successMsg,
+          trackingCode: data.trackingCode,
+          consignmentId: data.consignmentId,
+        });
+        showToast(successMsg, "success");
         setOrders((prev) =>
           prev.map((o) => (o.id === editingCourierOrder.id ? data.order : o))
         );
-        setEditingCourierOrder(null);
+        setEditingCourierOrder(data.order);
       } else {
-        showToast(data.message || "Failed to dispatch to courier", "error");
+        const errorMsg = data.message || "Failed to dispatch to courier";
+        setCourierFeedback({
+          type: "error",
+          message: errorMsg,
+        });
+        showToast(errorMsg, "error");
       }
     } catch (e) {
-      showToast("Error communicating with courier API", "error");
+      const errorMsg = e instanceof Error ? e.message : "Error communicating with courier API";
+      setCourierFeedback({
+        type: "error",
+        message: errorMsg,
+      });
+      showToast(errorMsg, "error");
     } finally {
       setSendingCourier(null);
     }
@@ -739,6 +764,7 @@ export default function AdminOrdersPage() {
                           <button
                             onClick={() => {
                               setEditingCourierOrder(order);
+                              setCourierFeedback(null);
                               setCourierName("");
                               setTrackingCode("");
                             }}
@@ -795,6 +821,7 @@ export default function AdminOrdersPage() {
                           <button
                             onClick={() => {
                               setEditingCourierOrder(order);
+                              setCourierFeedback(null);
                               setCourierName(order.courierName || "");
                               setTrackingCode(order.trackingCode || "");
                             }}
@@ -866,6 +893,62 @@ export default function AdminOrdersPage() {
               </div>
               <p className="text-slate-400 truncate">{editingCourierOrder.customerAddress}</p>
             </div>
+
+            {/* Real-time Feedback Status Banner */}
+            {courierFeedback && (
+              <div
+                className={`p-4 rounded-2xl border transition-all animate-in fade-in duration-200 ${
+                  courierFeedback.type === "success"
+                    ? "bg-emerald-950/60 border-emerald-500/60 text-emerald-200"
+                    : "bg-rose-950/60 border-rose-500/60 text-rose-200"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  {courierFeedback.type === "success" ? (
+                    <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                  ) : (
+                    <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400 shrink-0">
+                      <AlertCircle className="w-5 h-5" />
+                    </div>
+                  )}
+                  <div className="space-y-1.5 text-xs flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-black text-sm">
+                        {courierFeedback.type === "success" ? "✅ সফল হয়েছে (Dispatched Successfully)" : "❌ কুরিয়ারে পাঠাতে ব্যর্থ হয়েছে (Failed)"}
+                      </span>
+                      <button
+                        onClick={() => setCourierFeedback(null)}
+                        className="text-slate-400 hover:text-white text-xs px-2 py-0.5 rounded-lg bg-slate-800/80 hover:bg-slate-800"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                    <p className="font-semibold text-xs leading-relaxed">{courierFeedback.message}</p>
+                    
+                    {courierFeedback.trackingCode && (
+                      <div className="mt-2 pt-2 border-t border-emerald-800/50 flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-xs font-mono font-bold text-emerald-300">
+                          Tracking Code: <strong>{courierFeedback.trackingCode}</strong>
+                        </span>
+                        {courierFeedback.consignmentId && (
+                          <span className="text-[11px] text-slate-300 font-mono">
+                            CID: {courierFeedback.consignmentId}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {courierFeedback.type === "error" && (
+                      <div className="mt-2 pt-2 border-t border-rose-800/50 text-[11px] text-rose-300/90 leading-relaxed">
+                        💡 <strong>পরামর্শ:</strong> একাউন্ট সংক্রান্ত কোনো সমস্যা থাকলে <strong>Admin &gt; Settings &gt; Courier Integration</strong> এ গিয়ে API Key ও Secret Key যাচাই করুন অথবা টেস্ট কানেকশন চালান।
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* SECTION 1: 1-CLICK AUTOMATED API DISPATCH */}
             <div className="space-y-3">
