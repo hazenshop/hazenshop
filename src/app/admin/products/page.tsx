@@ -26,6 +26,8 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchProducts = async () => {
     try {
@@ -67,17 +69,23 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDeleteProduct = async (id: string, pName: string) => {
-    if (!confirm(`Are you sure you want to delete "${pName}"?`)) return;
+  const confirmDeleteProduct = async () => {
+    if (!deletingProduct) return;
+    setIsDeleting(true);
 
     try {
-      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/products/${deletingProduct.id}`, { method: "DELETE" });
       if (res.ok) {
-        showToast(`Deleted "${pName}"`);
-        setProducts((prev) => prev.filter((p) => p.id !== id));
+        showToast(`"${deletingProduct.name}" সফলভাবে মুছে ফেলা হয়েছে`);
+        setProducts((prev) => prev.filter((p) => p.id !== deletingProduct.id));
+        setDeletingProduct(null);
+      } else {
+        showToast("পণ্যটি মোছা যায়নি", "error");
       }
     } catch (e) {
       showToast("Failed to delete product", "error");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -239,7 +247,7 @@ export default function AdminProductsPage() {
                     <span>Edit</span>
                   </Link>
                   <button
-                    onClick={() => handleDeleteProduct(p.id, p.name)}
+                    onClick={() => setDeletingProduct(p)}
                     className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 min-h-[38px] min-w-[38px] flex items-center justify-center"
                     title="Delete Product"
                   >
@@ -406,7 +414,7 @@ export default function AdminProductsPage() {
                           <Edit2 className="w-4 h-4" />
                         </Link>
                         <button
-                          onClick={() => handleDeleteProduct(p.id, p.name)}
+                          onClick={() => setDeletingProduct(p)}
                           className="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
                           title="Delete Product"
                         >
@@ -421,6 +429,68 @@ export default function AdminProductsPage() {
           </table>
         </div>
       </div>
+
+      {/* Danger Delete Confirmation Modal */}
+      {deletingProduct && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative">
+            <div className="w-16 h-16 bg-rose-500/20 border border-rose-500/40 rounded-2xl flex items-center justify-center mx-auto text-rose-400">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-black text-white">Delete Product?</h2>
+              <p className="text-xs text-slate-400">
+                Are you sure you want to permanently delete <strong className="text-rose-400 font-bold">{deletingProduct.name}</strong>?
+                This action removes the item from storefront catalogs and search indexes.
+              </p>
+            </div>
+
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center gap-3 text-left">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 relative overflow-hidden shrink-0 border border-slate-800">
+                <Image src={deletingProduct.images?.[0] || "/logo.jpg"} alt={deletingProduct.name} fill className="object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate">{deletingProduct.name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] text-brand-400 font-bold">{formatPrice(deletingProduct.salePrice || deletingProduct.price)}</span>
+                  <span className="text-[10px] text-slate-500 font-mono">SKU: {deletingProduct.sku || deletingProduct.id}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeletingProduct(null)}
+                disabled={isDeleting}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 px-4 rounded-xl transition-colors border border-slate-700 min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteProduct}
+                disabled={isDeleting}
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 px-4 rounded-xl transition-colors shadow-lg shadow-rose-900/30 flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Product</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Help Guide Modal */}
       <HelpGuideModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
     </div>

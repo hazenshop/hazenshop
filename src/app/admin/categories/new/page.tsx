@@ -4,15 +4,17 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Sparkles, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Image as ImageIcon, CheckCircle2, ExternalLink, FolderPlus, Grid } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
+import { Category } from "@/lib/types";
 import ImageUploader from "@/components/admin/ImageUploader";
-
 
 export default function NewCategoryPage() {
   const router = useRouter();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [createdCategory, setCreatedCategory] = useState<Category | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -71,35 +73,42 @@ export default function NewCategoryPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && typeof e.preventDefault === "function") {
+      e.preventDefault();
+    }
     if (!name.trim()) {
-      showToast("Please enter a category name", "error");
+      showToast("Please enter a category name (ক্যাটাগরির নাম দিন)", "error");
       return;
     }
 
     setIsSubmitting(true);
     const finalSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
+    const categoryPayload = {
+      name: name.trim(),
+      slug: finalSlug,
+      description: description.trim(),
+      image: image.trim() || "/logo.jpg",
+      featured,
+    };
+
     try {
       const res = await fetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          slug: finalSlug,
-          description: description.trim(),
-          image: image.trim() || "/logo.jpg",
-          featured,
-        }),
+        body: JSON.stringify(categoryPayload),
       });
 
+      const resData = await res.json().catch(() => null);
+
       if (res.ok) {
-        showToast("Category created successfully!");
-        router.push("/admin/categories");
+        const saved = resData?.category || categoryPayload;
+        setCreatedCategory(saved);
+        setShowSuccessModal(true);
+        showToast("ক্যাটাগরি সফলভাবে তৈরি করা হয়েছে! (Category created)", "success");
       } else {
-        const data = await res.json();
-        showToast(data.error || "Failed to create category", "error");
+        showToast(resData?.error || "ক্যাটাগরি তৈরি করা যায়নি", "error");
       }
     } catch (err) {
       showToast("Network error. Could not create category.", "error");
@@ -283,8 +292,92 @@ export default function NewCategoryPage() {
             </div>
           </div>
         </div>
-
       </form>
+
+      {/* Success Confirmation Modal Dialog */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 max-w-lg w-full text-center shadow-2xl space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10">
+              <CheckCircle2 className="w-9 h-9" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl sm:text-2xl font-black text-white">
+                ক্যাটাগরি সফলভাবে তৈরি করা হয়েছে!
+              </h3>
+              <p className="text-xs text-slate-300">
+                New category is now live on your storefront navigation and product filters.
+              </p>
+            </div>
+
+            {/* Snapshot */}
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center gap-4 text-left">
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 shrink-0">
+                <Image
+                  src={createdCategory?.image || image || "/logo.jpg"}
+                  alt={createdCategory?.name || name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <h4 className="text-xs font-bold text-white truncate">
+                  {createdCategory?.name || name}
+                </h4>
+                <p className="text-[11px] font-mono text-brand-400">
+                  Slug: /category/{createdCategory?.slug || slug}
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  Homepage Display: {featured ? "Active" : "Hidden"}
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="space-y-2.5 pt-2">
+              <a
+                href={`/category/${createdCategory?.slug || slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-brand-500 hover:bg-brand-600 active:scale-95 text-brand-dark font-extrabold text-xs py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>Live Category Page এ দেখুন (View Live Category)</span>
+              </a>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    router.push("/admin/categories");
+                  }}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors border border-slate-700 flex items-center justify-center gap-1.5"
+                >
+                  <Grid className="w-3.5 h-3.5 text-brand-400" />
+                  <span>সকল ক্যাটাগরি</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    setName("");
+                    setSlug("");
+                    setDescription("");
+                    setImage("https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop");
+                  }}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition-colors border border-slate-700 flex items-center justify-center gap-1.5"
+                >
+                  <FolderPlus className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>আরও যোগ করুন</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

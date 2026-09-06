@@ -19,6 +19,7 @@ import {
   Layers,
   ArrowUpRight,
   Filter,
+  AlertTriangle,
 } from "lucide-react";
 import { MediaItem } from "@/lib/types";
 import { optimizeAndConvertToWebP, formatBytes, CompressionResult } from "@/lib/imageOptimizer";
@@ -34,6 +35,8 @@ export default function AdminStoragePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [deletingMedia, setDeletingMedia] = useState<MediaItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchMedia = async () => {
     try {
@@ -102,25 +105,27 @@ export default function AdminStoragePage() {
     }
   };
 
-  const handleDeleteMedia = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to permanently delete "${name}" from storage?`)) {
-      return;
-    }
+  const confirmDeleteMedia = async () => {
+    if (!deletingMedia) return;
+    setIsDeleting(true);
 
     try {
-      const res = await fetch(`/api/storage?id=${id}`, {
+      const res = await fetch(`/api/storage?id=${encodeURIComponent(deletingMedia.id)}`, {
         method: "DELETE",
       });
 
       if (res.ok) {
-        showToast("Image deleted permanently from storage", "info");
-        setMediaList((prev) => prev.filter((m) => m.id !== id));
+        showToast("ছবি সফলভাবে মুছে ফেলা হয়েছে (Image deleted)", "info");
+        setMediaList((prev) => prev.filter((m) => m.id !== deletingMedia.id));
+        setDeletingMedia(null);
       } else {
         throw new Error("Delete failed");
       }
     } catch (err) {
       console.error(err);
       showToast("Failed to delete media", "error");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -338,7 +343,7 @@ export default function AdminStoragePage() {
                   </a>
 
                   <button
-                    onClick={() => handleDeleteMedia(item.id, item.name)}
+                    onClick={() => setDeletingMedia(item)}
                     className="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/60 text-slate-400 hover:text-rose-300 transition-colors"
                     title="Delete permanently"
                   >
@@ -348,6 +353,71 @@ export default function AdminStoragePage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Danger Delete Confirmation Modal */}
+      {deletingMedia && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative">
+            <div className="w-16 h-16 bg-rose-500/20 border border-rose-500/40 rounded-2xl flex items-center justify-center mx-auto text-rose-400">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-black text-white">Delete Media File?</h2>
+              <p className="text-xs text-slate-400">
+                Are you sure you want to permanently delete <strong className="text-rose-400 font-bold">{deletingMedia.name}</strong> from storage?
+                {deletingMedia.productName && (
+                  <span className="block mt-1 text-amber-400 font-medium">
+                    This file is referenced by product: {deletingMedia.productName}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center gap-3 text-left">
+              <div className="w-16 h-16 rounded-xl bg-slate-900 relative overflow-hidden shrink-0 border border-slate-800">
+                <Image src={deletingMedia.url} alt={deletingMedia.name} fill className="object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate">{deletingMedia.name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-[10px] text-emerald-400 font-mono font-bold uppercase">{deletingMedia.format}</span>
+                  <span className="text-[10px] text-slate-400 font-mono">{formatBytes(deletingMedia.sizeBytes)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeletingMedia(null)}
+                disabled={isDeleting}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 px-4 rounded-xl transition-colors border border-slate-700 min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteMedia}
+                disabled={isDeleting}
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 px-4 rounded-xl transition-colors shadow-lg shadow-rose-900/30 flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete File</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

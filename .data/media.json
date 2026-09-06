@@ -1,18 +1,5 @@
 [
   {
-    "id": "img-1788662821415-s9pg0",
-    "name": "_428_frd_1786157370-1788662820927.webp",
-    "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_428_frd_1786157370-1788662820927-img-1788662821415-s9pg0.webp",
-    "sizeBytes": 204288,
-    "originalSizeBytes": 153804,
-    "format": "webp",
-    "width": 1080,
-    "height": 1080,
-    "productName": "Luxury King size Bed Sheet with Matching Pillow covers",
-    "categorySlug": "luxury-bedsheets",
-    "createdAt": "2026-09-06T02:47:02.405Z"
-  },
-  {
     "id": "img-1788662590358-oa8tn",
     "name": "_428_frd_1786157370-1788662589840.webp",
     "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_428_frd_1786157370-1788662589840-img-1788662590358-oa8tn.webp",
@@ -26,15 +13,6 @@
     "createdAt": "2026-09-06T02:43:11.667Z"
   },
   {
-    "id": "bb1704d5-c470-4070-969d-ba035bfe38f5",
-    "name": "_2_frd_1775921700-1788630357541-img-1788630363281-pmjlv.webp",
-    "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_2_frd_1775921700-1788630357541-img-1788630363281-pmjlv.webp",
-    "sizeBytes": 187666,
-    "originalSizeBytes": 187666,
-    "format": "webp",
-    "createdAt": "2026-09-05T17:46:04.602Z"
-  },
-  {
     "id": "86ec2cc5-1153-4753-87dd-64b3bf2fafee",
     "name": "_2_frd_1775921705-1788630363067-img-1788630366683-sngo7.webp",
     "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_2_frd_1775921705-1788630363067-img-1788630366683-sngo7.webp",
@@ -44,15 +22,6 @@
     "createdAt": "2026-09-05T17:46:07.774Z"
   },
   {
-    "id": "795af73f-4fe0-408a-a4fb-cb6a11769c9c",
-    "name": "_2_frd_1775921700-1788630599195-img-1788630602926-jyteq.webp",
-    "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_2_frd_1775921700-1788630599195-img-1788630602926-jyteq.webp",
-    "sizeBytes": 187666,
-    "originalSizeBytes": 187666,
-    "format": "webp",
-    "createdAt": "2026-09-05T17:50:04.234Z"
-  },
-  {
     "id": "8ab15d82-1b86-4776-a874-08c56e539c54",
     "name": "_2_frd_1775921705-1788630602850-img-1788630606622-slpz2.webp",
     "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_2_frd_1775921705-1788630602850-img-1788630606622-slpz2.webp",
@@ -60,15 +29,6 @@
     "originalSizeBytes": 240954,
     "format": "webp",
     "createdAt": "2026-09-05T17:50:07.829Z"
-  },
-  {
-    "id": "9c4821a0-5428-451f-8284-b062c435712a",
-    "name": "_428_frd_1786157370-1788662186212-img-1788662188930-7otin.webp",
-    "url": "https://vqhbpptjcltnssmoplcb.supabase.co/storage/v1/object/public/product-images/_428_frd_1786157370-1788662186212-img-1788662188930-7otin.webp",
-    "sizeBytes": 204288,
-    "originalSizeBytes": 204288,
-    "format": "webp",
-    "createdAt": "2026-09-06T02:36:30.150Z"
   },
   {
     "id": "858fe8de-06aa-4fbc-b0db-9d0f3316eef3",

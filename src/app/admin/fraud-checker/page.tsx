@@ -31,6 +31,7 @@ export default function FraudCheckerPage() {
   const [result, setResult] = useState<FraudCheckResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [togglingBlacklist, setTogglingBlacklist] = useState(false);
+  const [showBlacklistModal, setShowBlacklistModal] = useState(false);
 
   const handleCheck = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -66,7 +67,7 @@ export default function FraudCheckerPage() {
     }
   };
 
-  const handleToggleBlacklist = async () => {
+  const confirmToggleBlacklist = async () => {
     if (!result) return;
     setTogglingBlacklist(true);
     try {
@@ -82,6 +83,7 @@ export default function FraudCheckerPage() {
       if (json.success) {
         showToast(json.message, "success");
         setResult((prev) => (prev ? { ...prev, isBlacklisted: json.isBlacklisted } : prev));
+        setShowBlacklistModal(false);
       } else {
         showToast("Failed to update blacklist", "error");
       }
@@ -264,7 +266,8 @@ export default function FraudCheckerPage() {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={handleToggleBlacklist}
+                type="button"
+                onClick={() => setShowBlacklistModal(true)}
                 disabled={togglingBlacklist}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors border ${
                   result.isBlacklisted
@@ -483,6 +486,76 @@ export default function FraudCheckerPage() {
               <Phone className="w-4 h-4 text-brand-400" />
               <span>Call Customer Directly ({result.phone})</span>
             </a>
+          </div>
+        </div>
+      )}
+
+      {/* Blacklist Confirmation Modal */}
+      {showBlacklistModal && result && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative">
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto ${
+              result.isBlacklisted ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "bg-rose-500/20 text-rose-400 border border-rose-500/40"
+            }`}>
+              <Ban className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-black text-white">
+                {result.isBlacklisted ? "Remove from Blacklist?" : "Add to Store Blacklist?"}
+              </h2>
+              <p className="text-xs text-slate-400">
+                {result.isBlacklisted ? (
+                  <>
+                    Are you sure you want to unblock <strong className="text-emerald-400 font-bold">{result.phone}</strong>?
+                    This will allow Cash on Delivery orders from this number again.
+                  </>
+                ) : (
+                  <>
+                    Are you sure you want to blacklist <strong className="text-rose-400 font-bold">{result.phone}</strong>?
+                    Future automated checkouts from this number will be flagged for advance courier payment.
+                  </>
+                )}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowBlacklistModal(false)}
+                disabled={togglingBlacklist}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 px-4 rounded-xl transition-colors border border-slate-700 min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmToggleBlacklist}
+                disabled={togglingBlacklist}
+                className={`w-full font-black text-xs py-3 px-4 rounded-xl transition-colors shadow-lg flex items-center justify-center gap-1.5 min-h-[44px] ${
+                  result.isBlacklisted
+                    ? "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/30"
+                    : "bg-rose-600 hover:bg-rose-700 text-white shadow-rose-900/30"
+                }`}
+              >
+                {togglingBlacklist ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Updating...</span>
+                  </>
+                ) : result.isBlacklisted ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Unblock Customer</span>
+                  </>
+                ) : (
+                  <>
+                    <Ban className="w-3.5 h-3.5" />
+                    <span>Confirm Blacklist</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

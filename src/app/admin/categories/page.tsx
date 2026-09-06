@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FolderTree, Plus, Trash2, Edit2, Layers, ExternalLink, Sparkles } from "lucide-react";
+import { FolderTree, Plus, Trash2, Edit2, Layers, ExternalLink, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import { Category } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
 
@@ -11,10 +11,15 @@ export default function AdminCategoriesPage() {
   const { showToast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("/api/categories");
+      const res = await fetch("/api/categories", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" }
+      });
       const data = await res.json();
       if (data.categories) setCategories(data.categories);
     } catch (e) {
@@ -28,21 +33,25 @@ export default function AdminCategoriesPage() {
     fetchCategories();
   }, []);
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete category "${name}"?`)) return;
+  const confirmDelete = async () => {
+    if (!deletingCategory) return;
+    setIsDeleting(true);
 
     try {
-      const res = await fetch(`/api/categories/${id}`, {
+      const res = await fetch(`/api/categories/${deletingCategory.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
-        showToast("Category deleted successfully");
+        showToast(`ক্যাটাগরি "${deletingCategory.name}" মুছে ফেলা হয়েছে`, "info");
+        setDeletingCategory(null);
         fetchCategories();
       } else {
         showToast("Failed to delete category", "error");
       }
     } catch (e) {
       showToast("Error deleting category", "error");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -136,7 +145,7 @@ export default function AdminCategoriesPage() {
 
                   <button
                     type="button"
-                    onClick={() => handleDelete(cat.id, cat.name)}
+                    onClick={() => setDeletingCategory(cat)}
                     className="p-2.5 bg-rose-950/40 hover:bg-rose-900 text-rose-400 rounded-xl border border-rose-900/60 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
                     title="Delete Category"
                   >
@@ -146,6 +155,68 @@ export default function AdminCategoriesPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Danger Delete Confirmation Modal */}
+      {deletingCategory && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-rose-500/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5 text-center relative">
+            <div className="w-16 h-16 bg-rose-500/20 border border-rose-500/40 rounded-2xl flex items-center justify-center mx-auto text-rose-400">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-black text-white">Delete Category?</h2>
+              <p className="text-xs text-slate-400">
+                Are you sure you want to permanently delete <strong className="text-rose-400 font-bold">{deletingCategory.name}</strong>?
+                {Boolean(deletingCategory.productCount && deletingCategory.productCount > 0) && (
+                  <span className="block mt-1 text-amber-400 font-medium">
+                    Warning: There are {deletingCategory.productCount} products assigned to this category.
+                  </span>
+                )}
+              </p>
+            </div>
+
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center gap-3 text-left">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 relative overflow-hidden shrink-0 border border-slate-800">
+                <Image src={deletingCategory.image || "/logo.jpg"} alt={deletingCategory.name} fill className="object-cover" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate">{deletingCategory.name}</p>
+                <p className="text-[10px] text-slate-500 font-mono truncate">/category/{deletingCategory.slug}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeletingCategory(null)}
+                disabled={isDeleting}
+                className="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs py-3 px-4 rounded-xl transition-colors border border-slate-700 min-h-[44px]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 px-4 rounded-xl transition-colors shadow-lg shadow-rose-900/30 flex items-center justify-center gap-1.5 min-h-[44px]"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
