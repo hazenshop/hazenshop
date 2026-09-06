@@ -198,12 +198,12 @@ export const db = {
     cachedProducts = readJsonFile("products.json", cachedProducts);
 
     // Ensure slug is clean and unique
-    let finalSlug = product.slug?.trim() || product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-    if (!finalSlug) finalSlug = `product-${Date.now().toString().slice(-6)}`;
+    let rawSlug = product.slug?.trim() || product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!rawSlug) rawSlug = `product-${Date.now().toString().slice(-6)}`;
 
-    // Collision check against existing products
+    let finalSlug = rawSlug;
     if (cachedProducts.some((p) => p.slug === finalSlug)) {
-      finalSlug = `${finalSlug}-${Math.floor(100 + Math.random() * 900)}`;
+      finalSlug = `${rawSlug}-${Math.floor(100 + Math.random() * 900)}`;
     }
 
     const shortDesc = product.shortDescription?.trim() || product.name.trim() || "Premium export quality fabric";
@@ -240,42 +240,55 @@ export const db = {
     };
 
     if (isSupabaseConfigured && dbClient) {
-      try {
-        const { error } = await dbClient.from("products").insert({
-          id: newProduct.id,
-          sku: newProduct.sku,
-          slug: newProduct.slug,
-          name: newProduct.name,
-          short_description: newProduct.shortDescription,
-          description: newProduct.description,
-          price: newProduct.price,
-          sale_price: newProduct.salePrice ?? null,
-          images: newProduct.images,
-          category: newProduct.category,
-          category_name: newProduct.categoryName,
-          stock: newProduct.stock,
-          is_unlimited_stock: newProduct.isUnlimitedStock,
-          rating: newProduct.rating,
-          review_count: newProduct.reviewCount,
-          badge: newProduct.badge,
-          featured: newProduct.featured,
-          flash_sale: newProduct.flashSale,
-          variants: newProduct.variants,
-          bundle_offers: newProduct.bundleOffers,
-          features: newProduct.features,
-          specifications: newProduct.specifications,
-          seo_title: newProduct.seoTitle,
-          seo_description: newProduct.seoDescription,
-          created_at: newProduct.createdAt,
-        });
+      let insertSuccess = false;
+      let attempts = 0;
+      let currentSlug = newProduct.slug;
 
-        if (error) {
-          console.error("Supabase insert product error:", error);
-          throw new Error(`Database error: ${error.message}`);
+      while (!insertSuccess && attempts < 4) {
+        attempts++;
+        try {
+          const { error } = await dbClient.from("products").insert({
+            id: newProduct.id,
+            sku: newProduct.sku,
+            slug: currentSlug,
+            name: newProduct.name,
+            short_description: newProduct.shortDescription,
+            description: newProduct.description,
+            price: newProduct.price,
+            sale_price: newProduct.salePrice ?? null,
+            images: newProduct.images,
+            category: newProduct.category,
+            category_name: newProduct.categoryName,
+            stock: newProduct.stock,
+            is_unlimited_stock: newProduct.isUnlimitedStock,
+            rating: newProduct.rating,
+            review_count: newProduct.reviewCount,
+            badge: newProduct.badge,
+            featured: newProduct.featured,
+            flash_sale: newProduct.flashSale,
+            variants: newProduct.variants,
+            bundle_offers: newProduct.bundleOffers,
+            features: newProduct.features,
+            specifications: newProduct.specifications,
+            seo_title: newProduct.seoTitle,
+            seo_description: newProduct.seoDescription,
+            created_at: newProduct.createdAt,
+          });
+
+          if (!error) {
+            newProduct.slug = currentSlug;
+            insertSuccess = true;
+          } else if (error.code === "23505" || error.message?.includes("unique constraint") || error.message?.includes("already exists")) {
+            currentSlug = `${rawSlug}-${Math.floor(1000 + Math.random() * 9000)}`;
+            console.warn(`Supabase slug duplicate constraint detected. Retrying with unique slug: ${currentSlug}`);
+          } else {
+            console.error("Supabase insert product error:", error);
+            break;
+          }
+        } catch (sbErr: any) {
+          console.warn("Supabase insert product exception:", sbErr);
+          break;
         }
-      } catch (sbErr: any) {
-        console.warn("Supabase insert product error:", sbErr);
-        throw sbErr;
       }
     }
 

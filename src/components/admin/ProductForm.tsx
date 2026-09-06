@@ -207,6 +207,7 @@ export default function ProductForm({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const confirmDelete = async () => {
     if (!initialProduct) return;
@@ -236,15 +237,18 @@ export default function ProductForm({
     }
 
     if (!name.trim()) {
+      setErrorMessage("Product title is required (পণ্যের নাম দিন)");
       showToast("Product name is required (পণ্যের নাম দিন)", "error");
       return;
     }
     if (!price || Number(price) <= 0) {
+      setErrorMessage("Please enter a valid product price (সঠিক মূল্য লিখুন)");
       showToast("Please enter a valid product price (সঠিক মূল্য লিখুন)", "error");
       return;
     }
 
     setSaving(true);
+    setErrorMessage(null);
     const selectedCategorySlug = category || categories[0]?.slug || "luxury-bedsheets";
     const catObj = categories.find((c) => c.slug === selectedCategorySlug);
     const autoSlug = slug.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -295,7 +299,9 @@ export default function ProductForm({
       const resData = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(resData?.error || "Failed to save product. Please check your data.");
+        const errorText = resData?.error || "Failed to save product. Please check your data.";
+        setErrorMessage(errorText);
+        throw new Error(errorText);
       }
 
       const savedItem = resData?.product || payload;
@@ -304,7 +310,9 @@ export default function ProductForm({
       showToast(`পণ্য "${name}" সফলভাবে সংরক্ষণ করা হয়েছে! (Product saved)`, "success");
     } catch (err: any) {
       console.error("Product save error:", err);
-      showToast(err?.message || "পণ্যটি সেভ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।", "error");
+      const msg = err?.message || "পণ্যটি সেভ করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।";
+      setErrorMessage(msg);
+      showToast(msg, "error");
     } finally {
       setSaving(false);
     }
@@ -362,6 +370,28 @@ export default function ProductForm({
           </button>
         </div>
       </div>
+
+      {/* Error Alert Banner */}
+      {errorMessage && (
+        <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-300 flex items-center justify-between gap-3 animate-in fade-in duration-200">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-rose-200">Save Error (সংরক্ষণ ব্যর্থ)</h4>
+              <p className="text-xs text-rose-300/90">{errorMessage}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setErrorMessage(null)}
+            className="text-rose-400 hover:text-white p-1 rounded-lg hover:bg-rose-500/20 text-xs font-bold"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Main Form Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
