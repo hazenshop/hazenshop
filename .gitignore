@@ -11,7 +11,7 @@
 /.next/
 /out/
 /build
-
+/.data/
 # misc & OS files
 .DS_Store
 *.pem
