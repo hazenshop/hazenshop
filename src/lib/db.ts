@@ -987,7 +987,7 @@ export const db = {
 
           cachedSettings = {
             ...base,
-            siteName: data.site_name || data.store_name || base.siteName || "HAZENSHOP BD",
+            siteName: data.site_name || data.store_name || base.siteName || "HAZEN SHOP BD",
             tagline: data.tagline ?? base.tagline,
             logoUrl: data.logo_url ?? base.logoUrl,
             hotline: data.hotline || base.hotline,

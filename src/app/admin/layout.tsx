@@ -47,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-black text-sm sm:text-base text-white tracking-tight leading-none">
-                  HAZENSHOP BD<span className="text-brand-500">.</span>
+                  HAZENSHOP BD
                 </span>
                 <span className="text-[9px] font-bold text-brand-400 uppercase tracking-wider mt-0.5">
                   Store Admin

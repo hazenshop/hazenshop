@@ -70,7 +70,7 @@ export const initialProducts: Product[] = [];
 export const initialOrders: Order[] = [];
 
 export const initialSiteSettings: SiteSettings = {
-  siteName: "HAZENSHOP BD — Luxury Living",
+  siteName: "HAZEN SHOP BD — Luxury Living",
   tagline: "Artisanal Bedsheets & Designer Window Curtains",
   hotline: "+880 1700-000000",
   whatsappNumber: "8801700000000",
@@ -81,7 +81,7 @@ export const initialSiteSettings: SiteSettings = {
   freeShippingThreshold: 2500,
   announcementBarActive: true,
   announcementBarText: "✨ বিশেষ অফার: hazenshopbd.com এর সকল বেডশিট ও পর্দা কালেকশনে ক্যাশ অন ডেলিভারি সুবিধা!",
-  seoTitle: "HAZENSHOP BD (hazenshopbd.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
+  seoTitle: "HAZEN SHOP BD (hazenshopbd.com) — Luxury Bedsheets & Window Curtains in Bangladesh",
   seoDescription: "Shop export-quality 100% Egyptian cotton bedsheets, comforters, and blackout window curtains online at hazenshopbd.com with Cash on Delivery nationwide.",
   seoKeywords: [
     "hazenshopbd",

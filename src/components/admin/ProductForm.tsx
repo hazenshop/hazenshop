@@ -153,6 +153,35 @@ export default function ProductForm({
     showToast("Applied 360° Fitted Elastic Sheet Preset!");
   };
 
+  // Bedsheet with / without Kolbali cover pricing shortcuts
+  const applyBedsheetKolbaliPreset = () => {
+    setVariantType("custom");
+    setVariants([
+      { id: `v-kb-no-${Date.now()}`, name: "কোলবালিশ কাভার ছাড়া ১০৫০ টাকা", price: 1050, salePrice: 1050, stock: 20, color: "Standard", colorCode: "#F59E0B", material: "Export Quality" },
+      { id: `v-kb-yes-${Date.now()}`, name: "কোলবালিশ কাভার সহ ১২০০ টাকা", price: 1200, salePrice: 1200, stock: 20, color: "Standard", colorCode: "#F59E0B", material: "Export Quality" },
+    ]);
+    showToast("Applied Bedsheet + Kolbali Cover Pricing Preset!");
+  };
+
+  // Comforter set pricing shortcuts
+  const applyComforterSetPreset = () => {
+    setVariantType("custom");
+    setVariants([
+      { id: `v-cf-set-${Date.now()}`, name: "কমফোর্টার সহ ৫ পিসের সেট - ৩১৯০ টাকা", price: 3190, salePrice: 3190, stock: 15, color: "Standard", colorCode: "#3B82F6", material: "350 GSM Cloud Microfiber" },
+      { id: `v-cf-only-${Date.now()}`, name: "শুধু কমফোর্টার - ২১৯০ টাকা", price: 2190, salePrice: 2190, stock: 15, color: "Standard", colorCode: "#3B82F6", material: "350 GSM Cloud Microfiber" },
+    ]);
+    showToast("Applied Comforter Set Pricing Preset!");
+  };
+
+  // Curtain 7-piece set pricing shortcuts
+  const applyCurtainSetPreset = () => {
+    setVariantType("custom");
+    setVariants([
+      { id: `v-parda-set-${Date.now()}`, name: "২ টি পর্দা সহ ৭ পিসের সেট ৪১৯০ টাকা", price: 4190, salePrice: 4190, stock: 10, color: "Standard", colorCode: "#10B981", material: "Triple-Weave Heavy Blackout" },
+    ]);
+    showToast("Applied Curtain 7-Piece Set Pricing Preset!");
+  };
+
 
 
   // Handlers for images
@@ -573,6 +602,30 @@ export default function ProductForm({
                 >
                   <Layers className="w-3 h-3" />
                   <span>+ Fitted Elastic</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={applyBedsheetKolbaliPreset}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
+                >
+                  <BedDouble className="w-3 h-3" />
+                  <span>+ কোলবালিশ কাভার</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={applyComforterSetPreset}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
+                >
+                  <Package className="w-3 h-3" />
+                  <span>+ কমফোর্টার সেট</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={applyCurtainSetPreset}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>+ পর্দা ৭ পিস সেট</span>
                 </button>
               </div>
             </div>
