@@ -28,7 +28,7 @@ export default function Footer({
               </div>
               <div className="flex flex-col">
                 <span className="font-heading font-extrabold text-xl tracking-tight text-white leading-none">
-                  HAZENSHOP BD
+                  HAZEN SHOP BD
                 </span>
                 <span className="text-[9px] font-semibold tracking-widest text-slate-400 uppercase mt-0.5">
                   hazenshopbd.com
