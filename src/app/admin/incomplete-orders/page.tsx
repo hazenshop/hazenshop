@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   AlertCircle,
   Phone,
@@ -368,13 +369,16 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
                       Selected Items:
                     </p>
                     {order.items.map((it, idx) => (
-                      <div key={idx} className="flex justify-between items-center text-xs text-slate-300">
-                        <span className="line-clamp-1">
-                          {it.productName} {it.variantName ? `(${it.variantName})` : ""}
-                        </span>
-                        <span className="text-slate-400 font-mono shrink-0 ml-2">
-                          x{it.quantity} • {formatPrice(it.price * it.quantity)}
-                        </span>
+                      <div key={idx} className="flex items-center gap-2 text-xs text-slate-300">
+                        {it.productImage && (
+                          <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-700 bg-slate-800">
+                            <Image src={it.productImage} alt={it.productName} fill className="object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <span className="line-clamp-1">{it.productName} {it.variantName ? `(${it.variantName})` : ""}</span>
+                          <span className="text-slate-400 font-mono text-[10px]">x{it.quantity} • {formatPrice(it.price * it.quantity)}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -500,12 +504,18 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
                       <td className="p-4 align-top">
                         <div className="space-y-1 max-w-xs">
                           {order.items.map((it, idx) => (
-                            <div key={idx} className="text-slate-300 font-medium">
-                              • {it.productName}{" "}
-                              {it.variantName ? (
-                                <span className="text-slate-400 text-[11px]">({it.variantName})</span>
-                              ) : null}{" "}
-                              <span className="text-slate-500 font-mono">x{it.quantity}</span>
+                            <div key={idx} className="flex items-center gap-2 text-slate-300 font-medium">
+                              {it.productImage && (
+                                <div className="relative w-7 h-7 rounded-md overflow-hidden shrink-0 border border-slate-700 bg-slate-800">
+                                  <Image src={it.productImage} alt={it.productName} fill className="object-cover" />
+                                </div>
+                              )}
+                              <span>• {it.productName}{" "}
+                                {it.variantName ? (
+                                  <span className="text-slate-400 text-[11px]">({it.variantName})</span>
+                                ) : null}{" "}
+                                <span className="text-slate-500 font-mono">x{it.quantity}</span>
+                              </span>
                             </div>
                           ))}
                         </div>
