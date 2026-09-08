@@ -571,43 +571,7 @@ export default function ProductForm({
 
               {/* Quick Preset Buttons */}
               <div className="flex flex-col gap-2">
-                {/* Group 1: Dimension-based presets */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={applyBedsheetPreset}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-brand-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
-                  >
-                    <BedDouble className="w-3 h-3" />
-                    <span>+ Bedsheet Sizes</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={applyCurtainPreset}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    <span>+ Window Curtains (Porda)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={applyComforterPreset}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-blue-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
-                  >
-                    <Package className="w-3 h-3" />
-                    <span>+ Comforter / Quilt</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={applyFittedSheetPreset}
-                    className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-400 text-[11px] font-bold border border-slate-700 flex items-center gap-1"
-                  >
-                    <Layers className="w-3 h-3" />
-                    <span>+ Fitted Elastic</span>
-                  </button>
-                </div>
-
-                {/* Group 2: Bedsheet pricing (kolbali) */}
+                {/* Bedsheet pricing (kolbali) */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bedsheet:</span>
                   <button
@@ -620,7 +584,7 @@ export default function ProductForm({
                   </button>
                 </div>
 
-                {/* Group 3: Comforter pricing */}
+                {/* Comforter pricing */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Comforter:</span>
                   <button
