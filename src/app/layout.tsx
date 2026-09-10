@@ -38,6 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
       description: settings.seoDescription,
       images: ["/logo.jpg"],
     },
+    icons: {
+      icon: "/logo.jpg",
+      apple: "/logo.jpg",
+    },
   };
 }
 
@@ -54,6 +58,8 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
+        <link rel="icon" href="/logo.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/logo.jpg" />
       </head>
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
         <FacebookPixel
