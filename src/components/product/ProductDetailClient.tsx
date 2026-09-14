@@ -23,7 +23,6 @@ import {
 } from "@/lib/utils";
 import { trackViewContent, trackAddToCart as trackFBCart } from "@/lib/pixel";
 import ProductGallery from "@/components/product/ProductGallery";
-import FastCheckoutForm from "@/components/product/FastCheckoutForm";
 import ProductCard from "@/components/product/ProductCard";
 import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
@@ -72,12 +71,7 @@ export default function ProductDetailClient({
   };
 
   const handleScrollToOrder = () => {
-    const el = document.getElementById("fast-order");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    } else {
-      openQuickOrder(product, selectedVariant);
-    }
+    openQuickOrder(product, selectedVariant);
   };
 
   const whatsAppOrderUrl = generateWhatsAppOrderUrl(
@@ -492,19 +486,6 @@ export default function ProductDetailClient({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* BOTTOM FULL-WIDTH CASH ON DELIVERY (COD) EXPRESS CHECKOUT SECTION */}
-      {/* ========================================================================= */}
-      <section className="pt-4 sm:pt-6">
-        <div className="max-w-3xl mx-auto">
-          <FastCheckoutForm
-            product={product}
-            selectedVariant={selectedVariant}
-            quantity={quantity}
-            settings={settings}
-          />
-        </div>
-      </section>
 
       {/* ========================================================================= */}
       {/* RELATED PRODUCTS SHOWCASE */}
