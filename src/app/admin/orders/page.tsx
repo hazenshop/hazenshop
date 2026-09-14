@@ -123,7 +123,8 @@ export default function AdminOrdersPage() {
         );
         setEditingCourierOrder(data.order);
       } else {
-        const errorMsg = data.message || "Failed to dispatch to courier";
+        const errorMsg = data.message || `Steadfast API call failed (HTTP ${res.status}). Please check your API key and account status in Settings.`;
+        console.error("[Courier Dispatch Error]", { status: res.status, data });
         setCourierFeedback({
           type: "error",
           message: errorMsg,
@@ -132,9 +133,10 @@ export default function AdminOrdersPage() {
       }
     } catch (e) {
       const errorMsg = e instanceof Error ? e.message : "Error communicating with courier API";
+      console.error("[Courier Dispatch Catch]", e);
       setCourierFeedback({
         type: "error",
-        message: errorMsg,
+        message: `Network or server error: ${errorMsg}`,
       });
       showToast(errorMsg, "error");
     } finally {
@@ -592,6 +594,7 @@ export default function AdminOrdersPage() {
                     <button
                       onClick={() => {
                         setEditingCourierOrder(order);
+                        setCourierFeedback(null);
                         setCourierName(order.courierName || "");
                         setTrackingCode(order.trackingCode || "");
                       }}

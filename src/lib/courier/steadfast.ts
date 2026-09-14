@@ -44,14 +44,20 @@ export async function createSteadfastOrder(
     .map((i) => `${i.productName}${i.variantName ? ` (${i.variantName})` : ""} x${i.quantity}`)
     .join(", ");
 
+  // Steadfast expects BD local format: 01XXXXXXXXX (11 digits), NOT 8801...
+  let phone = order.customerPhone.replace(/[^0-9]/g, "");
+  if (phone.startsWith("88") && phone.length === 13) phone = phone.slice(2);
+
   const payload = {
     invoice: order.id,
     recipient_name: order.customerName,
-    recipient_phone: order.customerPhone.replace(/[^0-9]/g, ""),
+    recipient_phone: phone,
     recipient_address: order.customerAddress,
     cod_amount: Number(order.totalAmount),
     note: order.notes ? `${order.notes} | Items: ${itemsSummary}` : `Items: ${itemsSummary}`,
   };
+
+  console.log("[Steadfast] Creating order with payload:", JSON.stringify(payload));
 
   try {
     const res = await fetch("https://portal.packzy.com/api/v1/create_order", {
@@ -61,6 +67,7 @@ export async function createSteadfastOrder(
     });
 
     const text = await res.text();
+    console.log(`[Steadfast] HTTP ${res.status} response:`, text.slice(0, 500));
     let data: any = {};
     try {
       data = JSON.parse(text);
