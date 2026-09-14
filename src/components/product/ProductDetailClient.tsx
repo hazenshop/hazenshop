@@ -40,22 +40,21 @@ export default function ProductDetailClient({
   const { addToCart, openQuickOrder } = useCart();
   const { showToast } = useToast();
 
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(
-    product.variants && product.variants.length > 0 ? product.variants[0] : undefined
-  );
+  const defaultVariant =
+    product.variants && product.variants.length > 0 ? product.variants[0] : undefined;
   const [quantity, setQuantity] = useState(1);
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null);
 
-  // Trigger Facebook Pixel ViewContent on load & variant change
+  // Trigger Facebook Pixel ViewContent on load
   useEffect(() => {
-    trackViewContent(product, selectedVariant);
-  }, [product, selectedVariant]);
+    trackViewContent(product, defaultVariant);
+  }, [product, defaultVariant]);
 
-  const unitPrice = selectedVariant
-    ? selectedVariant.salePrice ?? selectedVariant.price
+  const unitPrice = defaultVariant
+    ? defaultVariant.salePrice ?? defaultVariant.price
     : product.salePrice ?? product.price;
 
-  const originalPrice = selectedVariant ? selectedVariant.price : product.price;
+  const originalPrice = defaultVariant ? defaultVariant.price : product.price;
   const discountPercent = calculateDiscountPercentage(originalPrice, unitPrice);
 
   const handleSelectBundle = (bundle: NonNullable<Product["bundleOffers"]>[number]) => {
@@ -65,13 +64,17 @@ export default function ProductDetailClient({
   };
 
   const handleAddToCart = () => {
-    addToCart(product, selectedVariant, quantity, { silent: false });
-    trackFBCart(product, selectedVariant, quantity);
+    if (product.variants && product.variants.length > 0) {
+      openQuickOrder(product);
+      return;
+    }
+    addToCart(product, undefined, quantity, { silent: false });
+    trackFBCart(product, undefined, quantity);
     showToast(`Added ${quantity}x "${product.name}" to bag.`);
   };
 
   const handleScrollToOrder = () => {
-    openQuickOrder(product, selectedVariant);
+    openQuickOrder(product);
   };
 
   const whatsAppOrderUrl = generateWhatsAppOrderUrl(
@@ -79,26 +82,13 @@ export default function ProductDetailClient({
     [
       {
         name: product.name,
-        variant: selectedVariant?.name,
+        variant: defaultVariant?.name,
         quantity,
         price: unitPrice,
       },
     ],
     unitPrice * quantity
   );
-
-  const getVariantLabel = () => {
-    switch (product.variantType) {
-      case "size":
-        return "সাইজ / পরিমাপ বাছাই করুন (Select Size):";
-      case "weight":
-        return "ওজন / পরিমাপ বাছাই করুন (Select Weight):";
-      case "dimension":
-        return "পর্দার মাপ বাছাই করুন (Select Dimension):";
-      default:
-        return "সাইজ / অপশন বাছাই করুন:";
-    }
-  };
 
   const defaultTrustBadges: TrustBadgeItem[] = [
     { icon: "award", title: "১০০% প্রিমিয়াম কোয়ালিটি", subtitle: "এক্সপোর্ট গ্রেড ফেব্রিক" },
@@ -288,86 +278,7 @@ export default function ProductDetailClient({
               </span>
             </div>
 
-            {/* Variants Selector (Mobile-Friendly Stacked Option Cards) */}
-            {product.variants && product.variants.length > 0 && (
-              <div className="space-y-2.5 pt-3 border-t border-slate-100">
-                <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-slate-900 uppercase tracking-wider">
-                    {getVariantLabel()}
-                  </label>
-                  {selectedVariant && (
-                    <span className="font-bold text-brand-maroon-700 bg-brand-maroon-50 px-2 py-0.5 rounded-md text-[11px]">
-                      {selectedVariant.name}
-                    </span>
-                  )}
-                </div>
 
-                <div className="flex flex-col gap-2">
-                  {product.variants.map((v) => {
-                    const isSelected = selectedVariant?.id === v.id;
-                    const variantPrice = v.salePrice ?? v.price;
-                    return (
-                      <button
-                        key={v.id}
-                        type="button"
-                        onClick={() => setSelectedVariant(v)}
-                        className={`group w-full p-3 sm:p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 min-h-[48px] ${
-                          isSelected
-                            ? "bg-brand-maroon-50/70 border-brand-maroon-700 text-slate-900 shadow-subtle ring-1 ring-brand-maroon-700"
-                            : "bg-slate-50/70 hover:bg-slate-100/90 text-slate-700 border-slate-200"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          {/* Radio Indicator */}
-                          <div
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                              isSelected
-                                ? "border-brand-maroon-700 bg-brand-maroon-700"
-                                : "border-slate-300 bg-white group-hover:border-slate-400"
-                            }`}
-                          >
-                            {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                          </div>
-
-                          {/* Color Swatch if present */}
-                          {v.colorCode && (
-                            <span
-                              className="w-4 h-4 rounded-full border border-black/20 shrink-0"
-                              style={{ backgroundColor: v.colorCode }}
-                            />
-                          )}
-
-                          {/* Variant Title - Wrap cleanly on mobile */}
-                          <span
-                            className={`text-xs sm:text-sm leading-snug break-words ${
-                              isSelected ? "font-bold text-brand-maroon-900" : "font-medium text-slate-800"
-                            }`}
-                          >
-                            {v.name}
-                          </span>
-                        </div>
-
-                        {/* Price Tag on Right */}
-                        <div className="shrink-0 text-right">
-                          <span
-                            className={`text-xs sm:text-sm font-extrabold block ${
-                              isSelected ? "text-brand-maroon-700" : "text-slate-700"
-                            }`}
-                          >
-                            {formatPrice(variantPrice)}
-                          </span>
-                          {v.salePrice && v.salePrice < v.price && (
-                            <span className="text-[10px] text-slate-400 line-through block">
-                              {formatPrice(v.price)}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
 
 
 
