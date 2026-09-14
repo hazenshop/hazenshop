@@ -244,11 +244,25 @@ export default function CheckoutPage() {
                 <div className="flex-1 min-w-0">
                   <h4 className="font-bold text-slate-900 truncate">{item.productName}</h4>
                   {item.variantName && <p className="text-[11px] text-slate-500">{item.variantName}</p>}
-                  <p className="text-[11px] text-slate-500">
-                    {formatPrice(item.price)} × {item.quantity}
-                  </p>
+                  <p className="text-[11px] text-slate-500">{formatPrice(item.price)}</p>
                 </div>
-                <span className="font-bold text-slate-900">{formatPrice(item.total)}</span>
+                {/* Qty stepper */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1), item.variantId)}
+                    className="w-6 h-6 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm leading-none transition-colors"
+                    aria-label="Decrease quantity"
+                  >−</button>
+                  <span className="w-5 text-center font-bold text-slate-900">{item.quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantId)}
+                    className="w-6 h-6 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white flex items-center justify-center font-bold text-sm leading-none transition-colors"
+                    aria-label="Increase quantity"
+                  >+</button>
+                </div>
+                <span className="font-bold text-slate-900 shrink-0 w-14 text-right">{formatPrice(item.total)}</span>
               </div>
             ))}
             <div className="pt-2 border-t border-slate-100 flex justify-between text-xs text-slate-500 font-medium">
@@ -429,7 +443,7 @@ export default function CheckoutPage() {
               {cart.map((item) => (
                 <div
                   key={`${item.productId}-${item.variantId || "default"}`}
-                  className="flex gap-3 items-center justify-between p-2.5 rounded-2xl bg-slate-50/60 border border-slate-100"
+                  className="flex gap-3 items-center p-2.5 rounded-2xl bg-slate-50/60 border border-slate-100"
                 >
                   <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-slate-100 bg-[#f4f2ee]">
                     <Image src={item.productImage || "/logo.jpg"} alt={item.productName} fill className="object-cover" />
@@ -440,16 +454,35 @@ export default function CheckoutPage() {
                       <p className="text-[11px] text-slate-500 font-normal">{item.variantName}</p>
                     )}
                     <p className="text-xs font-bold text-slate-800 mt-0.5">
-                      {formatPrice(item.price)} × {item.quantity} = {formatPrice(item.total)}
+                      {formatPrice(item.price)} = {formatPrice(item.total)}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeFromCart(item.productId, item.variantId)}
-                    className="text-slate-400 hover:text-rose-600 p-1.5 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                  {/* Qty stepper + remove */}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1), item.variantId)}
+                        className="w-7 h-7 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-base leading-none transition-colors"
+                        aria-label="Decrease quantity"
+                      >−</button>
+                      <span className="w-6 text-center font-bold text-sm text-slate-900">{item.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.productId, item.quantity + 1, item.variantId)}
+                        className="w-7 h-7 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white flex items-center justify-center font-bold text-base leading-none transition-colors"
+                        aria-label="Increase quantity"
+                      >+</button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.productId, item.variantId)}
+                      className="text-slate-400 hover:text-rose-600 p-1 transition-colors"
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

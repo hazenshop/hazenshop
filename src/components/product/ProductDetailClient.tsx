@@ -369,34 +369,7 @@ export default function ProductDetailClient({
               </div>
             )}
 
-            {/* Quantity Stepper */}
-            <div className="space-y-2 pt-2 border-t border-slate-100">
-              <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
-                পরিমাণ (Quantity):
-              </label>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center border border-slate-200 rounded-full p-1 bg-slate-50">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-9 h-9 rounded-full bg-white hover:bg-slate-200 text-slate-800 flex items-center justify-center font-bold text-base transition-colors shadow-subtle min-h-[36px] min-w-[36px]"
-                  >
-                    -
-                  </button>
-                  <span className="w-10 text-center font-bold text-sm text-slate-900">{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-9 h-9 rounded-full bg-brand-maroon-700 hover:bg-brand-maroon-800 text-white flex items-center justify-center font-bold text-base transition-colors shadow-subtle min-h-[36px] min-w-[36px]"
-                  >
-                    +
-                  </button>
-                </div>
-                <span className="text-xs text-slate-500">
-                  মোট মূল্য: <strong className="text-slate-900 font-bold">{formatPrice(unitPrice * quantity)}</strong>
-                </span>
-              </div>
-            </div>
+
 
             {/* Bundle Offers (if any) */}
             {product.bundleOffers && product.bundleOffers.length > 0 && (

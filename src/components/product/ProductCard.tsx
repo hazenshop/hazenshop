@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ShoppingBag, Star, ArrowRight } from "lucide-react";
 import { Product } from "@/lib/types";
 import { formatPrice, calculateDiscountPercentage } from "@/lib/utils";
@@ -11,7 +10,6 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 
 export default function ProductCard({ product }: { product: Product }) {
-  const router = useRouter();
   const { addToCart, openQuickOrder } = useCart();
   const { showToast } = useToast();
   const discountPercent = calculateDiscountPercentage(product.price, product.salePrice);
@@ -32,8 +30,13 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group relative bg-white rounded-2xl border border-black/[0.06] shadow-subtle hover:shadow-card-hover transition-all duration-500 flex flex-col overflow-hidden hover:-translate-y-1">
-      {/* Product Image & Badges */}
-      <Link href={`/products/${product.slug}`} className="relative aspect-[4/4.5] w-full bg-[#f4f2ee] overflow-hidden block">
+      {/* Product Image — clicking opens Quick Order Modal */}
+      <button
+        type="button"
+        onClick={handleQuickOrder}
+        className="relative aspect-[4/4.5] w-full bg-[#f4f2ee] overflow-hidden block cursor-pointer text-left"
+        aria-label={`Quick order ${product.name}`}
+      >
         <Image
           src={product.images[0] || "/logo.jpg"}
           alt={product.name}
@@ -63,7 +66,8 @@ export default function ProductCard({ product }: { product: Product }) {
             <span>{product.stock} left</span>
           </div>
         )}
-      </Link>
+      </button>
+
 
       {/* Content */}
       <div className="p-3 sm:p-5 flex-1 flex flex-col justify-between">
