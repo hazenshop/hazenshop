@@ -6,6 +6,7 @@ import { ToastProvider } from "@/context/ToastContext";
 import StorefrontShell from "@/components/layout/StorefrontShell";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 import { db } from "@/lib/db";
 
 const outfit = Outfit({
@@ -64,6 +65,7 @@ export default async function RootLayout({
       </head>
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
         <GoogleTagManager gtmId={settings.googleTagManagerId || "GTM-TCS2PCSC"} />
+        <GoogleAnalytics gaId={settings.googleAnalyticsId || "G-4YDHNQ6JPF"} />
         <FacebookPixel
           pixelId={settings.facebookPixelId || "2242388576616945"}
           testEventCode={settings.facebookTestEventCode || "TEST82490"}

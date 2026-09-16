@@ -143,6 +143,7 @@ export type SiteSettings = {
   facebookPixelId?: string;
   facebookTestEventCode?: string;
   googleTagManagerId?: string;
+  googleAnalyticsId?: string;
   // Steadfast Courier API
   steadfastApiKey?: string;
   steadfastSecretKey?: string;

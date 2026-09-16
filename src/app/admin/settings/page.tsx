@@ -517,10 +517,22 @@ export default function AdminSettingsPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
           <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
             <Tag className="w-4 h-4 text-brand-400" />
-            <span>মার্কেটিং ও ট্র্যাকিং অ্যানালিটিক্স (Google Tag Manager & Pixel)</span>
+            <span>মার্কেটিং ও ট্র্যাকিং অ্যানালিটিক্স (Google Analytics, Tag Manager & Pixel)</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">Google Analytics (GA4) ID</label>
+              <input
+                type="text"
+                placeholder="G-4YDHNQ6JPF"
+                value={settings.googleAnalyticsId || ""}
+                onChange={(e) => setSettings({ ...settings, googleAnalyticsId: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">Default: G-4YDHNQ6JPF</p>
+            </div>
+
             <div>
               <label className="block font-bold text-slate-300 mb-1">Google Tag Manager ID</label>
               <input
@@ -554,7 +566,7 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, facebookTestEventCode: e.target.value.trim() })}
                 className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Optional (For FB Events Manager testing)</p>
+              <p className="text-[10px] text-slate-500 mt-1">Optional (For FB Events testing)</p>
             </div>
           </div>
         </div>
