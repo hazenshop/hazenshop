@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/CartContext";
 import { ToastProvider } from "@/context/ToastContext";
 import StorefrontShell from "@/components/layout/StorefrontShell";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
+import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import { db } from "@/lib/db";
 
 const outfit = Outfit({
@@ -62,6 +63,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/logo.jpg" />
       </head>
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
+        <GoogleTagManager gtmId={settings.googleTagManagerId || "GTM-TCS2PCSC"} />
         <FacebookPixel
           pixelId={settings.facebookPixelId || "2242388576616945"}
           testEventCode={settings.facebookTestEventCode || "TEST82490"}

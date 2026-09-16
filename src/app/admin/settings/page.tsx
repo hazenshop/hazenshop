@@ -513,6 +513,52 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Marketing & Analytics Configuration */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
+          <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
+            <Tag className="w-4 h-4 text-brand-400" />
+            <span>মার্কেটিং ও ট্র্যাকিং অ্যানালিটিক্স (Google Tag Manager & Pixel)</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">Google Tag Manager ID</label>
+              <input
+                type="text"
+                placeholder="GTM-TCS2PCSC"
+                value={settings.googleTagManagerId || ""}
+                onChange={(e) => setSettings({ ...settings, googleTagManagerId: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">Default: GTM-TCS2PCSC</p>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">Facebook Pixel ID</label>
+              <input
+                type="text"
+                placeholder="2242388576616945"
+                value={settings.facebookPixelId || ""}
+                onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">Default: 2242388576616945</p>
+            </div>
+
+            <div>
+              <label className="block font-bold text-slate-300 mb-1">FB Pixel Test Event Code</label>
+              <input
+                type="text"
+                placeholder="TEST82490"
+                value={settings.facebookTestEventCode || ""}
+                onChange={(e) => setSettings({ ...settings, facebookTestEventCode: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono"
+              />
+              <p className="text-[10px] text-slate-500 mt-1">Optional (For FB Events Manager testing)</p>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom Save Action Bar */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
           <button
