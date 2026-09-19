@@ -28,8 +28,15 @@ export default function OrderInvoiceModal({
     rawSiteName = `${rawSiteName} BD`;
   }
   const siteTitle = rawSiteName;
-  const hotline = settings?.hotline || "+880 1700-000000";
+  const hotline = settings?.hotline || "+880 1711-030546";
   const orderDate = new Date(order.createdAt).toLocaleDateString("en-GB");
+
+  const courierBannerText =
+    order.courierName && order.trackingCode
+      ? `${order.courierName.toUpperCase()} #${order.trackingCode}`
+      : order.courierName
+        ? `${order.courierName.toUpperCase()} #${order.id}`
+        : `CASH ON DELIVERY • ORDER #${order.id}`;
 
   const hasRealAddress =
     order.customerAddress &&
@@ -72,11 +79,8 @@ export default function OrderInvoiceModal({
           author: "HAZENSHOP BD (hazenshopbd.com)",
         });
 
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = 70; // 70mm width leaves 2.5mm margin on physical 75mm roll
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        pdf.addImage(imgData, "PNG", 2.5, 2.5, pdfWidth, Math.min(pdfHeight, 95), undefined, "FAST");
+        // 71mm x 96mm fits perfectly inside 75x100mm page with 2mm safety margin
+        pdf.addImage(imgData, "PNG", 2, 2, 71, 96, undefined, "FAST");
         pdf.save(`Invoice_${order.id}_hazenshopbd_75x100mm.pdf`);
       } else if (paperSize === "4x3") {
         const element = document.getElementById("printable-invoice-4x3");
@@ -102,11 +106,8 @@ export default function OrderInvoiceModal({
           author: "HAZENSHOP BD (hazenshopbd.com)",
         });
 
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = 94; // 94mm width leaves 3mm margin on physical 100mm roll
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        pdf.addImage(imgData, "PNG", 3, 2.5, pdfWidth, Math.min(pdfHeight, 70), undefined, "FAST");
+        // 94mm x 71mm fits inside 100x75mm landscape page with 3mm safety margin
+        pdf.addImage(imgData, "PNG", 3, 2, 94, 71, undefined, "FAST");
         pdf.save(`Invoice_${order.id}_hazenshopbd_100x75mm.pdf`);
       } else {
         const element = document.getElementById("printable-invoice-a4");
@@ -165,7 +166,7 @@ export default function OrderInvoiceModal({
 
     doc.open();
     if (paperSize === "3x4") {
-      // 75mm x 100mm (3" x 4") portrait thermal label
+      // 75mm x 100mm (3" x 4") portrait thermal label - exact Photo 2 organized layout
       doc.write(`
         <!DOCTYPE html>
         <html lang="bn">
@@ -180,21 +181,30 @@ export default function OrderInvoiceModal({
                 margin: 0 !important;
               }
               html, body {
-                width: 75mm;
+                width: 75mm !important;
+                height: 98mm !important;
+                max-height: 98mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #ffffff;
-                color: #000000;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif;
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
                 overflow: hidden !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
               .thermal-card {
-                width: 70mm;
-                margin: 0 auto;
-                padding: 1.5mm 1mm;
-                display: block;
+                box-sizing: border-box;
+                width: 71mm;
+                height: 96mm;
+                max-height: 96mm;
+                margin: 1mm auto;
+                border: 1.5px solid #000;
+                border-radius: 2px;
+                padding: 2.5mm 3mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
                 overflow: hidden;
                 background: #ffffff;
                 color: #000000;
@@ -203,238 +213,257 @@ export default function OrderInvoiceModal({
                 break-inside: avoid !important;
                 break-after: avoid !important;
               }
-              .t-head {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                border-bottom: 1.5px solid #000;
-                padding-bottom: 1.5px;
-                margin-bottom: 2px;
+              .t-store-header {
+                text-align: center;
+                flex-shrink: 0;
               }
-              .t-brand {
-                font-size: 11px;
+              .t-store-name {
+                font-size: 15px;
                 font-weight: 900;
                 text-transform: uppercase;
-                letter-spacing: -0.2px;
+                letter-spacing: 0.5px;
                 line-height: 1.1;
               }
-              .t-hotline {
-                font-size: 7px;
-                color: #222;
-                margin-top: 1px;
-                font-weight: 600;
+              .t-store-sub {
+                font-size: 7.5px;
+                font-weight: 700;
+                text-transform: uppercase;
+                color: #111;
+                margin-top: 1.5px;
+                letter-spacing: 0.2px;
               }
-              .t-meta {
-                text-align: right;
-              }
-              .t-id {
-                font-family: monospace;
-                font-size: 12px;
+              .t-courier-bar {
+                flex-shrink: 0;
+                background: #000;
+                color: #fff;
+                text-align: center;
+                font-family: monospace, -apple-system, BlinkMacSystemFont, sans-serif;
+                font-size: 11.5px;
                 font-weight: 900;
-                line-height: 1.1;
-              }
-              .t-date {
-                font-size: 7px;
-                color: #444;
-                margin-top: 1px;
-              }
-              .t-cust {
-                border-bottom: 1px dashed #000;
-                padding: 2px 0 2.5px 0;
-                margin-bottom: 2px;
-              }
-              .t-cust-top {
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-                gap: 4px;
-              }
-              .t-name {
-                font-size: 9.5px;
-                font-weight: 800;
+                padding: 2.5px 4px;
+                margin: 2.5px 0 3.5px 0;
+                border-radius: 1.5px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
                 line-height: 1.2;
+              }
+              .t-cust-box {
+                flex-shrink: 0;
+                font-size: 9px;
+                line-height: 1.35;
+                color: #000;
+              }
+              .t-cust-row {
+                margin-bottom: 2px;
+                display: flex;
+                align-items: baseline;
+                gap: 3px;
                 word-break: break-word;
               }
-              .t-phone {
-                font-family: monospace;
-                font-size: 11px;
-                font-weight: 900;
+              .t-lbl {
+                font-weight: 800;
+                color: #000;
                 white-space: nowrap;
               }
-              .t-addr {
-                font-size: 8px;
+              .t-val {
                 font-weight: 600;
-                line-height: 1.25;
-                margin-top: 1.5px;
-                word-break: break-word;
+                color: #111;
               }
-              .t-logistics {
+              .t-mono {
+                font-family: monospace;
+                font-weight: 800;
+                font-size: 9.5px;
+              }
+              .t-missing-addr {
+                color: #dc2626;
+                font-weight: 700;
+              }
+              .t-cust-meta {
+                font-size: 7.5px;
+                color: #222;
+                margin-top: 2px;
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
-                font-size: 7px;
-                font-weight: 700;
-                color: #222;
-                margin-top: 1.5px;
+                font-weight: 600;
               }
-              .t-items {
-                margin-bottom: 2px;
+              .t-items-wrap {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                overflow: hidden;
+                margin: 1px 0;
+              }
+              .t-divider-solid {
+                border-top: 1px solid #000;
+                margin: 3px 0;
               }
               .t-table {
                 width: 100%;
                 border-collapse: collapse;
               }
               .t-table th {
-                font-size: 7px;
+                font-size: 8px;
                 font-weight: 900;
                 text-transform: uppercase;
                 color: #000;
+                padding: 1.5px 0;
                 border-bottom: 1px solid #000;
-                padding: 1px 0;
               }
               .t-table td {
-                font-size: 7.5px;
-                padding: 1.5px 0;
+                padding: 2px 0;
                 vertical-align: top;
-                border-bottom: 0.5px solid #f0f0f0;
+                border-bottom: 0.5px solid #eaeaea;
+                font-size: 8.5px;
               }
               .t-item-name {
                 font-weight: 700;
-                line-height: 1.2;
+                line-height: 1.25;
                 word-break: break-word;
-                white-space: normal;
               }
               .t-item-var {
-                font-size: 7px;
-                color: #444;
-                display: block;
-                line-height: 1.1;
-                margin-top: 1px;
-              }
-              .t-totals {
-                border-top: 1.5px solid #000;
-                padding-top: 2px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 2px;
-              }
-              .t-subtotal {
                 font-size: 7.5px;
-                color: #333;
-                line-height: 1.25;
-              }
-              .t-cod-box {
-                background: #000;
-                color: #fff;
-                padding: 2px 5px;
-                border-radius: 2px;
-                text-align: right;
-                border: 1px solid #000;
-              }
-              .t-cod-lbl {
-                font-size: 6px;
-                font-weight: 900;
-                letter-spacing: 0.5px;
-                line-height: 1;
-              }
-              .t-cod-val {
-                font-family: monospace;
-                font-size: 12px;
-                font-weight: 900;
-                line-height: 1.1;
-                margin-top: 1px;
-              }
-              .t-foot {
-                text-align: center;
-                font-size: 6.5px;
                 color: #444;
-                padding-top: 1.5px;
-                border-top: 0.5px dotted #999;
                 margin-top: 1px;
+                line-height: 1.15;
+              }
+              .t-bottom-wrap {
+                flex-shrink: 0;
+              }
+              .t-financials {
+                font-size: 9.5px;
+                line-height: 1.35;
+                color: #000;
+              }
+              .t-fin-row {
+                font-weight: 600;
+              }
+              .t-fin-row strong {
+                font-weight: 800;
+              }
+              .t-total-row {
+                font-size: 11px;
+                font-weight: 900;
+                margin-top: 1px;
+              }
+              .t-divider-dashed {
+                border-top: 1.5px dashed #000;
+                margin: 3.5px 0 2.5px 0;
+              }
+              .t-disclaimer {
+                font-size: 7.5px;
+                font-weight: 700;
+                text-align: center;
+                line-height: 1.3;
+                color: #000;
+                padding: 1px 0;
+              }
+              .t-footer-branding {
+                font-size: 6.5px;
+                font-weight: 600;
+                text-align: center;
+                color: #444;
+                margin-top: 1.5px;
               }
             </style>
           </head>
           <body>
             <div class="thermal-card">
-              <!-- Top Header -->
-              <div class="t-head">
-                <div>
-                  <div class="t-brand">${siteTitle}</div>
-                  <div class="t-hotline">Hotline: ${hotline} • hazenshopbd.com</div>
+              <!-- Top Store Header (Centered) -->
+              <div class="t-store-header">
+                <div class="t-store-name">${siteTitle}</div>
+                <div class="t-store-sub">HOTLINE: ${hotline} | INVOICED: ${orderDate}</div>
+              </div>
+
+              <!-- Courier / Delivery Black Strip -->
+              <div class="t-courier-bar">
+                ${courierBannerText}
+              </div>
+
+              <!-- Recipient / Customer Info -->
+              <div class="t-cust-box">
+                <div class="t-cust-row">
+                  <span class="t-lbl">Name:</span>
+                  <span class="t-val">${order.customerName}</span>
                 </div>
-                <div class="t-meta">
-                  <div class="t-id">#${order.id}</div>
-                  <div class="t-date">${orderDate}</div>
+                <div class="t-cust-row">
+                  <span class="t-lbl">Phone:</span>
+                  <span class="t-val t-mono">${order.customerPhone}</span>
+                </div>
+                <div class="t-cust-row">
+                  <span class="t-lbl">Address:</span>
+                  <span class="t-val ${hasRealAddress ? '' : 't-missing-addr'}">${displayAddress}</span>
+                </div>
+                <div class="t-cust-meta">
+                  <span><strong>Zone:</strong> ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
+                  <span><strong>Order ID:</strong> #${order.id}</span>
                 </div>
               </div>
 
-              <!-- Customer & Delivery -->
-              <div class="t-cust">
-                <div class="t-cust-top">
-                  <span class="t-name">${order.customerName}</span>
-                  <span class="t-phone">${order.customerPhone}</span>
-                </div>
-                <div class="t-addr" style="${hasRealAddress ? '' : 'color: #dc2626; font-weight: bold;'}">${displayAddress}</div>
-                <div class="t-logistics">
-                  <span>ZONE: ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
-                  <span>${order.courierName ? `COURIER: ${order.courierName}` : "STANDARD DELIVERY"}${order.trackingCode ? ` • CN: ${order.trackingCode}` : ""}</span>
-                </div>
-              </div>
-
-              <!-- Items Table -->
-              <div class="t-items">
+              <!-- Items Table Section -->
+              <div class="t-items-wrap">
+                <div class="t-divider-solid"></div>
                 <table class="t-table">
                   <thead>
                     <tr>
-                      <th style="text-align: left; width: 58%;">Item Description</th>
-                      <th style="text-align: center; width: 14%;">Qty</th>
-                      <th style="text-align: right; width: 28%;">Total</th>
+                      <th style="text-align: left; width: 56%;">ITEM</th>
+                      <th style="text-align: center; width: 16%;">QTY</th>
+                      <th style="text-align: right; width: 28%;">PRICE</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${order.items.slice(0, 6).map((item) => `
+                    ${order.items.slice(0, 4).map((item) => `
                       <tr>
-                        <td>
-                          <div class="t-item-name">${item.productName}${item.variantName ? `<span class="t-item-var">(${item.variantName})</span>` : ""}</div>
+                        <td style="text-align: left;">
+                          <div class="t-item-name">${item.productName}</div>
+                          ${item.variantName ? `<div class="t-item-var">(${item.variantName})</div>` : ""}
                         </td>
-                        <td style="text-align: center; font-family: monospace; font-weight: 800;">x${item.quantity}</td>
-                        <td style="text-align: right; font-family: monospace; font-weight: 900;">৳${item.total.toLocaleString("en-BD")}</td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 700;">
+                          ${item.quantity}
+                        </td>
+                        <td style="text-align: right; font-family: monospace; font-weight: 800;">
+                          ${item.total.toLocaleString("en-BD")}
+                        </td>
                       </tr>
                     `).join("")}
-                    ${order.items.length > 6 ? `
+                    ${order.items.length > 4 ? `
                       <tr>
-                        <td colspan="3" style="text-align: center; font-size: 7px; color: #666; font-style: italic; padding: 2px 0;">
-                          + ${order.items.length - 6} more item(s)...
+                        <td colspan="3" style="text-align: center; font-size: 7.5px; color: #555; font-style: italic; padding: 2px 0;">
+                          + ${order.items.length - 4} more item(s)...
                         </td>
                       </tr>
                     ` : ""}
                   </tbody>
                 </table>
+                <div class="t-divider-solid"></div>
               </div>
 
-              <!-- Pricing & COD Banner -->
-              <div class="t-totals">
-                <div class="t-subtotal">
-                  <div>Subtotal: ৳${order.subtotal.toLocaleString("en-BD")}</div>
-                  <div>Delivery: ${order.deliveryFee === 0 ? "FREE" : `৳${order.deliveryFee}`}</div>
+              <!-- Financials & Disclaimer -->
+              <div class="t-bottom-wrap">
+                <div class="t-financials">
+                  <div class="t-fin-row">
+                    Delivery Charge <strong>${order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
+                  </div>
+                  <div class="t-fin-row t-total-row">
+                    Sub Total <strong>${order.totalAmount.toLocaleString("en-BD")} Tk</strong>
+                  </div>
                 </div>
-                <div class="t-cod-box">
-                  <div class="t-cod-lbl">CASH ON DELIVERY (COD)</div>
-                  <div class="t-cod-val">৳${order.totalAmount.toLocaleString("en-BD")}</div>
-                </div>
-              </div>
 
-              <!-- Footer -->
-              <div class="t-foot">
-                Thank you for shopping with ${siteTitle}! • hazenshopbd.com • ${hotline}
+                <div class="t-divider-dashed"></div>
+
+                <div class="t-disclaimer">
+                  পার্সেল খুলে পণ্য যাচাই করা যাবে। তবে ব্যবহার করার জন্য অবশ্যই পার্সেলটি রিসিভ করতে হবে।
+                </div>
+                <div class="t-footer-branding">
+                  hazenshopbd.com • Helpline: ${hotline}
+                </div>
               </div>
             </div>
           </body>
         </html>
       `);
     } else if (paperSize === "4x3") {
-      // 100mm x 75mm (4" x 3") landscape thermal label format
+      // 100mm x 75mm (4" x 3") landscape thermal label - exact Photo 2 organized layout
       doc.write(`
         <!DOCTYPE html>
         <html lang="bn">
@@ -449,21 +478,30 @@ export default function OrderInvoiceModal({
                 margin: 0 !important;
               }
               html, body {
-                width: 100mm;
+                width: 100mm !important;
+                height: 73mm !important;
+                max-height: 73mm !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #ffffff;
-                color: #000000;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif;
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
                 overflow: hidden !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
               .thermal-card {
+                box-sizing: border-box;
                 width: 94mm;
-                margin: 0 auto;
-                padding: 1.5mm 2mm;
-                display: block;
+                height: 71mm;
+                max-height: 71mm;
+                margin: 1mm auto;
+                border: 1.5px solid #000;
+                border-radius: 2px;
+                padding: 2mm 3mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
                 overflow: hidden;
                 background: #ffffff;
                 color: #000000;
@@ -472,230 +510,239 @@ export default function OrderInvoiceModal({
                 break-inside: avoid !important;
                 break-after: avoid !important;
               }
-              .t-head {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                border-bottom: 1.5px solid #000;
-                padding-bottom: 1.5px;
-                margin-bottom: 2px;
+              .t-store-header {
+                text-align: center;
+                flex-shrink: 0;
               }
-              .t-brand {
-                font-size: 11.5px;
+              .t-store-name {
+                font-size: 15px;
                 font-weight: 900;
                 text-transform: uppercase;
-                letter-spacing: -0.2px;
+                letter-spacing: 0.5px;
                 line-height: 1.1;
               }
-              .t-hotline {
-                font-size: 7.5px;
-                color: #222;
-                margin-top: 1px;
-                font-weight: 500;
-              }
-              .t-meta {
-                text-align: right;
-              }
-              .t-id {
-                font-family: monospace;
-                font-size: 12px;
-                font-weight: 900;
-                line-height: 1.1;
-              }
-              .t-date {
-                font-size: 7.5px;
-                color: #444;
-                margin-top: 1px;
-              }
-              .t-cust {
-                border-bottom: 1px dashed #000;
-                padding: 2px 0 2.5px 0;
-                margin-bottom: 2px;
-              }
-              .t-cust-top {
-                display: flex;
-                justify-content: space-between;
-                align-items: baseline;
-                gap: 4px;
-              }
-              .t-name {
-                font-size: 10px;
-                font-weight: 800;
-                line-height: 1.2;
-                word-break: break-word;
-              }
-              .t-phone {
-                font-family: monospace;
-                font-size: 11px;
-                font-weight: 900;
-                white-space: nowrap;
-              }
-              .t-addr {
-                font-size: 8.5px;
-                font-weight: 600;
-                line-height: 1.25;
-                margin-top: 1.5px;
-                word-break: break-word;
-              }
-              .t-logistics {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+              .t-store-sub {
                 font-size: 7.5px;
                 font-weight: 700;
-                color: #222;
-                margin-top: 1.5px;
+                text-transform: uppercase;
+                color: #111;
+                margin-top: 1px;
               }
-              .t-items {
-                margin-bottom: 2px;
+              .t-courier-bar {
+                flex-shrink: 0;
+                background: #000;
+                color: #fff;
+                text-align: center;
+                font-family: monospace, -apple-system, BlinkMacSystemFont, sans-serif;
+                font-size: 11.5px;
+                font-weight: 900;
+                padding: 2px 4px;
+                margin: 2px 0 3px 0;
+                border-radius: 1.5px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                line-height: 1.2;
+              }
+              .t-cust-box {
+                flex-shrink: 0;
+                font-size: 8.5px;
+                line-height: 1.3;
+                color: #000;
+              }
+              .t-cust-row {
+                margin-bottom: 1.5px;
+                display: flex;
+                align-items: baseline;
+                gap: 3px;
+                word-break: break-word;
+              }
+              .t-lbl {
+                font-weight: 800;
+                color: #000;
+                white-space: nowrap;
+              }
+              .t-val {
+                font-weight: 600;
+                color: #111;
+              }
+              .t-mono {
+                font-family: monospace;
+                font-weight: 800;
+                font-size: 9px;
+              }
+              .t-missing-addr {
+                color: #dc2626;
+                font-weight: 700;
+              }
+              .t-cust-meta {
+                font-size: 7.5px;
+                color: #222;
+                margin-top: 1px;
+                display: flex;
+                justify-content: space-between;
+                font-weight: 600;
+              }
+              .t-items-wrap {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                overflow: hidden;
+                margin: 1px 0;
+              }
+              .t-divider-solid {
+                border-top: 1px solid #000;
+                margin: 2px 0;
               }
               .t-table {
                 width: 100%;
                 border-collapse: collapse;
               }
               .t-table th {
-                font-size: 7.5px;
+                font-size: 8px;
                 font-weight: 900;
                 text-transform: uppercase;
                 color: #000;
+                padding: 1px 0;
                 border-bottom: 1px solid #000;
-                padding: 1.5px 0;
               }
               .t-table td {
-                font-size: 8px;
                 padding: 1.5px 0;
                 vertical-align: top;
-                border-bottom: 0.5px solid #f0f0f0;
+                border-bottom: 0.5px solid #eaeaea;
+                font-size: 8px;
               }
               .t-item-name {
                 font-weight: 700;
                 line-height: 1.2;
                 word-break: break-word;
-                white-space: normal;
               }
               .t-item-var {
                 font-size: 7px;
                 color: #444;
-                display: block;
-                line-height: 1.1;
+                margin-top: 0.5px;
+              }
+              .t-bottom-wrap {
+                flex-shrink: 0;
+              }
+              .t-financials {
+                font-size: 9px;
+                line-height: 1.3;
+                color: #000;
+              }
+              .t-fin-row {
+                font-weight: 600;
+              }
+              .t-fin-row strong {
+                font-weight: 800;
+              }
+              .t-total-row {
+                font-size: 10.5px;
+                font-weight: 900;
                 margin-top: 1px;
               }
-              .t-totals {
-                border-top: 1.5px solid #000;
-                padding-top: 2px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 2px;
+              .t-divider-dashed {
+                border-top: 1px dashed #000;
+                margin: 2px 0;
               }
-              .t-subtotal {
-                font-size: 7.5px;
-                color: #333;
-                line-height: 1.25;
-              }
-              .t-cod-box {
-                background: #000;
-                color: #fff;
-                padding: 2px 6px;
-                border-radius: 2px;
-                text-align: right;
-                border: 1px solid #000;
-              }
-              .t-cod-lbl {
-                font-size: 6.5px;
-                font-weight: 900;
-                letter-spacing: 0.5px;
-                line-height: 1;
-              }
-              .t-cod-val {
-                font-family: monospace;
-                font-size: 12px;
-                font-weight: 900;
-                line-height: 1;
-              }
-              .t-foot {
+              .t-disclaimer {
+                font-size: 7px;
+                font-weight: 700;
                 text-align: center;
-                font-size: 6.5px;
+                line-height: 1.25;
+                color: #000;
+              }
+              .t-footer-branding {
+                font-size: 6px;
+                font-weight: 600;
+                text-align: center;
                 color: #444;
-                padding-top: 1.5px;
-                border-top: 0.5px dotted #999;
                 margin-top: 1px;
               }
             </style>
           </head>
           <body>
             <div class="thermal-card">
-              <!-- Top Header -->
-              <div class="t-head">
-                <div>
-                  <div class="t-brand">${siteTitle}</div>
-                  <div class="t-hotline">Hotline: ${hotline} • hazenshopbd.com</div>
+              <div class="t-store-header">
+                <div class="t-store-name">${siteTitle}</div>
+                <div class="t-store-sub">HOTLINE: ${hotline} | INVOICED: ${orderDate}</div>
+              </div>
+
+              <div class="t-courier-bar">
+                ${courierBannerText}
+              </div>
+
+              <div class="t-cust-box">
+                <div class="t-cust-row">
+                  <span class="t-lbl">Name:</span>
+                  <span class="t-val">${order.customerName}</span>
                 </div>
-                <div class="t-meta">
-                  <div class="t-id">#${order.id}</div>
-                  <div class="t-date">${orderDate}</div>
+                <div class="t-cust-row">
+                  <span class="t-lbl">Phone:</span>
+                  <span class="t-val t-mono">${order.customerPhone}</span>
+                </div>
+                <div class="t-cust-row">
+                  <span class="t-lbl">Address:</span>
+                  <span class="t-val ${hasRealAddress ? '' : 't-missing-addr'}">${displayAddress}</span>
+                </div>
+                <div class="t-cust-meta">
+                  <span><strong>Zone:</strong> ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
+                  <span><strong>Order ID:</strong> #${order.id}</span>
                 </div>
               </div>
 
-              <!-- Customer & Delivery -->
-              <div class="t-cust">
-                <div class="t-cust-top">
-                  <span class="t-name">${order.customerName}</span>
-                  <span class="t-phone">${order.customerPhone}</span>
-                </div>
-                <div class="t-addr" style="${hasRealAddress ? '' : 'color: #dc2626; font-weight: bold;'}">${displayAddress}</div>
-                <div class="t-logistics">
-                  <span>ZONE: ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
-                  <span>${order.courierName ? `COURIER: ${order.courierName}` : "STANDARD DELIVERY"}${order.trackingCode ? ` • CN: ${order.trackingCode}` : ""}</span>
-                </div>
-              </div>
-
-              <!-- Items Table -->
-              <div class="t-items">
+              <div class="t-items-wrap">
+                <div class="t-divider-solid"></div>
                 <table class="t-table">
                   <thead>
                     <tr>
-                      <th style="text-align: left; width: 62%;">Item Description</th>
-                      <th style="text-align: center; width: 14%;">Qty</th>
-                      <th style="text-align: right; width: 24%;">Total</th>
+                      <th style="text-align: left; width: 58%;">ITEM</th>
+                      <th style="text-align: center; width: 16%;">QTY</th>
+                      <th style="text-align: right; width: 26%;">PRICE</th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${order.items.slice(0, 5).map((item) => `
+                    ${order.items.slice(0, 3).map((item) => `
                       <tr>
-                        <td>
-                          <div class="t-item-name">${item.productName}${item.variantName ? `<span class="t-item-var">(${item.variantName})</span>` : ""}</div>
+                        <td style="text-align: left;">
+                          <div class="t-item-name">${item.productName}</div>
+                          ${item.variantName ? `<div class="t-item-var">(${item.variantName})</div>` : ""}
                         </td>
-                        <td style="text-align: center; font-family: monospace; font-weight: 800;">x${item.quantity}</td>
-                        <td style="text-align: right; font-family: monospace; font-weight: 900;">৳${item.total.toLocaleString("en-BD")}</td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 700;">
+                          ${item.quantity}
+                        </td>
+                        <td style="text-align: right; font-family: monospace; font-weight: 800;">
+                          ${item.total.toLocaleString("en-BD")}
+                        </td>
                       </tr>
                     `).join("")}
-                    ${order.items.length > 5 ? `
+                    ${order.items.length > 3 ? `
                       <tr>
-                        <td colspan="3" style="text-align: center; font-size: 7px; color: #666; font-style: italic; padding: 2px 0;">
-                          + ${order.items.length - 5} more item(s)...
+                        <td colspan="3" style="text-align: center; font-size: 7px; color: #555; font-style: italic; padding: 1px 0;">
+                          + ${order.items.length - 3} more item(s)...
                         </td>
                       </tr>
                     ` : ""}
                   </tbody>
                 </table>
+                <div class="t-divider-solid"></div>
               </div>
 
-              <!-- Pricing & COD Banner -->
-              <div class="t-totals">
-                <div class="t-subtotal">
-                  <div>Subtotal: ৳${order.subtotal.toLocaleString("en-BD")}</div>
-                  <div>Delivery: ${order.deliveryFee === 0 ? "FREE" : `৳${order.deliveryFee}`}</div>
+              <div class="t-bottom-wrap">
+                <div class="t-financials">
+                  <div class="t-fin-row">
+                    Delivery Charge <strong>${order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
+                  </div>
+                  <div class="t-fin-row t-total-row">
+                    Sub Total <strong>${order.totalAmount.toLocaleString("en-BD")} Tk</strong>
+                  </div>
                 </div>
-                <div class="t-cod-box">
-                  <div class="t-cod-lbl">CASH ON DELIVERY (COD)</div>
-                  <div class="t-cod-val">৳${order.totalAmount.toLocaleString("en-BD")}</div>
-                </div>
-              </div>
 
-              <!-- Footer -->
-              <div class="t-foot">
-                Thank you for shopping with ${siteTitle}! • hazenshopbd.com • ${hotline}
+                <div class="t-divider-dashed"></div>
+
+                <div class="t-footer-branding">
+                  hazenshopbd.com • Helpline: ${hotline}
+                </div>
               </div>
             </div>
           </body>
@@ -872,11 +919,10 @@ export default function OrderInvoiceModal({
               <button
                 type="button"
                 onClick={() => setPaperSize("3x4")}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                  paperSize === "3x4"
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${paperSize === "3x4"
                     ? "bg-brand-500 text-brand-dark shadow-sm"
                     : "text-slate-300 hover:text-white"
-                }`}
+                  }`}
                 title='3" × 4" (75mm × 100mm) Standard Thermal Sticker Label'
               >
                 <Tag className="w-3 h-3" />
@@ -885,11 +931,10 @@ export default function OrderInvoiceModal({
               <button
                 type="button"
                 onClick={() => setPaperSize("4x3")}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                  paperSize === "4x3"
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${paperSize === "4x3"
                     ? "bg-brand-500 text-brand-dark shadow-sm"
                     : "text-slate-300 hover:text-white"
-                }`}
+                  }`}
                 title='4" × 3" (100mm × 75mm) POS Thermal Sticker Label'
               >
                 <Tag className="w-3 h-3" />
@@ -898,11 +943,10 @@ export default function OrderInvoiceModal({
               <button
                 type="button"
                 onClick={() => setPaperSize("a4")}
-                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                  paperSize === "a4"
+                className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${paperSize === "a4"
                     ? "bg-brand-500 text-brand-dark shadow-sm"
                     : "text-slate-300 hover:text-white"
-                }`}
+                  }`}
                 title="Standard Full-Page A4 Invoice"
               >
                 <FileText className="w-3 h-3" />
@@ -959,130 +1003,122 @@ export default function OrderInvoiceModal({
                 <span>Thermal Label Preview (3&quot; × 4&quot; • 75mm × 100mm Portrait)</span>
               </div>
 
-              {/* Exact 70mm Container for on-screen & html2canvas */}
+              {/* Exact 71mm x 96mm Container for on-screen & html2canvas */}
               <div
                 id="printable-invoice-3x4"
-                className="bg-white text-black overflow-hidden box-border select-none border border-slate-400 shadow-md font-sans leading-tight rounded-sm"
+                className="bg-white text-black overflow-hidden box-border select-none border-[1.5px] border-black shadow-lg font-sans leading-tight rounded-sm"
                 style={{
-                  width: "70mm",
-                  maxWidth: "70mm",
-                  padding: "1.5mm 1.5mm",
-                  pageBreakInside: "avoid",
-                  pageBreakAfter: "avoid",
+                  width: "71mm",
+                  height: "96mm",
+                  maxWidth: "71mm",
+                  maxHeight: "96mm",
+                  padding: "2.5mm 3mm",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
                   boxSizing: "border-box",
                 }}
               >
-                {/* Top Header */}
-                <div className="border-b-[1.5px] border-black pb-1 mb-1 flex justify-between items-start">
-                  <div>
-                    <div className="font-black text-[11px] uppercase tracking-tight text-black leading-tight">
-                      {siteTitle}
-                    </div>
-                    <div className="text-[7px] text-black/80 font-semibold mt-0.5">
-                      Hotline: {hotline} • hazenshopbd.com
-                    </div>
+                {/* Top Store Header (Centered) */}
+                <div className="text-center shrink-0">
+                  <div className="font-black text-[15px] uppercase tracking-wide leading-tight text-black">
+                    {siteTitle}
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono font-black text-[12px] text-black leading-tight">
-                      #{order.id}
-                    </div>
-                    <div className="text-[7px] text-black/70">
-                      {orderDate}
-                    </div>
+                  <div className="text-[7.5px] font-bold uppercase text-black/90 mt-0.5 tracking-tight">
+                    HOTLINE: {hotline} | INVOICED: {orderDate}
                   </div>
                 </div>
 
-                {/* Customer & Delivery Information */}
-                <div className="border-b border-dashed border-black/80 pb-1 mb-1 space-y-0.5">
-                  <div className="flex justify-between items-baseline gap-1">
-                    <div className="text-[9.5px] font-black text-black break-words leading-tight">
-                      {order.customerName}
-                    </div>
-                    <div className="font-mono font-black text-[11px] text-black shrink-0">
-                      {order.customerPhone}
-                    </div>
+                {/* Courier / Delivery Black Strip */}
+                <div className="bg-black text-white text-center font-mono font-black text-[11.5px] py-1 px-1 rounded-sm uppercase tracking-wide leading-tight my-1 shrink-0">
+                  {courierBannerText}
+                </div>
+
+                {/* Recipient / Customer Info */}
+                <div className="text-[9px] leading-snug space-y-0.5 shrink-0 text-black">
+                  <div className="flex items-baseline gap-1 break-words">
+                    <span className="font-extrabold text-black shrink-0">Name:</span>
+                    <span className="font-semibold text-black">{order.customerName}</span>
                   </div>
-                  <div className="text-[8px] leading-snug break-words">
-                    {hasRealAddress ? (
-                      <span className="text-black font-semibold">{displayAddress}</span>
-                    ) : (
-                      <span className="text-rose-600 font-bold">{displayAddress}</span>
-                    )}
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-extrabold text-black shrink-0">Phone:</span>
+                    <span className="font-mono font-extrabold text-black text-[9.5px]">{order.customerPhone}</span>
                   </div>
-                  <div className="flex justify-between items-center text-[7px] text-black/90 font-bold pt-0.5">
-                    <span>
-                      ZONE: {order.deliveryZone.replace("_", " ").toUpperCase()}
+                  <div className="flex items-baseline gap-1 break-words">
+                    <span className="font-extrabold text-black shrink-0">Address:</span>
+                    <span className={`font-semibold ${hasRealAddress ? 'text-black' : 'text-rose-600 font-bold'}`}>
+                      {displayAddress}
                     </span>
-                    <span>
-                      {order.courierName ? `COURIER: ${order.courierName}` : "STANDARD"}
-                      {order.trackingCode ? ` • CN: ${order.trackingCode}` : ""}
-                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[7.5px] font-semibold text-black/80 pt-0.5">
+                    <span><strong className="font-bold">Zone:</strong> {order.deliveryZone.replace("_", " ").toUpperCase()}</span>
+                    <span><strong className="font-bold">Order ID:</strong> #{order.id}</span>
                   </div>
                 </div>
 
-                {/* Items Summary (Compact Natural List) */}
-                <div className="pb-1 mb-1 overflow-hidden">
+                {/* Items Table Section */}
+                <div className="grow flex flex-col justify-center overflow-hidden my-0.5">
+                  <div className="border-t border-black my-1" />
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-black text-[7px] font-black uppercase text-black">
-                        <th className="text-left pb-0.5" style={{ width: "58%" }}>Item Description</th>
-                        <th className="text-center pb-0.5" style={{ width: "14%" }}>Qty</th>
-                        <th className="text-right pb-0.5" style={{ width: "28%" }}>Total</th>
+                      <tr className="border-b border-black text-[8px] font-black uppercase text-black">
+                        <th className="text-left pb-0.5" style={{ width: "56%" }}>ITEM</th>
+                        <th className="text-center pb-0.5" style={{ width: "16%" }}>QTY</th>
+                        <th className="text-right pb-0.5" style={{ width: "28%" }}>PRICE</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/10">
-                      {order.items.slice(0, 6).map((item, idx) => (
-                        <tr key={idx} className="text-[7.5px] leading-tight">
+                      {order.items.slice(0, 4).map((item, idx) => (
+                        <tr key={idx} className="text-[8.5px] leading-tight">
                           <td className="py-1 pr-1 align-top">
                             <div className="font-bold text-black break-words leading-tight">
                               {item.productName}
-                              {item.variantName && (
-                                <span className="font-normal text-black/80 block text-[7px] mt-0.5">
-                                  ({item.variantName})
-                                </span>
-                              )}
                             </div>
+                            {item.variantName && (
+                              <div className="text-[7.5px] text-black/70 mt-0.5 leading-snug">
+                                ({item.variantName})
+                              </div>
+                            )}
                           </td>
                           <td className="py-1 text-center font-bold font-mono text-black align-top">
-                            x{item.quantity}
+                            {item.quantity}
                           </td>
                           <td className="py-1 text-right font-black font-mono text-black align-top">
-                            ৳{item.total.toLocaleString("en-BD")}
+                            {item.total.toLocaleString("en-BD")}
                           </td>
                         </tr>
                       ))}
-                      {order.items.length > 6 && (
+                      {order.items.length > 4 && (
                         <tr>
-                          <td colSpan={3} className="text-center text-[7px] text-black/70 italic py-1">
-                            + {order.items.length - 6} more item(s)...
+                          <td colSpan={3} className="text-center text-[7.5px] text-black/70 italic py-0.5">
+                            + {order.items.length - 4} more item(s)...
                           </td>
                         </tr>
                       )}
                     </tbody>
                   </table>
+                  <div className="border-t border-black my-1" />
                 </div>
 
-                {/* Pricing & COD Total Banner */}
-                <div className="border-t-[1.5px] border-black pt-1 mb-1">
-                  <div className="flex justify-between items-center">
-                    <div className="text-[7.5px] text-black/80 leading-tight">
-                      <div>Subtotal: ৳{order.subtotal.toLocaleString("en-BD")}</div>
-                      <div>Delivery: {order.deliveryFee === 0 ? "FREE" : `৳${order.deliveryFee}`}</div>
+                {/* Financials & Disclaimer */}
+                <div className="shrink-0 text-black">
+                  <div className="text-[9.5px] leading-snug">
+                    <div className="font-medium text-black">
+                      Delivery Charge <strong className="font-bold">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
                     </div>
-                    <div className="border-[1.5px] border-black px-2 py-0.5 rounded text-right bg-black text-white">
-                      <div className="text-[6px] font-extrabold tracking-wider uppercase leading-tight">
-                        CASH ON DELIVERY (COD)
-                      </div>
-                      <div className="font-mono font-black text-[12px] leading-none">
-                        ৳{order.totalAmount.toLocaleString("en-BD")}
-                      </div>
+                    <div className="text-[11px] font-black text-black mt-0.5">
+                      Sub Total <strong className="font-black">{order.totalAmount.toLocaleString("en-BD")} Tk</strong>
                     </div>
                   </div>
-                </div>
 
-                {/* Minimal Footer */}
-                <div className="text-[6.5px] text-center text-black/60 pt-1 border-t border-dotted border-black/30">
-                  Thank you for shopping with {siteTitle}! • hazenshopbd.com • {hotline}
+                  <div className="border-t-[1.5px] border-dashed border-black my-1.5" />
+
+                  <div className="text-[7.5px] font-bold text-center text-black leading-snug">
+                    পার্সেল খুলে পণ্য যাচাই করা যাবে। তবে ব্যবহার করার জন্য অবশ্যই পার্সেলটি রিসিভ করতে হবে।
+                  </div>
+                  <div className="text-[6.5px] font-semibold text-center text-black/70 mt-0.5">
+                    hazenshopbd.com • Helpline: {hotline}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1094,130 +1130,119 @@ export default function OrderInvoiceModal({
                 <span>Thermal Label Preview (4&quot; × 3&quot; • 100mm × 75mm Landscape)</span>
               </div>
 
-              {/* Exact 94mm Container for on-screen & html2canvas */}
+              {/* Exact 94mm x 71mm Container for on-screen & html2canvas */}
               <div
                 id="printable-invoice-4x3"
-                className="bg-white text-black overflow-hidden box-border select-none border border-slate-400 shadow-md font-sans leading-tight rounded-sm"
+                className="bg-white text-black overflow-hidden box-border select-none border-[1.5px] border-black shadow-lg font-sans leading-tight rounded-sm"
                 style={{
                   width: "94mm",
+                  height: "71mm",
                   maxWidth: "94mm",
-                  padding: "1.5mm 2mm",
-                  pageBreakInside: "avoid",
-                  pageBreakAfter: "avoid",
+                  maxHeight: "71mm",
+                  padding: "2mm 3mm",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
                   boxSizing: "border-box",
                 }}
               >
-                {/* Top Header */}
-                <div className="border-b-[1.5px] border-black pb-1 mb-1 flex justify-between items-start">
-                  <div>
-                    <div className="font-black text-[11.5px] uppercase tracking-tight text-black leading-tight">
-                      {siteTitle}
-                    </div>
-                    <div className="text-[7.5px] text-black/80 font-medium mt-0.5">
-                      Hotline: {hotline} • hazenshopbd.com
-                    </div>
+                {/* Top Store Header */}
+                <div className="text-center shrink-0">
+                  <div className="font-black text-[15px] uppercase tracking-wide leading-tight text-black">
+                    {siteTitle}
                   </div>
-                  <div className="text-right">
-                    <div className="font-mono font-black text-[12px] text-black leading-tight">
-                      #{order.id}
-                    </div>
-                    <div className="text-[7.5px] text-black/70">
-                      {orderDate}
-                    </div>
+                  <div className="text-[7.5px] font-bold uppercase text-black/90 mt-0.5 tracking-tight">
+                    HOTLINE: {hotline} | INVOICED: {orderDate}
                   </div>
                 </div>
 
-                {/* Customer & Delivery Information */}
-                <div className="border-b border-dashed border-black/80 pb-1 mb-1 space-y-0.5">
-                  <div className="flex justify-between items-baseline gap-1">
-                    <div className="text-[10px] font-black text-black break-words leading-tight">
-                      {order.customerName}
-                    </div>
-                    <div className="font-mono font-black text-[11px] text-black shrink-0">
-                      {order.customerPhone}
-                    </div>
+                {/* Courier / Delivery Bar */}
+                <div className="bg-black text-white text-center font-mono font-black text-[11.5px] py-0.5 px-1 rounded-sm uppercase tracking-wide leading-tight my-0.5 shrink-0">
+                  {courierBannerText}
+                </div>
+
+                {/* Customer Details */}
+                <div className="text-[8.5px] leading-snug space-y-0.5 shrink-0 text-black">
+                  <div className="flex items-baseline gap-1 break-words">
+                    <span className="font-extrabold text-black shrink-0">Name:</span>
+                    <span className="font-semibold text-black">{order.customerName}</span>
                   </div>
-                  <div className="text-[8.5px] leading-snug break-words">
-                    {hasRealAddress ? (
-                      <span className="text-black font-semibold">{displayAddress}</span>
-                    ) : (
-                      <span className="text-rose-600 font-bold">{displayAddress}</span>
-                    )}
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-extrabold text-black shrink-0">Phone:</span>
+                    <span className="font-mono font-extrabold text-black text-[9px]">{order.customerPhone}</span>
                   </div>
-                  <div className="flex justify-between items-center text-[7.5px] text-black/90 font-bold pt-0.5">
-                    <span>
-                      ZONE: {order.deliveryZone.replace("_", " ").toUpperCase()}
+                  <div className="flex items-baseline gap-1 break-words">
+                    <span className="font-extrabold text-black shrink-0">Address:</span>
+                    <span className={`font-semibold ${hasRealAddress ? 'text-black' : 'text-rose-600 font-bold'}`}>
+                      {displayAddress}
                     </span>
-                    <span>
-                      {order.courierName ? `COURIER: ${order.courierName}` : "STANDARD DELIVERY"}
-                      {order.trackingCode ? ` • CN: ${order.trackingCode}` : ""}
-                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-[7.5px] font-semibold text-black/80">
+                    <span><strong className="font-bold">Zone:</strong> {order.deliveryZone.replace("_", " ").toUpperCase()}</span>
+                    <span><strong className="font-bold">Order ID:</strong> #{order.id}</span>
                   </div>
                 </div>
 
-                {/* Items Summary (Compact List) */}
-                <div className="pb-1 mb-1 overflow-hidden">
+                {/* Items Table */}
+                <div className="grow flex flex-col justify-center overflow-hidden my-0.5">
+                  <div className="border-t border-black my-0.5" />
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-black text-[7.5px] font-black uppercase text-black">
-                        <th className="text-left pb-0.5" style={{ width: "62%" }}>Item Description</th>
-                        <th className="text-center pb-0.5" style={{ width: "14%" }}>Qty</th>
-                        <th className="text-right pb-0.5" style={{ width: "24%" }}>Total</th>
+                      <tr className="border-b border-black text-[8px] font-black uppercase text-black">
+                        <th className="text-left pb-0.5" style={{ width: "58%" }}>ITEM</th>
+                        <th className="text-center pb-0.5" style={{ width: "16%" }}>QTY</th>
+                        <th className="text-right pb-0.5" style={{ width: "26%" }}>PRICE</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/10">
-                      {order.items.slice(0, 5).map((item, idx) => (
+                      {order.items.slice(0, 3).map((item, idx) => (
                         <tr key={idx} className="text-[8px] leading-tight">
-                          <td className="py-1 pr-1 align-top">
+                          <td className="py-0.5 pr-1 align-top">
                             <div className="font-bold text-black break-words leading-tight">
                               {item.productName}
-                              {item.variantName && (
-                                <span className="font-normal text-black/80 block text-[7px] mt-0.5">
-                                  ({item.variantName})
-                                </span>
-                              )}
                             </div>
+                            {item.variantName && (
+                              <div className="text-[7px] text-black/70 mt-0.5 leading-snug">
+                                ({item.variantName})
+                              </div>
+                            )}
                           </td>
-                          <td className="py-1 text-center font-bold font-mono text-black align-top">
-                            x{item.quantity}
+                          <td className="py-0.5 text-center font-bold font-mono text-black align-top">
+                            {item.quantity}
                           </td>
-                          <td className="py-1 text-right font-black font-mono text-black align-top">
-                            ৳{item.total.toLocaleString("en-BD")}
+                          <td className="py-0.5 text-right font-black font-mono text-black align-top">
+                            {item.total.toLocaleString("en-BD")}
                           </td>
                         </tr>
                       ))}
-                      {order.items.length > 5 && (
+                      {order.items.length > 3 && (
                         <tr>
-                          <td colSpan={3} className="text-center text-[7px] text-black/70 italic py-1">
-                            + {order.items.length - 5} more item(s)...
+                          <td colSpan={3} className="text-center text-[7px] text-black/70 italic py-0.5">
+                            + {order.items.length - 3} more item(s)...
                           </td>
                         </tr>
                       )}
                     </tbody>
                   </table>
+                  <div className="border-t border-black my-0.5" />
                 </div>
 
-                {/* Pricing & COD Total Banner */}
-                <div className="border-t-[1.5px] border-black pt-1 mb-1">
-                  <div className="flex justify-between items-center">
-                    <div className="text-[7.5px] text-black/80 leading-tight">
-                      <div>Subtotal: ৳{order.subtotal.toLocaleString("en-BD")}</div>
-                      <div>Delivery: {order.deliveryFee === 0 ? "FREE" : `৳${order.deliveryFee}`}</div>
+                {/* Financials & Disclaimer */}
+                <div className="shrink-0 text-black">
+                  <div className="text-[9px] leading-snug">
+                    <div className="font-medium text-black">
+                      Delivery Charge <strong className="font-bold">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
                     </div>
-                    <div className="border-[1.5px] border-black px-2 py-0.5 rounded text-right bg-black text-white">
-                      <div className="text-[6.5px] font-extrabold tracking-wider uppercase leading-tight">
-                        CASH ON DELIVERY (COD)
-                      </div>
-                      <div className="font-mono font-black text-[12px] leading-none">
-                        ৳{order.totalAmount.toLocaleString("en-BD")}
-                      </div>
+                    <div className="text-[10.5px] font-black text-black mt-0.5">
+                      Sub Total <strong className="font-black">{order.totalAmount.toLocaleString("en-BD")} Tk</strong>
                     </div>
                   </div>
-                </div>
 
-                {/* Minimal Footer */}
-                <div className="text-[6.5px] text-center text-black/60 pt-1 border-t border-dotted border-black/30">
-                  Thank you for shopping with {siteTitle}! • hazenshopbd.com • {hotline}
+                  <div className="border-t border-dashed border-black my-1" />
+
+                  <div className="text-[6px] font-semibold text-center text-black/70 mt-0.5">
+                    hazenshopbd.com • Helpline: {hotline}
+                  </div>
                 </div>
               </div>
             </div>
