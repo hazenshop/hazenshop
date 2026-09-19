@@ -241,8 +241,6 @@ export default function OrderInvoiceModal({
                 line-height: 1.25;
                 margin-top: 1.5px;
                 word-break: break-word;
-                max-height: 22px;
-                overflow: hidden;
               }
               .t-logistics {
                 display: flex;
@@ -373,20 +371,19 @@ export default function OrderInvoiceModal({
                     </tr>
                   </thead>
                   <tbody>
-                    ${order.items.slice(0, 3).map((item) => `
+                    ${order.items.slice(0, 4).map((item) => `
                       <tr>
                         <td>
-                          <div class="t-item-name">${item.productName}</div>
-                          ${item.variantName ? `<span class="t-item-var">• ${item.variantName}</span>` : ""}
+                          <div class="t-item-name">${item.productName}${item.variantName ? ` <span style="font-weight: normal; color: #444;">(${item.variantName})</span>` : ""}</div>
                         </td>
                         <td style="text-align: center; font-family: monospace; font-weight: 800;">x${item.quantity}</td>
                         <td style="text-align: right; font-family: monospace; font-weight: 900;">৳${item.total.toLocaleString("en-BD")}</td>
                       </tr>
                     `).join("")}
-                    ${order.items.length > 3 ? `
+                    ${order.items.length > 4 ? `
                       <tr>
                         <td colspan="3" style="text-align: center; font-size: 7px; color: #666; font-style: italic;">
-                          + ${order.items.length - 3} more item(s)...
+                          + ${order.items.length - 4} more item(s)...
                         </td>
                       </tr>
                     ` : ""}
@@ -707,7 +704,7 @@ export default function OrderInvoiceModal({
                       {order.customerPhone}
                     </div>
                   </div>
-                  <div className="text-[8.5px] leading-snug break-words max-h-[22px] overflow-hidden">
+                  <div className="text-[8.5px] leading-snug break-words">
                     {hasRealAddress ? (
                       <span className="text-black font-semibold">{displayAddress}</span>
                     ) : (
@@ -736,15 +733,15 @@ export default function OrderInvoiceModal({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/10">
-                      {order.items.slice(0, 3).map((item, idx) => (
+                      {order.items.slice(0, 4).map((item, idx) => (
                         <tr key={idx} className="text-[8px] leading-tight">
                           <td className="py-0.5 pr-1 align-top">
-                            <div className="font-bold text-black truncate max-w-[58mm]">{item.productName}</div>
-                            {item.variantName && (
-                              <span className="text-[7px] text-black/80 block truncate">
-                                • {item.variantName}
-                              </span>
-                            )}
+                            <div className="font-bold text-black truncate max-w-[58mm]">
+                              {item.productName}
+                              {item.variantName && (
+                                <span className="font-normal text-black/80"> ({item.variantName})</span>
+                              )}
+                            </div>
                           </td>
                           <td className="py-0.5 text-center font-bold font-mono text-black align-top">
                             x{item.quantity}
@@ -754,10 +751,10 @@ export default function OrderInvoiceModal({
                           </td>
                         </tr>
                       ))}
-                      {order.items.length > 3 && (
+                      {order.items.length > 4 && (
                         <tr>
                           <td colSpan={3} className="text-center text-[7px] text-black/70 italic py-0.5">
-                            + {order.items.length - 3} more item(s)...
+                            + {order.items.length - 4} more item(s)...
                           </td>
                         </tr>
                       )}
