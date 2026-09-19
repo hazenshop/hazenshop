@@ -180,31 +180,28 @@ export default function OrderInvoiceModal({
         margin: 0mm;
       }
       html, body {
+        /* width only — do NOT set height, let content be naturally shorter than page */
+        /* A document shorter than the label is impossible to paginate into 2 pages */
         width: 75mm;
-        height: 100mm;
-        max-height: 100mm;
         margin: 0;
         padding: 0;
         overflow: hidden;
         background: #ffffff;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        /* font-size:0 kills phantom whitespace text nodes that add blank pages */
+        /* font-size:0 kills phantom whitespace text nodes */
         font-size: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
       }
       .thermal-card {
-        /* Normal block flow — body height = card height = exactly 1 page, no blank 2nd page */
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         box-sizing: border-box;
-        /* 62mm keeps us inside the ~6mm hardware margin browsers enforce on each side of a 75mm page */
         width: 62mm;
-        height: 92mm;
-        max-height: 92mm;
-        /* center horizontally within the 75mm page */
-        margin: 2mm auto 0 auto;
+        height: 90mm;
+        /* 3mm top + auto sides = balanced padding on all visible edges */
+        margin: 3mm auto 0 auto;
         border: 1.5px solid #000;
         border-radius: 2px;
         padding: 2mm 2.5mm;
@@ -214,12 +211,12 @@ export default function OrderInvoiceModal({
         font-size: 8.5px;
         page-break-inside: avoid;
         break-inside: avoid;
+        page-break-after: avoid;
+        break-after: avoid;
       }
       @media print {
         html, body {
           width: 75mm !important;
-          height: 100mm !important;
-          max-height: 100mm !important;
           margin: 0 !important;
           padding: 0 !important;
           overflow: hidden !important;
