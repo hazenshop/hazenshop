@@ -177,12 +177,17 @@ export default function OrderInvoiceModal({
       * { box-sizing: border-box; margin: 0; padding: 0; }
       @page {
         size: 75mm 100mm;
-        margin: 0 !important;
+        margin: 0mm !important;
       }
-      html, body {
+      html {
+        width: 75mm;
+        height: 100mm;
+        overflow: hidden;
+        background: #ffffff;
+      }
+      body {
         width: 75mm !important;
-        height: 90mm !important;
-        max-height: 90mm !important;
+        height: 100mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -192,13 +197,17 @@ export default function OrderInvoiceModal({
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         font-size: 0 !important;
+        /* Clamp to exactly 1 label — prevents gap sensor from seeing a 2nd page */
+        max-height: 100mm !important;
+        position: relative;
       }
       .thermal-card {
         box-sizing: border-box;
-        width: 70mm;
-        height: 88mm;
-        max-height: 88mm;
-        margin: 1mm auto 0 auto;
+        position: absolute;
+        top: 1mm;
+        left: 1mm;
+        width: 73mm;
+        height: 90mm;
         border: 1.5px solid #000;
         border-radius: 2px;
         padding: 2mm 2.5mm;
@@ -445,9 +454,7 @@ export default function OrderInvoiceModal({
         </div>
       </div>
     </div>
-  </body>
-</html>
-`);
+  </body></html>`);
     } else if (paperSize === "4x3") {
       // 100mm x 75mm (4" x 3") landscape thermal label - safe 1-page fit & un-squeezed address
       doc.write(`<!DOCTYPE html>
@@ -460,12 +467,18 @@ export default function OrderInvoiceModal({
       * { box-sizing: border-box; margin: 0; padding: 0; }
       @page {
         size: 100mm 75mm;
-        margin: 0 !important;
+        margin: 0mm !important;
       }
-      html, body {
+      html {
+        width: 100mm;
+        height: 75mm;
+        overflow: hidden;
+        background: #ffffff;
+      }
+      body {
         width: 100mm !important;
-        height: 68mm !important;
-        max-height: 68mm !important;
+        height: 75mm !important;
+        max-height: 75mm !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -475,13 +488,15 @@ export default function OrderInvoiceModal({
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         font-size: 0 !important;
+        position: relative;
       }
       .thermal-card {
         box-sizing: border-box;
-        width: 94mm;
-        height: 66mm;
-        max-height: 66mm;
-        margin: 1mm auto 0 auto;
+        position: absolute;
+        top: 1mm;
+        left: 1mm;
+        width: 98mm;
+        height: 70mm;
         border: 1.5px solid #000;
         border-radius: 2px;
         padding: 1.5mm 2.5mm;
