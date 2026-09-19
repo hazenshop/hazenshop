@@ -31,12 +31,15 @@ export default function OrderInvoiceModal({
   const hotline = settings?.hotline || "+880 1711-030546";
   const orderDate = new Date(order.createdAt).toLocaleDateString("en-GB");
 
-  const courierBannerText =
-    order.courierName && order.trackingCode
-      ? `${order.courierName.toUpperCase()} #${order.trackingCode}`
-      : order.courierName
-        ? `${order.courierName.toUpperCase()} #${order.id}`
-        : `CASH ON DELIVERY • ORDER #${order.id}`;
+  const courierBannerMethod = order.courierName
+    ? order.courierName.toUpperCase()
+    : "CASH ON DELIVERY";
+
+  const courierBannerOrder = order.trackingCode
+    ? `#${order.trackingCode}`
+    : `ORDER #${order.id}`;
+
+  const courierBannerText = `${courierBannerMethod} • ${courierBannerOrder}`;
 
   const hasRealAddress =
     order.customerAddress &&
@@ -189,9 +192,10 @@ export default function OrderInvoiceModal({
         background: #ffffff;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        /* font-size:0 kills phantom whitespace text nodes */
         font-size: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Noto Sans Bengali", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
       }
       .thermal-card {
         display: flex;
@@ -199,12 +203,12 @@ export default function OrderInvoiceModal({
         justify-content: space-between;
         box-sizing: border-box;
         width: 62mm;
-        height: 90mm;
-        /* 3mm top + auto sides = balanced padding on all visible edges */
-        margin: 3mm auto 0 auto;
-        border: 1.5px solid #000;
+        height: 89mm;
+        /* 4.5mm top margin + 2.5mm top padding gives comfortable top breathing room */
+        margin: 4.5mm auto 0 auto;
+        border: 1.5px solid #000000;
         border-radius: 2px;
-        padding: 2mm 2.5mm;
+        padding: 2.5mm 2.5mm 2mm 2.5mm;
         overflow: hidden;
         background: #ffffff;
         color: #000000;
@@ -236,65 +240,76 @@ export default function OrderInvoiceModal({
         text-transform: uppercase;
         letter-spacing: 0.5px;
         line-height: 1.1;
+        color: #000000;
       }
       .t-store-sub {
-        font-size: 7.5px;
-        font-weight: 700;
+        font-size: 8px;
+        font-weight: 800;
         text-transform: uppercase;
-        color: #111;
+        color: #000000;
         margin-top: 1.5px;
         letter-spacing: 0.2px;
       }
       .t-courier-bar {
         flex-shrink: 0;
-        background: #000;
-        color: #fff;
-        text-align: center;
-        font-family: monospace, -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 11.5px;
+        background: #000000;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 10px;
         font-weight: 900;
         padding: 2.5px 4px;
         margin: 2px 0 3px 0;
         border-radius: 1.5px;
-        letter-spacing: 0.5px;
         text-transform: uppercase;
         line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .t-courier-left {
+        letter-spacing: 0.3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .t-courier-right {
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-left: 6px;
+        white-space: nowrap;
       }
       .t-cust-box {
         flex-shrink: 0;
-        font-size: 8.5px;
-        color: #000;
+        font-size: 9px;
+        color: #000000;
       }
       .t-cust-line {
         margin-bottom: 2px;
-        line-height: 1.4;
+        line-height: 1.35;
         word-break: break-word;
       }
       .t-cust-line strong {
-        font-weight: 800;
-        color: #000;
+        font-weight: 900;
+        color: #000000;
         margin-right: 3px;
       }
       .t-cust-line span {
-        font-weight: 600;
-        color: #111;
+        font-weight: 700;
+        color: #000000;
       }
-      .t-mono {
-        font-family: monospace;
-        font-weight: 800;
-        font-size: 9.5px;
+      .t-phone {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-weight: 900;
+        font-size: 13px;
+        letter-spacing: 0.6px;
+        color: #000000;
+        display: inline-block;
       }
       .t-missing-addr {
-        color: #dc2626;
-        font-weight: 700;
-      }
-      .t-cust-meta {
-        font-size: 7.5px;
-        color: #222;
-        margin-top: 1.5px;
-        display: flex;
-        justify-content: space-between;
-        font-weight: 600;
+        color: #000000;
+        font-weight: 800;
       }
       .t-items-wrap {
         flex-grow: 1;
@@ -305,7 +320,7 @@ export default function OrderInvoiceModal({
         margin: 1px 0;
       }
       .t-divider-solid {
-        border-top: 1px solid #000;
+        border-top: 1.5px solid #000000;
         margin: 2.5px 0;
       }
       .t-table {
@@ -313,27 +328,30 @@ export default function OrderInvoiceModal({
         border-collapse: collapse;
       }
       .t-table th {
-        font-size: 8px;
+        font-size: 8.5px;
         font-weight: 900;
         text-transform: uppercase;
-        color: #000;
+        color: #000000;
         padding: 1px 0;
-        border-bottom: 1px solid #000;
+        border-bottom: 1.5px solid #000000;
       }
       .t-table td {
         padding: 1.5px 0;
         vertical-align: top;
-        border-bottom: 0.5px solid #eaeaea;
-        font-size: 8.5px;
+        border-bottom: 1px dashed #000000;
+        font-size: 9px;
+        color: #000000;
       }
       .t-item-name {
-        font-weight: 700;
+        font-weight: 800;
         line-height: 1.25;
         word-break: break-word;
+        color: #000000;
       }
       .t-item-var {
-        font-size: 7.5px;
-        color: #444;
+        font-size: 8px;
+        font-weight: 700;
+        color: #000000;
         margin-top: 1px;
         line-height: 1.15;
       }
@@ -341,39 +359,42 @@ export default function OrderInvoiceModal({
         flex-shrink: 0;
       }
       .t-financials {
-        font-size: 9.5px;
+        font-size: 10px;
         line-height: 1.35;
-        color: #000;
+        color: #000000;
       }
       .t-fin-row {
-        font-weight: 600;
+        font-weight: 700;
+        color: #000000;
       }
       .t-fin-row strong {
-        font-weight: 800;
+        font-weight: 900;
+        color: #000000;
       }
       .t-total-row {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 900;
         margin-top: 1px;
+        color: #000000;
       }
       .t-divider-dashed {
-        border-top: 1.5px dashed #000;
-        margin: 3px 0 2px 0;
+        border-top: 1.5px dashed #000000;
+        margin: 2.5px 0;
       }
       .t-disclaimer {
-        font-size: 7.5px;
-        font-weight: 700;
+        font-size: 8px;
+        font-weight: 800;
         text-align: center;
         line-height: 1.3;
-        color: #000;
+        color: #000000;
         padding: 1px 0;
       }
       .t-footer-branding {
-        font-size: 6.5px;
-        font-weight: 600;
+        font-size: 7.5px;
+        font-weight: 700;
         text-align: center;
-        color: #444;
-        margin-top: 1.5px;
+        color: #000000;
+        margin-top: 1px;
       }
     </style>
   </head>
@@ -384,21 +405,18 @@ export default function OrderInvoiceModal({
         <div class="t-store-sub">HOTLINE: ${hotline} | INVOICED: ${orderDate}</div>
       </div>
       <div class="t-courier-bar">
-        ${courierBannerText}
+        <span class="t-courier-left">${courierBannerMethod}</span>
+        <span class="t-courier-right">${courierBannerOrder}</span>
       </div>
       <div class="t-cust-box">
         <div class="t-cust-line">
           <strong>Name:</strong><span>${order.customerName}</span>
         </div>
         <div class="t-cust-line">
-          <strong>Phone:</strong><span class="t-mono">${order.customerPhone}</span>
+          <strong>Phone:</strong><span class="t-phone">${order.customerPhone}</span>
         </div>
         <div class="t-cust-line">
           <strong>Address:</strong><span class="${hasRealAddress ? '' : 't-missing-addr'}">${displayAddress}</span>
-        </div>
-        <div class="t-cust-meta">
-          <span><strong>Zone:</strong> ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
-          <span><strong>Order ID:</strong> #${order.id}</span>
         </div>
       </div>
       <div class="t-items-wrap">
@@ -418,17 +436,17 @@ export default function OrderInvoiceModal({
                   <div class="t-item-name">${item.productName}</div>
                   ${item.variantName ? `<div class="t-item-var">(${item.variantName})</div>` : ""}
                 </td>
-                <td style="text-align: center; font-family: monospace; font-weight: 700;">
+                <td style="text-align: center; font-weight: 800;">
                   ${item.quantity}
                 </td>
-                <td style="text-align: right; font-family: monospace; font-weight: 800;">
+                <td style="text-align: right; font-weight: 900;">
                   ${item.total.toLocaleString("en-BD")}
                 </td>
               </tr>
             `).join("")}
             ${order.items.length > 4 ? `
               <tr>
-                <td colspan="3" style="text-align: center; font-size: 7.5px; color: #555; font-style: italic; padding: 2px 0;">
+                <td colspan="3" style="text-align: center; font-size: 8px; color: #000000; font-weight: 700; font-style: italic; padding: 2px 0;">
                   + ${order.items.length - 4} more item(s)...
                 </td>
               </tr>
@@ -481,21 +499,23 @@ export default function OrderInvoiceModal({
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         font-size: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Noto Sans Bengali", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
       }
       .thermal-card {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         box-sizing: border-box;
-        /* 84mm keeps us inside the ~6mm hardware margin browsers enforce on each side of a 100mm wide page */
         width: 84mm;
         height: 64mm;
         max-height: 64mm;
-        margin: 1.5mm auto 0 auto;
-        border: 1.5px solid #000;
+        /* 2.5mm top margin + 2.5mm top padding */
+        margin: 2.5mm auto 0 auto;
+        border: 1.5px solid #000000;
         border-radius: 2px;
-        padding: 1.5mm 2.5mm;
+        padding: 2.5mm 3mm 2mm 3mm;
         overflow: hidden;
         background: #ffffff;
         color: #000000;
@@ -527,33 +547,49 @@ export default function OrderInvoiceModal({
         text-transform: uppercase;
         letter-spacing: 0.5px;
         line-height: 1.1;
+        color: #000000;
       }
       .t-store-sub {
-        font-size: 7.5px;
-        font-weight: 700;
+        font-size: 8px;
+        font-weight: 800;
         text-transform: uppercase;
-        color: #111;
+        color: #000000;
         margin-top: 1px;
       }
       .t-courier-bar {
         flex-shrink: 0;
-        background: #000;
-        color: #fff;
-        text-align: center;
-        font-family: monospace, -apple-system, BlinkMacSystemFont, sans-serif;
-        font-size: 11.5px;
+        background: #000000;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-size: 10px;
         font-weight: 900;
-        padding: 2px 4px;
+        padding: 2px 5px;
         margin: 1.5px 0 2.5px 0;
         border-radius: 1.5px;
-        letter-spacing: 0.5px;
         text-transform: uppercase;
         line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      .t-courier-left {
+        letter-spacing: 0.3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .t-courier-right {
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        margin-left: 6px;
+        white-space: nowrap;
       }
       .t-cust-box {
         flex-shrink: 0;
-        font-size: 8px;
-        color: #000;
+        font-size: 8.5px;
+        color: #000000;
       }
       .t-cust-line {
         margin-bottom: 1.5px;
@@ -561,30 +597,25 @@ export default function OrderInvoiceModal({
         word-break: break-word;
       }
       .t-cust-line strong {
-        font-weight: 800;
-        color: #000;
+        font-weight: 900;
+        color: #000000;
         margin-right: 3px;
       }
       .t-cust-line span {
-        font-weight: 600;
-        color: #111;
+        font-weight: 700;
+        color: #000000;
       }
-      .t-mono {
-        font-family: monospace;
-        font-weight: 800;
-        font-size: 9px;
+      .t-phone {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        font-weight: 900;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+        color: #000000;
+        display: inline-block;
       }
       .t-missing-addr {
-        color: #dc2626;
-        font-weight: 700;
-      }
-      .t-cust-meta {
-        font-size: 7.5px;
-        color: #222;
-        margin-top: 1px;
-        display: flex;
-        justify-content: space-between;
-        font-weight: 600;
+        color: #000000;
+        font-weight: 800;
       }
       .t-items-wrap {
         flex-grow: 1;
@@ -595,7 +626,7 @@ export default function OrderInvoiceModal({
         margin: 1px 0;
       }
       .t-divider-solid {
-        border-top: 1px solid #000;
+        border-top: 1.5px solid #000000;
         margin: 2px 0;
       }
       .t-table {
@@ -606,54 +637,60 @@ export default function OrderInvoiceModal({
         font-size: 8px;
         font-weight: 900;
         text-transform: uppercase;
-        color: #000;
+        color: #000000;
         padding: 1px 0;
-        border-bottom: 1px solid #000;
+        border-bottom: 1.5px solid #000000;
       }
       .t-table td {
         padding: 1.5px 0;
         vertical-align: top;
-        border-bottom: 0.5px solid #eaeaea;
-        font-size: 8px;
+        border-bottom: 1px dashed #000000;
+        font-size: 8.5px;
+        color: #000000;
       }
       .t-item-name {
-        font-weight: 700;
+        font-weight: 800;
         line-height: 1.2;
         word-break: break-word;
+        color: #000000;
       }
       .t-item-var {
-        font-size: 7px;
-        color: #444;
+        font-size: 7.5px;
+        font-weight: 700;
+        color: #000000;
         margin-top: 0.5px;
       }
       .t-bottom-wrap {
         flex-shrink: 0;
       }
       .t-financials {
-        font-size: 9px;
+        font-size: 9.5px;
         line-height: 1.3;
-        color: #000;
+        color: #000000;
       }
       .t-fin-row {
-        font-weight: 600;
+        font-weight: 700;
+        color: #000000;
       }
       .t-fin-row strong {
-        font-weight: 800;
+        font-weight: 900;
+        color: #000000;
       }
       .t-total-row {
-        font-size: 10.5px;
+        font-size: 11px;
         font-weight: 900;
         margin-top: 1px;
+        color: #000000;
       }
       .t-divider-dashed {
-        border-top: 1px dashed #000;
+        border-top: 1.5px dashed #000000;
         margin: 2px 0;
       }
       .t-footer-branding {
-        font-size: 6px;
-        font-weight: 600;
+        font-size: 7px;
+        font-weight: 700;
         text-align: center;
-        color: #444;
+        color: #000000;
         margin-top: 1px;
       }
     </style>
@@ -665,21 +702,18 @@ export default function OrderInvoiceModal({
         <div class="t-store-sub">HOTLINE: ${hotline} | INVOICED: ${orderDate}</div>
       </div>
       <div class="t-courier-bar">
-        ${courierBannerText}
+        <span class="t-courier-left">${courierBannerMethod}</span>
+        <span class="t-courier-right">${courierBannerOrder}</span>
       </div>
       <div class="t-cust-box">
         <div class="t-cust-line">
           <strong>Name:</strong><span>${order.customerName}</span>
         </div>
         <div class="t-cust-line">
-          <strong>Phone:</strong><span class="t-mono">${order.customerPhone}</span>
+          <strong>Phone:</strong><span class="t-phone">${order.customerPhone}</span>
         </div>
         <div class="t-cust-line">
           <strong>Address:</strong><span class="${hasRealAddress ? '' : 't-missing-addr'}">${displayAddress}</span>
-        </div>
-        <div class="t-cust-meta">
-          <span><strong>Zone:</strong> ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
-          <span><strong>Order ID:</strong> #${order.id}</span>
         </div>
       </div>
       <div class="t-items-wrap">
@@ -699,17 +733,17 @@ export default function OrderInvoiceModal({
                   <div class="t-item-name">${item.productName}</div>
                   ${item.variantName ? `<div class="t-item-var">(${item.variantName})</div>` : ""}
                 </td>
-                <td style="text-align: center; font-family: monospace; font-weight: 700;">
+                <td style="text-align: center; font-weight: 800;">
                   ${item.quantity}
                 </td>
-                <td style="text-align: right; font-family: monospace; font-weight: 800;">
+                <td style="text-align: right; font-weight: 900;">
                   ${item.total.toLocaleString("en-BD")}
                 </td>
               </tr>
             `).join("")}
             ${order.items.length > 3 ? `
               <tr>
-                <td colspan="3" style="text-align: center; font-size: 7px; color: #555; font-style: italic; padding: 1px 0;">
+                <td colspan="3" style="text-align: center; font-size: 7.5px; color: #000000; font-weight: 700; font-style: italic; padding: 1px 0;">
                   + ${order.items.length - 3} more item(s)...
                 </td>
               </tr>
@@ -1015,29 +1049,26 @@ export default function OrderInvoiceModal({
                 </div>
 
                 {/* Courier / Delivery Black Strip */}
-                <div className="bg-black text-white text-center font-mono font-black text-[11.5px] py-0.5 px-1 rounded-sm uppercase tracking-wide leading-tight my-0.5 shrink-0">
-                  {courierBannerText}
+                <div className="bg-black text-white flex justify-between items-center font-sans font-black text-[10px] py-1 px-2 rounded-sm uppercase tracking-wide leading-tight my-0.5 shrink-0 whitespace-nowrap overflow-hidden">
+                  <span className="truncate">{courierBannerMethod}</span>
+                  <span className="shrink-0 ml-2 font-black tracking-wider">{courierBannerOrder}</span>
                 </div>
 
                 {/* Recipient / Customer Info (Natural Block Flow - No Flex Squish) */}
-                <div className="text-[8.5px] leading-snug space-y-0.5 shrink-0 text-black">
+                <div className="text-[9px] leading-snug space-y-0.5 shrink-0 text-black">
                   <div className="block leading-snug break-words">
-                    <strong className="font-extrabold text-black mr-1">Name:</strong>
-                    <span className="font-semibold text-black">{order.customerName}</span>
+                    <strong className="font-black text-black mr-1">Name:</strong>
+                    <span className="font-bold text-black">{order.customerName}</span>
                   </div>
                   <div className="block leading-snug break-words">
-                    <strong className="font-extrabold text-black mr-1">Phone:</strong>
-                    <span className="font-mono font-extrabold text-black text-[9.5px]">{order.customerPhone}</span>
+                    <strong className="font-black text-black mr-1">Phone:</strong>
+                    <span className="font-sans font-black text-black text-[13px] tracking-wide">{order.customerPhone}</span>
                   </div>
                   <div className="block leading-normal break-words">
-                    <strong className="font-extrabold text-black mr-1">Address:</strong>
-                    <span className={`font-semibold ${hasRealAddress ? 'text-black' : 'text-rose-600 font-bold'}`}>
+                    <strong className="font-black text-black mr-1">Address:</strong>
+                    <span className={`font-bold ${hasRealAddress ? 'text-black' : 'text-black font-extrabold underline'}`}>
                       {displayAddress}
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[7.5px] font-semibold text-black/80 pt-0.5">
-                    <span><strong className="font-bold">Zone:</strong> {order.deliveryZone.replace("_", " ").toUpperCase()}</span>
-                    <span><strong className="font-bold">Order ID:</strong> #{order.id}</span>
                   </div>
                 </div>
 
@@ -1046,7 +1077,7 @@ export default function OrderInvoiceModal({
                   <div className="border-t border-black my-0.5" />
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="border-b border-black text-[8px] font-black uppercase text-black">
+                      <tr className="border-b border-black text-[8.5px] font-black uppercase text-black">
                         <th className="text-left pb-0.5" style={{ width: "56%" }}>ITEM</th>
                         <th className="text-center pb-0.5" style={{ width: "16%" }}>QTY</th>
                         <th className="text-right pb-0.5" style={{ width: "28%" }}>PRICE</th>
@@ -1054,28 +1085,28 @@ export default function OrderInvoiceModal({
                     </thead>
                     <tbody className="divide-y divide-black/10">
                       {order.items.slice(0, 4).map((item, idx) => (
-                        <tr key={idx} className="text-[8.5px] leading-tight">
+                        <tr key={idx} className="text-[9px] leading-tight font-medium text-black">
                           <td className="py-0.5 pr-1 align-top">
                             <div className="font-bold text-black break-words leading-tight">
                               {item.productName}
                             </div>
                             {item.variantName && (
-                              <div className="text-[7.5px] text-black/70 mt-0.5 leading-snug">
+                              <div className="text-[7.5px] font-bold text-black mt-0.5 leading-snug">
                                 ({item.variantName})
                               </div>
                             )}
                           </td>
-                          <td className="py-0.5 text-center font-bold font-mono text-black align-top">
+                          <td className="py-0.5 text-center font-black font-sans text-black align-top">
                             {item.quantity}
                           </td>
-                          <td className="py-0.5 text-right font-black font-mono text-black align-top">
+                          <td className="py-0.5 text-right font-black font-sans text-black align-top">
                             {item.total.toLocaleString("en-BD")}
                           </td>
                         </tr>
                       ))}
                       {order.items.length > 4 && (
                         <tr>
-                          <td colSpan={3} className="text-center text-[7.5px] text-black/70 italic py-0.5">
+                          <td colSpan={3} className="text-center text-[8px] font-bold text-black italic py-0.5">
                             + {order.items.length - 4} more item(s)...
                           </td>
                         </tr>
@@ -1087,21 +1118,21 @@ export default function OrderInvoiceModal({
 
                 {/* Financials & Disclaimer */}
                 <div className="shrink-0 text-black">
-                  <div className="text-[9.5px] leading-snug">
-                    <div className="font-medium text-black">
-                      Delivery Charge <strong className="font-bold">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
+                  <div className="text-[10px] leading-snug">
+                    <div className="font-bold text-black">
+                      Delivery Charge <strong className="font-black">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
                     </div>
-                    <div className="text-[11px] font-black text-black mt-0.5">
+                    <div className="text-[12px] font-black text-black mt-0.5">
                       Sub Total <strong className="font-black">{order.totalAmount.toLocaleString("en-BD")} Tk</strong>
                     </div>
                   </div>
 
                   <div className="border-t-[1.5px] border-dashed border-black my-1" />
 
-                  <div className="text-[7.5px] font-bold text-center text-black leading-snug">
+                  <div className="text-[8px] font-extrabold text-center text-black leading-snug">
                     পার্সেল খুলে পণ্য যাচাই করা যাবে। তবে ব্যবহার করার জন্য অবশ্যই পার্সেলটি রিসিভ করতে হবে।
                   </div>
-                  <div className="text-[6.5px] font-semibold text-center text-black/70 mt-0.5">
+                  <div className="text-[7.5px] font-bold text-center text-black mt-0.5">
                     hazenshopbd.com • Helpline: {hotline}
                   </div>
                 </div>
@@ -1136,35 +1167,32 @@ export default function OrderInvoiceModal({
                   <div className="font-black text-[15px] uppercase tracking-wide leading-tight text-black">
                     {siteTitle}
                   </div>
-                  <div className="text-[7.5px] font-bold uppercase text-black/90 mt-0.5 tracking-tight">
+                  <div className="text-[8px] font-extrabold uppercase text-black mt-0.5 tracking-tight">
                     HOTLINE: {hotline} | INVOICED: {orderDate}
                   </div>
                 </div>
 
                 {/* Courier / Delivery Bar */}
-                <div className="bg-black text-white text-center font-mono font-black text-[11.5px] py-0.5 px-1 rounded-sm uppercase tracking-wide leading-tight my-0.5 shrink-0">
-                  {courierBannerText}
+                <div className="bg-black text-white flex justify-between items-center font-sans font-black text-[10px] py-0.5 px-1.5 rounded-sm uppercase tracking-wide leading-tight my-0.5 shrink-0 whitespace-nowrap overflow-hidden">
+                  <span className="truncate">{courierBannerMethod}</span>
+                  <span className="shrink-0 ml-1.5 font-black tracking-wider">{courierBannerOrder}</span>
                 </div>
 
                 {/* Customer Details */}
-                <div className="text-[8px] leading-snug space-y-0.5 shrink-0 text-black">
+                <div className="text-[8.5px] leading-snug space-y-0.5 shrink-0 text-black">
                   <div className="block leading-snug break-words">
-                    <strong className="font-extrabold text-black mr-1">Name:</strong>
-                    <span className="font-semibold text-black">{order.customerName}</span>
+                    <strong className="font-black text-black mr-1">Name:</strong>
+                    <span className="font-bold text-black">{order.customerName}</span>
                   </div>
                   <div className="block leading-snug break-words">
-                    <strong className="font-extrabold text-black mr-1">Phone:</strong>
-                    <span className="font-mono font-extrabold text-black text-[9px]">{order.customerPhone}</span>
+                    <strong className="font-black text-black mr-1">Phone:</strong>
+                    <span className="font-sans font-black text-black text-[12px] tracking-wide">{order.customerPhone}</span>
                   </div>
                   <div className="block leading-snug break-words">
-                    <strong className="font-extrabold text-black mr-1">Address:</strong>
-                    <span className={`font-semibold ${hasRealAddress ? 'text-black' : 'text-rose-600 font-bold'}`}>
+                    <strong className="font-black text-black mr-1">Address:</strong>
+                    <span className={`font-bold ${hasRealAddress ? 'text-black' : 'text-black font-extrabold underline'}`}>
                       {displayAddress}
                     </span>
-                  </div>
-                  <div className="flex justify-between items-center text-[7.5px] font-semibold text-black/80">
-                    <span><strong className="font-bold">Zone:</strong> {order.deliveryZone.replace("_", " ").toUpperCase()}</span>
-                    <span><strong className="font-bold">Order ID:</strong> #{order.id}</span>
                   </div>
                 </div>
 
@@ -1192,17 +1220,17 @@ export default function OrderInvoiceModal({
                               </div>
                             )}
                           </td>
-                          <td className="py-0.5 text-center font-bold font-mono text-black align-top">
+                          <td className="py-0.5 text-center font-black font-sans text-black align-top">
                             {item.quantity}
                           </td>
-                          <td className="py-0.5 text-right font-black font-mono text-black align-top">
+                          <td className="py-0.5 text-right font-black font-sans text-black align-top">
                             {item.total.toLocaleString("en-BD")}
                           </td>
                         </tr>
                       ))}
                       {order.items.length > 3 && (
                         <tr>
-                          <td colSpan={3} className="text-center text-[7px] text-black/70 italic py-0.5">
+                          <td colSpan={3} className="text-center text-[7.5px] text-black font-bold italic py-0.5">
                             + {order.items.length - 3} more item(s)...
                           </td>
                         </tr>
@@ -1214,18 +1242,18 @@ export default function OrderInvoiceModal({
 
                 {/* Financials & Disclaimer */}
                 <div className="shrink-0 text-black">
-                  <div className="text-[9px] leading-snug">
-                    <div className="font-medium text-black">
-                      Delivery Charge <strong className="font-bold">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
+                  <div className="text-[9.5px] leading-snug">
+                    <div className="font-bold text-black">
+                      Delivery Charge <strong className="font-black">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
                     </div>
-                    <div className="text-[10.5px] font-black text-black mt-0.5">
+                    <div className="text-[11px] font-black text-black mt-0.5">
                       Sub Total <strong className="font-black">{order.totalAmount.toLocaleString("en-BD")} Tk</strong>
                     </div>
                   </div>
 
                   <div className="border-t border-dashed border-black my-1" />
 
-                  <div className="text-[6px] font-semibold text-center text-black/70 mt-0.5">
+                  <div className="text-[7px] font-bold text-center text-black mt-0.5">
                     hazenshopbd.com • Helpline: {hotline}
                   </div>
                 </div>
