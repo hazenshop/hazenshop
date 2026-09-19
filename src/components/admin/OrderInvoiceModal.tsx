@@ -22,6 +22,17 @@ export default function OrderInvoiceModal({
 
   const siteTitle = settings?.siteName?.replace(/—.*/, "").trim() || "HAZENSHOP BD";
   const hotline = settings?.hotline || "+880 1700-000000";
+  const orderDate = new Date(order.createdAt).toLocaleDateString("en-GB");
+
+  const hasRealAddress =
+    order.customerAddress &&
+    order.customerAddress !== "Incomplete Address" &&
+    order.customerAddress !== "Address Not Entered" &&
+    order.customerAddress.trim().length > 0;
+
+  const displayAddress = hasRealAddress
+    ? order.customerAddress.trim()
+    : "ঠিকানা দেওয়া হয়নি (No Address Provided)";
 
   // Native PDF generation using jsPDF
   const handleDownloadPdf = async () => {
@@ -45,7 +56,7 @@ export default function OrderInvoiceModal({
         const pdf = new jsPDF({
           orientation: "landscape",
           unit: "mm",
-          format: [75, 100], // 100mm width x 75mm height (4" x 3")
+          format: [75, 100], // 100mm wide x 75mm tall (4" x 3")
         });
 
         pdf.setProperties({
@@ -117,6 +128,7 @@ export default function OrderInvoiceModal({
 
     doc.open();
     if (is4x3) {
+      // 100mm x 75mm (4" x 3") thermal label format with self-contained CSS
       doc.write(`
         <!DOCTYPE html>
         <html lang="bn">
@@ -126,30 +138,284 @@ export default function OrderInvoiceModal({
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <style>
               * { box-sizing: border-box; margin: 0; padding: 0; }
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                color: #000000;
-                background: #ffffff;
-                margin: 0;
-                padding: 0;
+              @page {
+                size: 100mm 75mm;
+                margin: 0 !important;
+              }
+              html, body {
                 width: 100mm;
                 height: 75mm;
+                max-width: 100mm;
+                max-height: 75mm;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff;
+                color: #000000;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", sans-serif;
                 overflow: hidden;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                page-break-inside: avoid;
+                page-break-after: avoid;
+                break-inside: avoid;
+                break-after: avoid;
               }
-              @page {
-                size: 100mm 75mm;
-                margin: 0;
+              .thermal-card {
+                width: 100mm;
+                height: 75mm;
+                max-width: 100mm;
+                max-height: 75mm;
+                padding: 2.2mm 3.2mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+                background: #ffffff;
+                color: #000000;
+                page-break-inside: avoid;
+                page-break-after: avoid;
+                break-inside: avoid;
+                break-after: avoid;
+              }
+              .t-head {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                border-bottom: 1.5px solid #000;
+                padding-bottom: 2px;
+              }
+              .t-brand {
+                font-size: 11.5px;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: -0.2px;
+                line-height: 1.1;
+              }
+              .t-hotline {
+                font-size: 7.5px;
+                color: #222;
+                margin-top: 1px;
+                font-weight: 500;
+              }
+              .t-meta {
+                text-align: right;
+              }
+              .t-id {
+                font-family: monospace;
+                font-size: 12px;
+                font-weight: 900;
+                line-height: 1.1;
+              }
+              .t-date {
+                font-size: 7.5px;
+                color: #444;
+                margin-top: 1px;
+              }
+              .t-cust {
+                border-bottom: 1px dashed #000;
+                padding: 2.5px 0;
+              }
+              .t-cust-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 4px;
+              }
+              .t-name {
+                font-size: 10px;
+                font-weight: 800;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 60%;
+              }
+              .t-phone {
+                font-family: monospace;
+                font-size: 11px;
+                font-weight: 900;
+                white-space: nowrap;
+              }
+              .t-addr {
+                font-size: 8.5px;
+                font-weight: 600;
+                line-height: 1.25;
+                margin-top: 1.5px;
+                word-break: break-word;
+                max-height: 22px;
+                overflow: hidden;
+              }
+              .t-logistics {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 7.5px;
+                font-weight: 700;
+                color: #222;
+                margin-top: 1.5px;
+              }
+              .t-items {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                overflow: hidden;
+                padding: 2px 0;
+              }
+              .t-table {
+                width: 100%;
+                border-collapse: collapse;
+              }
+              .t-table th {
+                font-size: 7.5px;
+                font-weight: 900;
+                text-transform: uppercase;
+                color: #333;
+                border-bottom: 1px solid #ccc;
+                padding-bottom: 1.5px;
+              }
+              .t-table td {
+                font-size: 8px;
+                padding: 1.5px 0;
+                vertical-align: top;
+              }
+              .t-item-name {
+                font-weight: 700;
+                line-height: 1.15;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 58mm;
+              }
+              .t-item-var {
+                font-size: 7px;
+                color: #444;
+                display: block;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              .t-totals {
+                border-top: 1.5px solid #000;
+                padding-top: 2.5px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+              }
+              .t-subtotal {
+                font-size: 7.5px;
+                color: #333;
+                line-height: 1.25;
+              }
+              .t-cod-box {
+                background: #000000;
+                color: #ffffff;
+                padding: 2px 6px;
+                border-radius: 3px;
+                text-align: right;
+                border: 1px solid #000000;
+              }
+              .t-cod-lbl {
+                font-size: 6.5px;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+                line-height: 1;
+              }
+              .t-cod-val {
+                font-family: monospace;
+                font-size: 12px;
+                font-weight: 900;
+                line-height: 1.1;
+              }
+              .t-foot {
+                font-size: 6.5px;
+                text-align: center;
+                color: #555;
+                padding-top: 1px;
               }
             </style>
           </head>
           <body>
-            ${printContent.outerHTML}
+            <div class="thermal-card">
+              <!-- Top Header -->
+              <div class="t-head">
+                <div>
+                  <div class="t-brand">${siteTitle}</div>
+                  <div class="t-hotline">Hotline: ${hotline} • hazenshopbd.com</div>
+                </div>
+                <div class="t-meta">
+                  <div class="t-id">#${order.id}</div>
+                  <div class="t-date">${orderDate}</div>
+                </div>
+              </div>
+
+              <!-- Customer & Delivery -->
+              <div class="t-cust">
+                <div class="t-cust-top">
+                  <span class="t-name">${order.customerName}</span>
+                  <span class="t-phone">${order.customerPhone}</span>
+                </div>
+                <div class="t-addr" style="${hasRealAddress ? '' : 'color: #dc2626; font-weight: bold;'}">${displayAddress}</div>
+                <div class="t-logistics">
+                  <span>ZONE: ${order.deliveryZone.replace("_", " ").toUpperCase()}</span>
+                  <span>${order.courierName ? `COURIER: ${order.courierName}` : "STANDARD DELIVERY"}${order.trackingCode ? ` • CN: ${order.trackingCode}` : ""}</span>
+                </div>
+              </div>
+
+              <!-- Items Table -->
+              <div class="t-items">
+                <table class="t-table">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; width: 62%;">Item Description</th>
+                      <th style="text-align: center; width: 14%;">Qty</th>
+                      <th style="text-align: right; width: 24%;">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${order.items.slice(0, 3).map((item) => `
+                      <tr>
+                        <td>
+                          <div class="t-item-name">${item.productName}</div>
+                          ${item.variantName ? `<span class="t-item-var">• ${item.variantName}</span>` : ""}
+                        </td>
+                        <td style="text-align: center; font-family: monospace; font-weight: 800;">x${item.quantity}</td>
+                        <td style="text-align: right; font-family: monospace; font-weight: 900;">৳${item.total.toLocaleString("en-BD")}</td>
+                      </tr>
+                    `).join("")}
+                    ${order.items.length > 3 ? `
+                      <tr>
+                        <td colspan="3" style="text-align: center; font-size: 7px; color: #666; font-style: italic;">
+                          + ${order.items.length - 3} more item(s)...
+                        </td>
+                      </tr>
+                    ` : ""}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pricing & COD Banner -->
+              <div class="t-totals">
+                <div class="t-subtotal">
+                  <div>Subtotal: ৳${order.subtotal.toLocaleString("en-BD")}</div>
+                  <div>Delivery: ${order.deliveryFee === 0 ? "FREE" : `৳${order.deliveryFee}`}</div>
+                </div>
+                <div class="t-cod-box">
+                  <div class="t-cod-lbl">CASH ON DELIVERY (COD)</div>
+                  <div class="t-cod-val">৳${order.totalAmount.toLocaleString("en-BD")}</div>
+                </div>
+              </div>
+
+              <!-- Footer -->
+              <div class="t-foot">
+                Thank you for shopping with ${siteTitle}! • ${hotline}
+              </div>
+            </div>
           </body>
         </html>
       `);
     } else {
+      // Standard A4 full-page layout
       doc.write(`
         <!DOCTYPE html>
         <html lang="bn">
@@ -396,15 +662,25 @@ export default function OrderInvoiceModal({
                 <span>Thermal Label Preview (4&quot; × 3&quot; • 100mm × 75mm)</span>
               </div>
 
+              {/* Exact 100mm x 75mm Container for on-screen & html2canvas */}
               <div
                 id="printable-invoice-4x3"
-                className="w-[100mm] h-[75mm] max-w-[100mm] max-h-[75mm] bg-white text-black p-[3mm] flex flex-col justify-between overflow-hidden box-border select-none border border-slate-400 shadow-lg rounded-sm font-sans leading-tight"
-                style={{ width: "100mm", height: "75mm" }}
+                className="bg-white text-black flex flex-col justify-between overflow-hidden box-border select-none border border-slate-400 shadow-md font-sans leading-tight"
+                style={{
+                  width: "100mm",
+                  height: "75mm",
+                  maxWidth: "100mm",
+                  maxHeight: "75mm",
+                  padding: "2.2mm 3.2mm",
+                  pageBreakInside: "avoid",
+                  pageBreakAfter: "avoid",
+                  boxSizing: "border-box",
+                }}
               >
                 {/* Top Header */}
-                <div className="border-b-[1.5px] border-black pb-1 flex justify-between items-start">
+                <div className="border-b-[1.5px] border-black pb-0.5 flex justify-between items-start">
                   <div>
-                    <div className="font-black text-[12px] uppercase tracking-tight text-black leading-tight">
+                    <div className="font-black text-[11.5px] uppercase tracking-tight text-black leading-tight">
                       {siteTitle}
                     </div>
                     <div className="text-[7.5px] text-black/80 font-medium">
@@ -416,23 +692,27 @@ export default function OrderInvoiceModal({
                       #{order.id}
                     </div>
                     <div className="text-[7.5px] text-black/70">
-                      {new Date(order.createdAt).toLocaleDateString("en-GB")}
+                      {orderDate}
                     </div>
                   </div>
                 </div>
 
                 {/* Customer & Delivery Information */}
                 <div className="border-b border-dashed border-black/80 py-1 space-y-0.5">
-                  <div className="flex justify-between items-baseline">
+                  <div className="flex justify-between items-baseline gap-1">
                     <div className="text-[10px] font-black text-black truncate max-w-[62%]">
                       {order.customerName}
                     </div>
-                    <div className="font-mono font-black text-[10.5px] text-black">
+                    <div className="font-mono font-black text-[11px] text-black shrink-0">
                       {order.customerPhone}
                     </div>
                   </div>
-                  <div className="text-[8.5px] text-black font-medium leading-snug line-clamp-2">
-                    {order.customerAddress}
+                  <div className="text-[8.5px] leading-snug break-words max-h-[22px] overflow-hidden">
+                    {hasRealAddress ? (
+                      <span className="text-black font-semibold">{displayAddress}</span>
+                    ) : (
+                      <span className="text-rose-600 font-bold">{displayAddress}</span>
+                    )}
                   </div>
                   <div className="flex justify-between items-center text-[7.5px] text-black/90 font-bold pt-0.5">
                     <span>
@@ -447,36 +727,42 @@ export default function OrderInvoiceModal({
 
                 {/* Items Summary (Compact List) */}
                 <div className="flex-1 py-1 overflow-hidden flex flex-col justify-center">
-                  <div className="border-b border-black/30 pb-0.5 mb-0.5 flex justify-between text-[7.5px] font-black uppercase text-black/70">
-                    <span className="flex-1">Item Description</span>
-                    <span className="w-8 text-center">Qty</span>
-                    <span className="w-14 text-right">Total</span>
-                  </div>
-                  <div className="space-y-0.5 overflow-hidden">
-                    {order.items.slice(0, 3).map((item, idx) => (
-                      <div key={idx} className="flex justify-between items-baseline text-[8px] leading-tight">
-                        <div className="flex-1 truncate pr-1">
-                          <span className="font-bold text-black">{item.productName}</span>
-                          {item.variantName && (
-                            <span className="text-[7.5px] text-black/80 block truncate">
-                              • {item.variantName}
-                            </span>
-                          )}
-                        </div>
-                        <div className="w-8 text-center font-bold font-mono text-black">
-                          x{item.quantity}
-                        </div>
-                        <div className="w-14 text-right font-black font-mono text-black">
-                          ৳{item.total.toLocaleString("en-BD")}
-                        </div>
-                      </div>
-                    ))}
-                    {order.items.length > 3 && (
-                      <div className="text-[7px] text-black/70 italic text-center">
-                        + {order.items.length - 3} more item(s)...
-                      </div>
-                    )}
-                  </div>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-black/30 text-[7.5px] font-black uppercase text-black/70">
+                        <th className="text-left pb-0.5" style={{ width: "62%" }}>Item Description</th>
+                        <th className="text-center pb-0.5" style={{ width: "14%" }}>Qty</th>
+                        <th className="text-right pb-0.5" style={{ width: "24%" }}>Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-black/10">
+                      {order.items.slice(0, 3).map((item, idx) => (
+                        <tr key={idx} className="text-[8px] leading-tight">
+                          <td className="py-0.5 pr-1 align-top">
+                            <div className="font-bold text-black truncate max-w-[58mm]">{item.productName}</div>
+                            {item.variantName && (
+                              <span className="text-[7px] text-black/80 block truncate">
+                                • {item.variantName}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-0.5 text-center font-bold font-mono text-black align-top">
+                            x{item.quantity}
+                          </td>
+                          <td className="py-0.5 text-right font-black font-mono text-black align-top">
+                            ৳{item.total.toLocaleString("en-BD")}
+                          </td>
+                        </tr>
+                      ))}
+                      {order.items.length > 3 && (
+                        <tr>
+                          <td colSpan={3} className="text-center text-[7px] text-black/70 italic py-0.5">
+                            + {order.items.length - 3} more item(s)...
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Pricing & COD Total Banner */}
@@ -487,7 +773,7 @@ export default function OrderInvoiceModal({
                       <div>Delivery: {order.deliveryFee === 0 ? "FREE" : `৳${order.deliveryFee}`}</div>
                     </div>
                     <div className="border-[1.5px] border-black px-2 py-0.5 rounded text-right bg-black text-white">
-                      <div className="text-[6.5px] font-extrabold tracking-wider uppercase">
+                      <div className="text-[6.5px] font-extrabold tracking-wider uppercase leading-tight">
                         CASH ON DELIVERY (COD)
                       </div>
                       <div className="font-mono font-black text-[12px] leading-none">
@@ -499,7 +785,7 @@ export default function OrderInvoiceModal({
 
                 {/* Minimal Footer */}
                 <div className="text-[6.5px] text-center text-black/60 pt-0.5">
-                  Thank you for shopping with {siteTitle} • {hotline}
+                  Thank you for shopping with {siteTitle}! • {hotline}
                 </div>
               </div>
             </div>
@@ -528,7 +814,7 @@ export default function OrderInvoiceModal({
                     INVOICE: #{order.id}
                   </span>
                   <p className="text-slate-500 text-[11px]">
-                    Date: {new Date(order.createdAt).toLocaleDateString("en-GB")}
+                    Date: {orderDate}
                   </p>
                   <span className="inline-block bg-amber-100 text-amber-900 font-extrabold px-2.5 py-0.5 rounded text-[10px] mt-1 border border-amber-200">
                     CASH ON DELIVERY (COD)
@@ -543,8 +829,10 @@ export default function OrderInvoiceModal({
                     Deliver To (Recipient):
                   </span>
                   <p className="font-bold text-sm text-slate-900 mt-0.5">{order.customerName}</p>
-                  <p className="font-bold text-slate-800 text-xs">{order.customerPhone}</p>
-                  <p className="text-slate-600 text-[11px] mt-1 leading-relaxed">{order.customerAddress}</p>
+                  <p className="font-bold text-slate-800 text-xs font-mono">{order.customerPhone}</p>
+                  <p className="text-slate-700 text-[11px] mt-1 leading-relaxed break-words font-medium">
+                    {displayAddress}
+                  </p>
                 </div>
                 <div className="text-left sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200">
                   <span className="font-bold text-slate-400 uppercase tracking-wider block text-[10px]">

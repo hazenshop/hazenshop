@@ -48,11 +48,7 @@ export async function POST(req: NextRequest) {
       updatedAt: new Date().toISOString(),
     };
 
-    if (existing) {
-      await db.updateOrderStatus(draftId, "incomplete");
-    } else {
-      await db.createOrder(draftOrder);
-    }
+    await db.createOrder(draftOrder);
 
     return NextResponse.json({ success: true, id: draftId });
   } catch (error: unknown) {

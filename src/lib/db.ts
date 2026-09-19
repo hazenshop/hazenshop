@@ -778,7 +778,7 @@ export const db = {
 
     if (isSupabaseConfigured && dbClient) {
       try {
-        await dbClient.from("orders").insert({
+        await dbClient.from("orders").upsert({
           id: newOrder.id,
           customer_name: newOrder.customerName,
           customer_phone: newOrder.customerPhone,
@@ -804,7 +804,12 @@ export const db = {
     }
 
     cachedOrders = readJsonFile("orders.json", cachedOrders);
-    cachedOrders.unshift(newOrder);
+    const existingIndex = cachedOrders.findIndex((o) => o.id === newOrder.id);
+    if (existingIndex > -1) {
+      cachedOrders[existingIndex] = newOrder;
+    } else {
+      cachedOrders.unshift(newOrder);
+    }
     writeJsonFile("orders.json", cachedOrders);
 
     // Decrement inventory stock for ordered products (unless marked as unlimited stock)
