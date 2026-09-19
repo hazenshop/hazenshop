@@ -177,53 +177,57 @@ export default function OrderInvoiceModal({
       * { box-sizing: border-box; margin: 0; padding: 0; }
       @page {
         size: 75mm 100mm;
-        margin: 0mm !important;
+        margin: 0mm;
       }
-      html {
+      html, body {
         width: 75mm;
         height: 100mm;
+        max-height: 100mm;
+        margin: 0;
+        padding: 0;
         overflow: hidden;
         background: #ffffff;
-      }
-      body {
-        width: 75mm !important;
-        height: 100mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
-        overflow: hidden !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        font-size: 0 !important;
-        /* Clamp to exactly 1 label — prevents gap sensor from seeing a 2nd page */
-        max-height: 100mm !important;
-        position: relative;
+        /* font-size:0 kills phantom whitespace text nodes that add blank pages */
+        font-size: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
       }
       .thermal-card {
-        box-sizing: border-box;
-        position: absolute;
-        top: 1mm;
-        left: 1mm;
-        width: 73mm;
-        height: 90mm;
-        border: 1.5px solid #000;
-        border-radius: 2px;
-        padding: 2mm 2.5mm;
+        /* Normal block flow — body height = card height = exactly 1 page, no blank 2nd page */
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        box-sizing: border-box;
+        /* 62mm keeps us inside the ~6mm hardware margin browsers enforce on each side of a 75mm page */
+        width: 62mm;
+        height: 92mm;
+        max-height: 92mm;
+        /* center horizontally within the 75mm page */
+        margin: 2mm auto 0 auto;
+        border: 1.5px solid #000;
+        border-radius: 2px;
+        padding: 2mm 2.5mm;
         overflow: hidden;
         background: #ffffff;
         color: #000000;
         font-size: 8.5px;
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
-        page-break-before: avoid !important;
-        break-inside: avoid !important;
-        break-after: avoid !important;
-        break-before: avoid !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      @media print {
+        html, body {
+          width: 75mm !important;
+          height: 100mm !important;
+          max-height: 100mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
+        .thermal-card {
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+        }
       }
       .t-store-header {
         text-align: center;
@@ -467,52 +471,54 @@ export default function OrderInvoiceModal({
       * { box-sizing: border-box; margin: 0; padding: 0; }
       @page {
         size: 100mm 75mm;
-        margin: 0mm !important;
+        margin: 0mm;
       }
-      html {
+      html, body {
         width: 100mm;
         height: 75mm;
+        max-height: 75mm;
+        margin: 0;
+        padding: 0;
         overflow: hidden;
         background: #ffffff;
-      }
-      body {
-        width: 100mm !important;
-        height: 75mm !important;
-        max-height: 75mm !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
-        overflow: hidden !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        font-size: 0 !important;
-        position: relative;
+        font-size: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans Bengali", "SolaimanLipi", sans-serif;
       }
       .thermal-card {
-        box-sizing: border-box;
-        position: absolute;
-        top: 1mm;
-        left: 1mm;
-        width: 98mm;
-        height: 70mm;
-        border: 1.5px solid #000;
-        border-radius: 2px;
-        padding: 1.5mm 2.5mm;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        box-sizing: border-box;
+        /* 84mm keeps us inside the ~6mm hardware margin browsers enforce on each side of a 100mm wide page */
+        width: 84mm;
+        height: 64mm;
+        max-height: 64mm;
+        margin: 1.5mm auto 0 auto;
+        border: 1.5px solid #000;
+        border-radius: 2px;
+        padding: 1.5mm 2.5mm;
         overflow: hidden;
         background: #ffffff;
         color: #000000;
         font-size: 8px;
-        page-break-inside: avoid !important;
-        page-break-after: avoid !important;
-        page-break-before: avoid !important;
-        break-inside: avoid !important;
-        break-after: avoid !important;
-        break-before: avoid !important;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      @media print {
+        html, body {
+          width: 100mm !important;
+          height: 75mm !important;
+          max-height: 75mm !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
+        .thermal-card {
+          page-break-after: avoid !important;
+          break-after: avoid !important;
+        }
       }
       .t-store-header {
         text-align: center;
