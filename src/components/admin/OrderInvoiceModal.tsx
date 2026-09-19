@@ -20,7 +20,14 @@ export default function OrderInvoiceModal({
 
   if (!order) return null;
 
-  const siteTitle = settings?.siteName?.replace(/—.*/, "").trim() || "HAZENSHOP BD";
+  // Ensure the brand name on the printing document always includes "BD" (HAZENSHOP BD / hazenshopbd)
+  let rawSiteName = settings?.siteName?.replace(/—.*/, "").trim() || "HAZENSHOP BD";
+  if (/hazen\s*shop/i.test(rawSiteName)) {
+    rawSiteName = "HAZENSHOP BD";
+  } else if (!/bd\b/i.test(rawSiteName)) {
+    rawSiteName = `${rawSiteName} BD`;
+  }
+  const siteTitle = rawSiteName;
   const hotline = settings?.hotline || "+880 1700-000000";
   const orderDate = new Date(order.createdAt).toLocaleDateString("en-GB");
 
@@ -60,13 +67,13 @@ export default function OrderInvoiceModal({
         });
 
         pdf.setProperties({
-          title: `Invoice_${order.id}_75x100mm`,
-          subject: `${siteTitle} Order #${order.id} 3x4 Label`,
-          author: siteTitle,
+          title: `Invoice_${order.id}_hazenshopbd_75x100mm`,
+          subject: `${siteTitle} (hazenshopbd.com) Order #${order.id} 3x4 Label`,
+          author: "HAZENSHOP BD (hazenshopbd.com)",
         });
 
         pdf.addImage(imgData, "PNG", 0, 0, 75, 100, undefined, "FAST");
-        pdf.save(`Invoice_${order.id}_75x100mm.pdf`);
+        pdf.save(`Invoice_${order.id}_hazenshopbd_75x100mm.pdf`);
       } else if (paperSize === "4x3") {
         const element = document.getElementById("printable-invoice-4x3");
         if (!element) return;
@@ -86,13 +93,13 @@ export default function OrderInvoiceModal({
         });
 
         pdf.setProperties({
-          title: `Invoice_${order.id}_100x75mm`,
-          subject: `${siteTitle} Order #${order.id} 4x3 Label`,
-          author: siteTitle,
+          title: `Invoice_${order.id}_hazenshopbd_100x75mm`,
+          subject: `${siteTitle} (hazenshopbd.com) Order #${order.id} 4x3 Label`,
+          author: "HAZENSHOP BD (hazenshopbd.com)",
         });
 
         pdf.addImage(imgData, "PNG", 0, 0, 100, 75, undefined, "FAST");
-        pdf.save(`Invoice_${order.id}_100x75mm.pdf`);
+        pdf.save(`Invoice_${order.id}_hazenshopbd_100x75mm.pdf`);
       } else {
         const element = document.getElementById("printable-invoice-a4");
         if (!element) return;
@@ -112,9 +119,9 @@ export default function OrderInvoiceModal({
         });
 
         pdf.setProperties({
-          title: `Invoice_${order.id}_A4`,
-          subject: `${siteTitle} Order #${order.id} Invoice`,
-          author: siteTitle,
+          title: `Invoice_${order.id}_hazenshopbd_A4`,
+          subject: `${siteTitle} (hazenshopbd.com) Order #${order.id} Invoice`,
+          author: "HAZENSHOP BD (hazenshopbd.com)",
         });
 
         const imgProps = pdf.getImageProperties(imgData);
@@ -122,7 +129,7 @@ export default function OrderInvoiceModal({
         const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(pdfHeight, 297), undefined, "FAST");
-        pdf.save(`Invoice_${order.id}_A4.pdf`);
+        pdf.save(`Invoice_${order.id}_hazenshopbd_A4.pdf`);
       }
     } catch (err) {
       console.error("Failed to generate PDF via jsPDF:", err);
@@ -155,7 +162,7 @@ export default function OrderInvoiceModal({
         <!DOCTYPE html>
         <html lang="bn">
           <head>
-            <title>Invoice_${order.id}_75x100mm</title>
+            <title>Invoice_${order.id}_hazenshopbd_75x100mm</title>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <style>
@@ -421,7 +428,7 @@ export default function OrderInvoiceModal({
 
               <!-- Footer -->
               <div class="t-foot">
-                Thank you for shopping with ${siteTitle}! • ${hotline}
+                Thank you for shopping with ${siteTitle}! • hazenshopbd.com • ${hotline}
               </div>
             </div>
           </body>
@@ -433,7 +440,7 @@ export default function OrderInvoiceModal({
         <!DOCTYPE html>
         <html lang="bn">
           <head>
-            <title>Invoice_${order.id}_100x75mm</title>
+            <title>Invoice_${order.id}_hazenshopbd_100x75mm</title>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <style>
@@ -706,7 +713,7 @@ export default function OrderInvoiceModal({
 
               <!-- Footer -->
               <div class="t-foot">
-                Thank you for shopping with ${siteTitle}! • ${hotline}
+                Thank you for shopping with ${siteTitle}! • hazenshopbd.com • ${hotline}
               </div>
             </div>
           </body>
@@ -718,7 +725,7 @@ export default function OrderInvoiceModal({
         <!DOCTYPE html>
         <html lang="bn">
           <head>
-            <title>Invoice_${order.id}_HAZENSHOP_BD</title>
+            <title>Invoice_${order.id}_hazenshopbd_A4</title>
             <meta charset="utf-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
             <style>
@@ -1093,7 +1100,7 @@ export default function OrderInvoiceModal({
 
                 {/* Minimal Footer */}
                 <div className="text-[6.5px] text-center text-black/60 pt-0.5">
-                  Thank you for shopping with {siteTitle}! • {hotline}
+                  Thank you for shopping with {siteTitle}! • hazenshopbd.com • {hotline}
                 </div>
               </div>
             </div>
@@ -1228,7 +1235,7 @@ export default function OrderInvoiceModal({
 
                 {/* Minimal Footer */}
                 <div className="text-[6.5px] text-center text-black/60 pt-0.5">
-                  Thank you for shopping with {siteTitle}! • {hotline}
+                  Thank you for shopping with {siteTitle}! • hazenshopbd.com • {hotline}
                 </div>
               </div>
             </div>
@@ -1245,7 +1252,7 @@ export default function OrderInvoiceModal({
                     <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
                       {siteTitle}
                     </h1>
-                    <p className="text-slate-500 text-[11px]">Luxury Bedsheets &amp; Designer Window Curtains</p>
+                    <p className="text-slate-500 text-[11px]">Luxury Bedsheets &amp; Designer Window Curtains • hazenshopbd.com</p>
                     <p className="text-slate-500 text-[10px] sm:text-[11px]">
                       Hotline: {hotline} • hazenshopbd.com
                     </p>
@@ -1352,7 +1359,7 @@ export default function OrderInvoiceModal({
 
               {/* Footer Receipt Note */}
               <div className="border-t border-slate-200 pt-4 text-[10px] text-slate-500 text-center space-y-0.5">
-                <p className="font-bold text-slate-700">Thank you for ordering with {siteTitle}!</p>
+                <p className="font-bold text-slate-700">Thank you for ordering with {siteTitle} (hazenshopbd.com)!</p>
                 <p>
                   For queries or return assistance, call our helpline: {hotline}
                 </p>
