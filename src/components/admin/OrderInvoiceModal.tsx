@@ -934,7 +934,7 @@ export default function OrderInvoiceModal({
           {/* Size Switcher & Actions */}
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             {/* Format Toggle Buttons */}
-            <div className="bg-slate-800 p-1 rounded-xl flex items-center gap-1 border border-slate-700 text-[11px] font-bold">
+            <div className="bg-slate-800 p-1 rounded-xl flex items-center gap-1 border border-slate-700 text-[10.5px] sm:text-[11px] font-bold overflow-x-auto max-w-full scrollbar-none">
               <button
                 type="button"
                 onClick={() => setPaperSize("3x4")}

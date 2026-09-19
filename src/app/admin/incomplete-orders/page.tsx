@@ -376,8 +376,21 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <span className="line-clamp-1">{it.productName} {it.variantName ? `(${it.variantName})` : ""}</span>
-                          <span className="text-slate-400 font-mono text-[10px]">x{it.quantity} • {formatPrice(it.price * it.quantity)}</span>
+                          {it.productSlug ? (
+                            <a
+                              href={`/products/${it.productSlug}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="line-clamp-1 hover:text-brand-400 font-bold text-white inline-flex items-center gap-1"
+                              title="Open live product page"
+                            >
+                              <span>{it.productName} {it.variantName ? `(${it.variantName})` : ""}</span>
+                              <ExternalLink className="w-2.5 h-2.5 text-brand-400 shrink-0" />
+                            </a>
+                          ) : (
+                            <span className="line-clamp-1">{it.productName} {it.variantName ? `(${it.variantName})` : ""}</span>
+                          )}
+                          <span className="text-slate-400 font-mono text-[10px] block">x{it.quantity} • {formatPrice(it.price * it.quantity)}</span>
                         </div>
                       </div>
                     ))}
@@ -504,13 +517,27 @@ hazenshopbd.com এ আপনার ${firstItem} (${total}) এর অর্ড�
                       <td className="p-4 align-top">
                         <div className="space-y-1 max-w-xs">
                           {order.items.map((it, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-slate-300 font-medium">
+                            <div key={idx} className="flex items-center gap-2 text-slate-300 font-medium text-xs">
                               {it.productImage && (
                                 <div className="relative w-7 h-7 rounded-md overflow-hidden shrink-0 border border-slate-700 bg-slate-800">
                                   <Image src={it.productImage} alt={it.productName} fill className="object-cover" />
                                 </div>
                               )}
-                              <span>• {it.productName}{" "}
+                              <span>•{" "}
+                                {it.productSlug ? (
+                                  <a
+                                    href={`/products/${it.productSlug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-bold text-white hover:text-brand-300 inline-flex items-center gap-1 transition-colors"
+                                    title="Open live product page"
+                                  >
+                                    <span>{it.productName}</span>
+                                    <ExternalLink className="w-2.5 h-2.5 text-brand-400 shrink-0" />
+                                  </a>
+                                ) : (
+                                  <span className="text-white font-bold">{it.productName}</span>
+                                )}{" "}
                                 {it.variantName ? (
                                   <span className="text-slate-400 text-[11px]">({it.variantName})</span>
                                 ) : null}{" "}

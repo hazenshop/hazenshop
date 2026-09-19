@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ShoppingBag,
   Search,
@@ -22,10 +23,13 @@ import {
   CheckSquare,
   Square,
   Trash2,
+  Eye,
+  Package,
 } from "lucide-react";
-import { Order, OrderStatus, SiteSettings } from "@/lib/types";
+import { Order, OrderItem, OrderStatus, Product, SiteSettings } from "@/lib/types";
 import { formatPrice, getStatusColor, generateOrdersCSV, getCourierTrackingUrl } from "@/lib/utils";
 import OrderInvoiceModal from "@/components/admin/OrderInvoiceModal";
+import OrderProductsModal from "@/components/admin/OrderProductsModal";
 import FraudCheckModal from "@/components/admin/FraudCheckModal";
 import HelpGuideModal from "@/components/admin/HelpGuideModal";
 import { useToast } from "@/context/ToastContext";
@@ -33,6 +37,7 @@ import { useToast } from "@/context/ToastContext";
 export default function AdminOrdersPage() {
   const { showToast } = useToast();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -40,6 +45,7 @@ export default function AdminOrdersPage() {
 
   // Modals & bulk state
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
+  const [selectedProductsOrder, setSelectedProductsOrder] = useState<Order | null>(null);
   const [selectedFraudCheckOrder, setSelectedFraudCheckOrder] = useState<Order | null>(null);
   const [editingCourierOrder, setEditingCourierOrder] = useState<Order | null>(null);
   const [courierName, setCourierName] = useState("");
@@ -57,18 +63,31 @@ export default function AdminOrdersPage() {
 
   const fetchData = async () => {
     try {
-      const [orderRes, setRes] = await Promise.all([
+      const [orderRes, setRes, prodRes] = await Promise.all([
         fetch("/api/orders").then((r) => r.json()),
         fetch("/api/settings").then((r) => r.json()),
+        fetch("/api/products").then((r) => r.json()).catch(() => ({ products: [] })),
       ]);
       if (orderRes.orders) setOrders(orderRes.orders);
       if (setRes.settings) setSettings(setRes.settings);
+      if (prodRes?.products) setProducts(prodRes.products);
     } catch (e) {
       console.error(e);
       showToast("অর্ডার তালিকা লোড করতে সমস্যা হয়েছে। দয়া করে পেজটি রিফ্রেশ করুন। (Failed to load orders)", "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const getProductInfo = (item: OrderItem) => {
+    const matched = products.find(
+      (p) => p.id === item.productId || (item.productSlug && p.slug === item.productSlug)
+    );
+    const slug = item.productSlug || matched?.slug || "";
+    const image = item.productImage || matched?.images?.[0] || "";
+    const currentStock = matched?.stock;
+    const isUnlimited = matched?.isUnlimitedStock;
+    return { matched, slug, image, currentStock, isUnlimited };
   };
 
   useEffect(() => {
@@ -530,17 +549,65 @@ export default function AdminOrdersPage() {
                   </span>
                 </div>
 
-                {/* Items Summary */}
-                <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800/80 text-xs space-y-1">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase block">
-                    Ordered Items ({order.items.length}):
-                  </span>
-                  {order.items.map((i, idx) => (
-                    <div key={idx} className="flex justify-between text-slate-300 text-[11px]">
-                      <span className="truncate pr-2">{i.quantity}x {i.productName}</span>
-                      <span className="font-bold text-white shrink-0">{formatPrice(i.total)}</span>
-                    </div>
-                  ))}
+                {/* Items Summary with Product Page Links */}
+                <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800/80 text-xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+                      Ordered Items ({order.items.length}):
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProductsOrder(order)}
+                      className="text-[11px] text-brand-400 hover:text-brand-300 font-bold flex items-center gap-1"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View Products</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {order.items.map((i, idx) => {
+                      const { slug, image } = getProductInfo(i);
+                      return (
+                        <div key={idx} className="flex items-center gap-2.5 text-slate-300 text-[11px] bg-slate-900/60 p-2 rounded-xl border border-slate-800/60">
+                          <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-slate-800 bg-slate-900">
+                            {image ? (
+                              <Image src={image} alt={i.productName} fill className="object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-slate-600">
+                                <Package className="w-5 h-5" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            {slug ? (
+                              <a
+                                href={`/products/${slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-bold text-white hover:text-brand-400 transition-colors line-clamp-1 flex items-center gap-1"
+                                title="Open live product page"
+                              >
+                                <span>{i.productName}</span>
+                                <ExternalLink className="w-3 h-3 text-brand-400 shrink-0" />
+                              </a>
+                            ) : (
+                              <span className="font-bold text-white line-clamp-1">{i.productName}</span>
+                            )}
+                            <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-0.5">
+                              <span>Qty: <strong className="text-white">{i.quantity}</strong></span>
+                              {i.variantName && (
+                                <span className="bg-brand-500/10 text-brand-300 px-1.5 py-0.2 rounded font-medium truncate max-w-[120px]">
+                                  {i.variantName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span className="font-bold text-brand-400 shrink-0 text-xs">{formatPrice(i.total)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Courier info (if assigned) */}
@@ -575,6 +642,14 @@ export default function AdminOrdersPage() {
                   </select>
 
                   <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProductsOrder(order)}
+                      className="p-2.5 rounded-xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 border border-brand-500/30 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      title="View Ordered Products & Live Page"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </button>
                     <a
                       href={getWhatsAppConfirmationLink(order)}
                       target="_blank"
@@ -727,11 +802,73 @@ export default function AdminOrdersPage() {
                       </td>
 
                       {/* Items */}
-                      <td className="p-4">
-                        <span className="font-bold text-white block">{order.items.length} Product(s)</span>
-                        <p className="text-[11px] text-slate-400 truncate max-w-[180px]">
-                          {order.items.map((i) => `${i.quantity}x ${i.productName}`).join(", ")}
-                        </p>
+                      <td className="p-4 max-w-xs">
+                        <div className="space-y-1.5">
+                          {order.items.slice(0, 2).map((item, idx) => {
+                            const { slug, image } = getProductInfo(item);
+                            return (
+                              <div key={idx} className="flex items-center gap-2 group/item">
+                                <div className="relative w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-slate-700 bg-slate-800">
+                                  {image ? (
+                                    <Image src={image} alt={item.productName} fill className="object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-500">
+                                      <Package className="w-4 h-4" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  {slug ? (
+                                    <a
+                                      href={`/products/${slug}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="font-bold text-white hover:text-brand-300 transition-colors line-clamp-1 inline-flex items-center gap-1 text-xs"
+                                      title="Open live product page"
+                                    >
+                                      <span className="truncate">{item.productName}</span>
+                                      <ExternalLink className="w-3 h-3 text-brand-400 shrink-0" />
+                                    </a>
+                                  ) : (
+                                    <span className="font-bold text-white text-xs line-clamp-1">
+                                      {item.productName}
+                                    </span>
+                                  )}
+                                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                                    <span className="font-mono text-brand-400 font-bold">{item.quantity}x</span>
+                                    {item.variantName && (
+                                      <span className="bg-slate-800 text-slate-300 px-1 py-0.2 rounded border border-slate-700 truncate max-w-[110px]">
+                                        {item.variantName}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          {order.items.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedProductsOrder(order)}
+                              className="text-[10px] text-brand-400 hover:text-brand-300 font-bold flex items-center gap-1 mt-0.5"
+                            >
+                              <span>+ {order.items.length - 2} more product(s)...</span>
+                            </button>
+                          )}
+
+                          <div className="pt-0.5 flex items-center gap-2 text-[10.5px]">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedProductsOrder(order)}
+                              className="text-brand-400 hover:text-brand-300 font-bold inline-flex items-center gap-1 hover:underline"
+                              title="Inspect ordered products in modal"
+                            >
+                              <Eye className="w-3 h-3" />
+                              <span>View Product Details</span>
+                            </button>
+                          </div>
+                        </div>
                       </td>
 
                       {/* Total */}
@@ -798,6 +935,13 @@ export default function AdminOrdersPage() {
                       {/* Actions */}
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setSelectedProductsOrder(order)}
+                            className="p-2 rounded-lg bg-brand-500/10 hover:bg-brand-500/20 text-brand-400 border border-brand-500/30 transition-colors"
+                            title="View Ordered Products & Live Page"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <a
                             href={getWhatsAppConfirmationLink(order)}
                             target="_blank"
@@ -850,6 +994,23 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </div>
+
+      {/* Ordered Products & Live Page Modal */}
+      {selectedProductsOrder && (
+        <OrderProductsModal
+          order={selectedProductsOrder}
+          products={products}
+          onClose={() => setSelectedProductsOrder(null)}
+          onOpenInvoice={(o) => setSelectedInvoiceOrder(o)}
+          onOpenFraudCheck={(o) => setSelectedFraudCheckOrder(o)}
+          onOpenCourier={(o) => {
+            setEditingCourierOrder(o);
+            setCourierFeedback(null);
+            setCourierName(o.courierName || "");
+            setTrackingCode(o.trackingCode || "");
+          }}
+        />
+      )}
 
       {/* Printable Invoice Modal */}
       {selectedInvoiceOrder && (
