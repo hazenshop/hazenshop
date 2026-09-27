@@ -67,7 +67,7 @@ export default async function RootLayout({
         <GoogleTagManager gtmId={settings.googleTagManagerId || "GTM-TCS2PCSC"} />
         <GoogleAnalytics gaId={settings.googleAnalyticsId || "G-4YDHNQ6JPF"} />
         <FacebookPixel
-          pixelId={settings.facebookPixelId || "2242388576616945"}
+          pixelId={settings.facebookPixelId || "2147237946145364"}
           testEventCode={settings.facebookTestEventCode || "TEST82490"}
         />
         <CartProvider>

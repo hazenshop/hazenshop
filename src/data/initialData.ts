@@ -98,7 +98,7 @@ export const initialSiteSettings: SiteSettings = {
     "comforter sets",
     "luxury bedding"
   ],
-  facebookPixelId: "2242388576616945",
+  facebookPixelId: "2147237946145364",
   facebookTestEventCode: "TEST82490",
   // Steadfast Courier API
   steadfastApiKey: "",

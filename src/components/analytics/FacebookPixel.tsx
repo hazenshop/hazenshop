@@ -1,13 +1,13 @@
 "use client";
 
-import React, { Suspense, useEffect } from "react";
-import Script from "next/script";
+import React, { Suspense, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { setPixelTestCode } from "@/lib/pixel";
 
 function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventCode?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (testEventCode) {
@@ -16,7 +16,10 @@ function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventC
   }, [testEventCode]);
 
   useEffect(() => {
-    const activeId = pixelId || "2242388576616945";
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (typeof window !== "undefined" && (window as any).fbq) {
       const extra = testEventCode ? { test_event_code: testEventCode } : undefined;
       (window as any).fbq("track", "PageView", extra);
@@ -27,19 +30,18 @@ function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventC
 }
 
 export default function FacebookPixel({
-  pixelId = "2242388576616945",
+  pixelId = "2147237946145364",
   testEventCode = "TEST82490",
 }: {
   pixelId?: string;
   testEventCode?: string;
 }) {
-  const activePixelId = pixelId || "2242388576616945";
+  const activePixelId = pixelId || "2147237946145364";
 
   return (
     <>
-      <Script
+      <script
         id="fb-pixel"
-        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
