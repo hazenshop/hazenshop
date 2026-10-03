@@ -381,25 +381,63 @@ export default function FraudCheckerPage() {
                     </div>
                   </div>
 
-                  {/* Individual Courier Split */}
-                  <div className="grid grid-cols-2 gap-2.5 pt-1">
-                    {result.steadfastStats && (
-                      <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
-                        <span className="font-bold text-white block">Steadfast Courier:</span>
-                        <span className="text-slate-400 block text-[11px]">
-                          {result.steadfastStats.delivered} delivered / {result.steadfastStats.totalParcels} ({result.steadfastStats.successRate}%)
-                        </span>
-                      </div>
-                    )}
-                    {result.pathaoStats && (
-                      <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
-                        <span className="font-bold text-rose-400 block">Pathao Courier:</span>
-                        <span className="text-slate-400 block text-[11px]">
-                          {result.pathaoStats.delivered} delivered / {result.pathaoStats.totalParcels} ({result.pathaoStats.successRate}%)
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                  {/* Individual Courier Split across Bangladesh Couriers */}
+                  {result.courierBreakdown && result.courierBreakdown.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                      {result.courierBreakdown.map((c) => (
+                        <div
+                          key={c.courier}
+                          className="bg-slate-900/90 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-white block truncate">{c.courier}</span>
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                c.totalParcels > 0 && c.successRate >= 70
+                                  ? "bg-emerald-500/20 text-emerald-300"
+                                  : c.totalParcels > 0 && c.successRate >= 40
+                                  ? "bg-amber-500/20 text-amber-300"
+                                  : c.totalParcels > 0
+                                  ? "bg-rose-500/20 text-rose-300"
+                                  : "bg-slate-800 text-slate-400"
+                              }`}
+                            >
+                              {c.totalParcels > 0 ? `${c.successRate}%` : "0%"}
+                            </span>
+                          </div>
+                          <span className="text-slate-400 block text-[11px]">
+                            {c.delivered} delivered / {c.totalParcels} total ({c.cancelled} return)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2.5 pt-1">
+                      {result.steadfastStats && (
+                        <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
+                          <span className="font-bold text-white block">Steadfast Courier:</span>
+                          <span className="text-slate-400 block text-[11px]">
+                            {result.steadfastStats.delivered} delivered / {result.steadfastStats.totalParcels} ({result.steadfastStats.successRate}%)
+                          </span>
+                        </div>
+                      )}
+                      {result.pathaoStats && (
+                        <div className="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 text-xs space-y-1">
+                          <span className="font-bold text-rose-400 block">Pathao Courier:</span>
+                          <span className="text-slate-400 block text-[11px]">
+                            {result.pathaoStats.delivered} delivered / {result.pathaoStats.totalParcels} ({result.pathaoStats.successRate}%)
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {result.usage && (
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 px-1 pt-1 border-t border-slate-800/60">
+                      <span>⚡ SM Soft Live Multi-Courier Network</span>
+                      <span>Daily Quota: {result.usage.todayUsed} / {result.usage.dailyLimit} checks used</span>
+                    </div>
+                  )}
 
                   {result.courierStats.fraudReports > 0 && (
                     <div className="p-2.5 rounded-xl bg-rose-500/20 text-rose-300 text-xs font-bold border border-rose-500/30 text-center">

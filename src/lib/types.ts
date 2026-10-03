@@ -226,6 +226,8 @@ export type FraudCheckResult = {
   courierStats?: CourierDeliveryStats;
   steadfastStats?: CourierDeliveryStats;
   pathaoStats?: CourierDeliveryStats;
+  courierBreakdown?: CourierDeliveryStats[];
+  usage?: { todayUsed: number; dailyLimit: number };
   localStats: LocalOrderStats;
   warnings: string[];
   checkedAt: string;

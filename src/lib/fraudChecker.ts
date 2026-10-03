@@ -25,6 +25,95 @@ export function cleanAndValidateBdPhone(phone: string): {
   };
 }
 
+export async function fetchSmSoftFraudStats(
+  cleanPhone: string
+): Promise<{
+  aggregated: CourierDeliveryStats;
+  breakdown: CourierDeliveryStats[];
+  usage?: { todayUsed: number; dailyLimit: number };
+} | null> {
+  const apiKey = (process.env.SMSOFT_API_KEY || "5c09dcbde9eabb0bad82e82d5e553e336c2ce7f1c0558d76d9d7fac61aceb1da").trim();
+  const baseUrl = (process.env.SMSOFT_BASE_URL || "https://smsoft.net/fraud/api/v1/check").trim();
+
+  if (!apiKey) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`${baseUrl}?phone=${cleanPhone}&key=${apiKey}`, {
+      method: "GET",
+      headers: {
+        "X-API-Key": apiKey,
+        "Referer": "https://hazenshopbd.com/",
+        "Origin": "https://hazenshopbd.com",
+        "Accept": "application/json",
+      },
+      next: { revalidate: 300 }, // Cache 5 min
+    });
+
+    if (!res.ok) {
+      console.warn(`SM Soft fraud API returned HTTP ${res.status}`);
+      return null;
+    }
+
+    const data = await res.json();
+    if (!data || !data.success) {
+      return null;
+    }
+
+    const totalParcels = Number(data.total_parcels || 0);
+    const delivered = Number(data.total_delivered || 0);
+    const cancelled = Number(data.total_cancelled || 0);
+    const deliveryRate = totalParcels > 0
+      ? (data.delivery_rate !== undefined ? Number(data.delivery_rate) : Math.round((delivered / totalParcels) * 100))
+      : 100;
+    const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
+
+    const breakdown: CourierDeliveryStats[] = [];
+    if (Array.isArray(data.apis)) {
+      for (const api of data.apis) {
+        const cTotal = Number(api.total_parcels || 0);
+        const cDelivered = Number(api.total_delivered_parcels || 0);
+        const cCancelled = Number(api.total_cancelled_parcels || 0);
+        const cSuccessRate = cTotal > 0 ? Math.round((cDelivered / cTotal) * 100) : 100;
+        const cCancelRate = cTotal > 0 ? Math.round((cCancelled / cTotal) * 100) : 0;
+
+        breakdown.push({
+          courier: api.courier_name,
+          totalParcels: cTotal,
+          delivered: cDelivered,
+          cancelled: cCancelled,
+          fraudReports: 0,
+          successRate: cSuccessRate,
+          cancelRate: cCancelRate,
+        });
+      }
+    }
+
+    return {
+      aggregated: {
+        courier: "Bangladesh Multi-Courier Network (Steadfast, Pathao, RedX, Paperfly, Carrybee)",
+        totalParcels,
+        delivered,
+        cancelled,
+        fraudReports: 0,
+        successRate: deliveryRate,
+        cancelRate,
+      },
+      breakdown,
+      usage: data.usage
+        ? {
+            todayUsed: Number(data.usage.today_used || 0),
+            dailyLimit: Number(data.usage.daily_limit || 0),
+          }
+        : undefined,
+    };
+  } catch (err) {
+    console.warn("Error checking SM Soft fraud check API:", err);
+    return null;
+  }
+}
+
 export async function fetchSteadfastFraudStats(
   cleanPhone: string,
   settings: SiteSettings
@@ -215,37 +304,60 @@ export async function performFraudCheck(
     }
   }
 
-  // Fetch Courier Delivery Stats in parallel (Steadfast + Pathao)
-  const [steadfastStats, pathaoStats] = await Promise.all([
+  // Fetch Courier Delivery Stats in parallel (SM Soft Multi-Courier + Steadfast + Pathao)
+  const [smSoftResult, steadfastStats, pathaoStats] = await Promise.all([
+    fetchSmSoftFraudStats(cleanPhone),
     fetchSteadfastFraudStats(cleanPhone, settings),
     fetchPathaoFraudStats(cleanPhone, settings),
   ]);
 
-  // Combined Courier Aggregation
   let courierStats: CourierDeliveryStats | undefined;
-  const couriersWithData = [steadfastStats, pathaoStats].filter(Boolean) as CourierDeliveryStats[];
+  let courierBreakdown: CourierDeliveryStats[] = [];
+  const usage = smSoftResult?.usage;
 
-  if (couriersWithData.length > 0) {
-    const totalParcels = couriersWithData.reduce((sum, c) => sum + c.totalParcels, 0);
-    const delivered = couriersWithData.reduce((sum, c) => sum + c.delivered, 0);
-    const cancelled = couriersWithData.reduce((sum, c) => sum + c.cancelled, 0);
-    const fraudReports = couriersWithData.reduce((sum, c) => sum + c.fraudReports, 0);
+  if (smSoftResult) {
+    courierStats = { ...smSoftResult.aggregated };
+    courierBreakdown = [...smSoftResult.breakdown];
 
-    const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
-    const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
+    // If Steadfast direct API reported merchant fraud reports, merge it
+    if (steadfastStats?.fraudReports) {
+      courierStats.fraudReports += steadfastStats.fraudReports;
+    }
+  } else {
+    // Fallback: Combine Steadfast + Pathao direct APIs
+    const couriersWithData = [steadfastStats, pathaoStats].filter(Boolean) as CourierDeliveryStats[];
+    if (couriersWithData.length > 0) {
+      const totalParcels = couriersWithData.reduce((sum, c) => sum + c.totalParcels, 0);
+      const delivered = couriersWithData.reduce((sum, c) => sum + c.delivered, 0);
+      const cancelled = couriersWithData.reduce((sum, c) => sum + c.cancelled, 0);
+      const fraudReports = couriersWithData.reduce((sum, c) => sum + c.fraudReports, 0);
 
-    const names = couriersWithData.map((c) => c.courier.replace(" Courier", "")).join(" & ");
+      const successRate = totalParcels > 0 ? Math.round((delivered / totalParcels) * 100) : 100;
+      const cancelRate = totalParcels > 0 ? Math.round((cancelled / totalParcels) * 100) : 0;
+      const names = couriersWithData.map((c) => c.courier.replace(" Courier", "")).join(" & ");
 
-    courierStats = {
-      courier: `${names} Network`,
-      totalParcels,
-      delivered,
-      cancelled,
-      fraudReports,
-      successRate,
-      cancelRate,
-    };
+      courierStats = {
+        courier: `${names} Network`,
+        totalParcels,
+        delivered,
+        cancelled,
+        fraudReports,
+        successRate,
+        cancelRate,
+      };
+      courierBreakdown = couriersWithData;
+    }
   }
+
+  // Find individual courier stats for backward-compatibility
+  const resolvedSteadfast =
+    steadfastStats ||
+    courierBreakdown.find((c) => /steadfast/i.test(c.courier)) ||
+    undefined;
+  const resolvedPathao =
+    pathaoStats ||
+    courierBreakdown.find((c) => /pathao/i.test(c.courier)) ||
+    undefined;
 
   // Compute Risk Score (0 to 100)
   let riskScore = 0;
@@ -313,8 +425,10 @@ export async function performFraudCheck(
     recommendationBn,
     isBlacklisted,
     courierStats,
-    steadfastStats: steadfastStats || undefined,
-    pathaoStats: pathaoStats || undefined,
+    steadfastStats: resolvedSteadfast,
+    pathaoStats: resolvedPathao,
+    courierBreakdown: courierBreakdown.length > 0 ? courierBreakdown : undefined,
+    usage,
     localStats,
     warnings,
     checkedAt: new Date().toISOString(),
