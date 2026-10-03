@@ -72,7 +72,8 @@ export type Category = {
   slug: string;
   name: string;
   description?: string;
-  image?: string;
+  image?: string; // Thumbnail / Icon
+  coverImage?: string; // 16:9 Banner Cover Image
   featured?: boolean;
   productCount?: number;
   createdAt: string;
@@ -164,6 +165,10 @@ export type SiteSettings = {
   telegramEnabled?: boolean;
   blacklistedPhones?: string[];
   socialLinks?: Record<string, string>;
+  // Homepage 16:9 Showcase Poster
+  homepagePosterUrl?: string;
+  homepagePosterLink?: string;
+  homepagePosterActive?: boolean;
   heroBanners?: {
     id: string;
     title: string;

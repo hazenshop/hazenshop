@@ -462,6 +462,7 @@ export const db = {
             name: c.name,
             description: c.description || "",
             image: c.image || "/logo.jpg",
+            coverImage: c.cover_image || c.coverImage || c.image || "/logo.jpg",
             featured: c.featured ?? true,
             productCount: c.product_count || 0,
             createdAt: c.created_at || new Date().toISOString(),
@@ -491,6 +492,7 @@ export const db = {
             name: data.name,
             description: data.description || "",
             image: data.image || "/logo.jpg",
+            coverImage: data.cover_image || data.coverImage || data.image || "/logo.jpg",
             featured: data.featured ?? true,
             productCount: data.product_count || 0,
             createdAt: data.created_at || new Date().toISOString(),
@@ -509,6 +511,7 @@ export const db = {
   async createCategory(category: Omit<Category, "id" | "createdAt">): Promise<Category> {
     const newCategory: Category = {
       ...category,
+      coverImage: category.coverImage || category.image || "/logo.jpg",
       id: category.slug ? `cat-${category.slug}` : `cat-${Date.now()}`,
       productCount: 0,
       createdAt: new Date().toISOString(),
@@ -521,6 +524,7 @@ export const db = {
           name: newCategory.name,
           description: newCategory.description || "",
           image: newCategory.image || "/logo.jpg",
+          cover_image: newCategory.coverImage || newCategory.image || "/logo.jpg",
           featured: newCategory.featured ?? true,
           product_count: 0,
           created_at: newCategory.createdAt,
@@ -547,6 +551,7 @@ export const db = {
         if (updates.slug !== undefined) updatePayload.slug = updates.slug;
         if (updates.description !== undefined) updatePayload.description = updates.description;
         if (updates.image !== undefined) updatePayload.image = updates.image;
+        if (updates.coverImage !== undefined) updatePayload.cover_image = updates.coverImage;
         if (updates.featured !== undefined) updatePayload.featured = updates.featured;
 
         let { data, error } = await dbClient
@@ -574,6 +579,7 @@ export const db = {
             name: data.name,
             description: data.description || "",
             image: data.image || "/logo.jpg",
+            coverImage: data.cover_image || data.image || "/logo.jpg",
             featured: data.featured ?? true,
             productCount: data.product_count || 0,
             createdAt: data.created_at || new Date().toISOString(),
@@ -1024,6 +1030,9 @@ export const db = {
             telegramBotToken: data.telegram_bot_token || base.telegramBotToken,
             telegramChatId: data.telegram_chat_id || base.telegramChatId,
             telegramEnabled: data.telegram_enabled ?? base.telegramEnabled,
+            homepagePosterUrl: data.homepage_poster_url ?? base.homepagePosterUrl ?? "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
+            homepagePosterLink: data.homepage_poster_link ?? base.homepagePosterLink ?? "/products",
+            homepagePosterActive: data.homepage_poster_active ?? base.homepagePosterActive ?? true,
             blacklistedPhones: Array.isArray(data.blacklisted_phones) ? data.blacklisted_phones : base.blacklistedPhones || [],
           };
           return cachedSettings;
@@ -1085,6 +1094,9 @@ export const db = {
             telegram_bot_token: cachedSettings.telegramBotToken,
             telegram_chat_id: cachedSettings.telegramChatId,
             telegram_enabled: cachedSettings.telegramEnabled,
+            homepage_poster_url: cachedSettings.homepagePosterUrl,
+            homepage_poster_link: cachedSettings.homepagePosterLink,
+            homepage_poster_active: cachedSettings.homepagePosterActive,
             blacklisted_phones: cachedSettings.blacklistedPhones || [],
             updated_at: new Date().toISOString(),
           });

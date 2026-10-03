@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Settings,
   Save,
@@ -16,10 +17,12 @@ import {
   Bell,
   Send,
   HelpCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import { SiteSettings } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
 import CourierTestModal from "@/components/admin/CourierTestModal";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function AdminSettingsPage() {
   const { showToast } = useToast();
@@ -189,7 +192,92 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Homepage 16:9 Showcase Poster / Hero Banner */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-lg">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2.5 text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center">
+                <ImageIcon className="w-4 h-4 text-brand-400" />
+              </div>
+              <div>
+                <span>Homepage 16:9 Showcase Poster (ওয়েবসাইটের শীর্ষ পোস্টার/ব্যানার)</span>
+                <p className="text-[11px] font-normal text-slate-400">
+                  ওয়েবসাইটের মেনুবারের ঠিক নিচে 16:9 অনুপাতে আকর্ষক পোস্টার প্রদর্শিত হবে
+                </p>
+              </div>
+            </div>
 
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="homepagePosterActive"
+                checked={settings.homepagePosterActive ?? true}
+                onChange={(e) => setSettings({ ...settings, homepagePosterActive: e.target.checked })}
+                className="w-4 h-4 rounded text-brand-500 cursor-pointer"
+              />
+              <label htmlFor="homepagePosterActive" className="text-slate-300 font-bold text-xs cursor-pointer">
+                Show on Homepage
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 space-y-4">
+              <div>
+                <label className="block font-bold text-slate-300 mb-1.5 text-xs">
+                  Upload 16:9 Poster Image (WebP Auto-Compression)
+                </label>
+                <ImageUploader
+                  images={settings.homepagePosterUrl ? [settings.homepagePosterUrl] : []}
+                  onChange={(imgs) => setSettings({ ...settings, homepagePosterUrl: imgs[0] || "" })}
+                  maxImages={1}
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-300 mb-1 text-xs">
+                  Poster Click Destination URL (পোস্টারে ক্লিক করলে যেখানে যাবে)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. /products or /category/luxury-bedsheets"
+                  value={settings.homepagePosterLink || ""}
+                  onChange={(e) => setSettings({ ...settings, homepagePosterLink: e.target.value.trim() })}
+                  className="w-full bg-slate-950 text-brand-300 rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-brand-500 focus:outline-none"
+                />
+                <span className="text-[11px] text-slate-500 mt-1 block">
+                  খালি রাখলে পোস্টারটি ক্লিকেবল হবে না। ডিফল্ট: /products
+                </span>
+              </div>
+            </div>
+
+            {/* 16:9 Live Preview */}
+            <div className="lg:col-span-5 space-y-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
+                16:9 Widescreen Live Preview
+              </span>
+              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-inner">
+                {settings.homepagePosterUrl ? (
+                  <Image
+                    src={settings.homepagePosterUrl}
+                    alt="Homepage Poster Preview"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-600 p-4 text-center">
+                    <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+                    <span className="text-xs">কোনো পোস্টার আপলোড করা হয়নি</span>
+                    <span className="text-[10px] text-slate-500">16:9 widescreen recommended (1920x1080)</span>
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-slate-500 text-center">
+                16:9 অনুপাত (যেমন: 1920x1080 বা 1280x720 পিক্সেল) সবচেয়ে চমৎকারভাবে প্রদর্শিত হয়।
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Announcement Ticker Bar */}
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">

@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Sparkles,
   MessageCircle,
@@ -18,8 +19,40 @@ export default async function HomePage() {
   const flashSaleProducts = allProducts.filter((p) => p.flashSale);
   const cleanWhatsApp = (settings.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
 
+  const posterImage = settings.homepagePosterUrl || settings.heroBanners?.[0]?.image;
+  const isPosterActive = settings.homepagePosterActive !== false && !!posterImage;
+
   return (
     <div className="space-y-10 sm:space-y-14 pb-16 pt-2 sm:pt-4">
+      {/* 0. HOMEPAGE 16:9 SHOWCASE POSTER (UNDER NAVBAR) */}
+      {isPosterActive && (
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="relative w-full aspect-[16/9] rounded-2xl sm:rounded-3xl overflow-hidden shadow-card border border-black/[0.06] bg-slate-900 group">
+            {settings.homepagePosterLink ? (
+              <Link href={settings.homepagePosterLink} className="block w-full h-full relative cursor-pointer">
+                <Image
+                  src={posterImage}
+                  alt={settings.siteName || "Exclusive Collections Poster"}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 100vw, 1280px"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                />
+              </Link>
+            ) : (
+              <Image
+                src={posterImage}
+                alt={settings.siteName || "Exclusive Collections Poster"}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1280px) 100vw, 1280px"
+                className="object-cover"
+              />
+            )}
+          </div>
+        </section>
+      )}
+
       {/* 1. FLASH SALE / LIMITED RELEASE (IF ANY) */}
       {flashSaleProducts.length > 0 && (
         <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
