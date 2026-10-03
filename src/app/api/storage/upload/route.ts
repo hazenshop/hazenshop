@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
+import crypto from "crypto";
 import { db } from "@/lib/db";
 import { MediaItem } from "@/lib/types";
 import { isSupabaseConfigured, supabaseAdmin, supabase } from "@/lib/supabase";
@@ -18,6 +19,46 @@ function ensureUploadsDir() {
     } catch (e) {
       console.error("Failed to create uploads dir", e);
     }
+  }
+}
+
+async function uploadToCloudinary(buffer: Buffer, fileName: string): Promise<string | null> {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    return null;
+  }
+
+  try {
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const cleanPublicId = fileName.replace(/\.[^/.]+$/, "");
+    const strToSign = `public_id=${cleanPublicId}&timestamp=${timestamp}${apiSecret}`;
+    const signature = crypto.createHash("sha1").update(strToSign).digest("hex");
+
+    const base64File = `data:image/webp;base64,${buffer.toString("base64")}`;
+    const form = new URLSearchParams();
+    form.append("file", base64File);
+    form.append("api_key", apiKey);
+    form.append("timestamp", timestamp.toString());
+    form.append("public_id", cleanPublicId);
+    form.append("signature", signature);
+
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: form,
+    });
+
+    const data = await res.json();
+    if (data.secure_url) {
+      return data.secure_url;
+    }
+    console.error("Cloudinary upload failed response:", data);
+    return null;
+  } catch (err) {
+    console.error("Cloudinary upload exception:", err);
+    return null;
   }
 }
 
@@ -63,10 +104,16 @@ export async function POST(req: NextRequest) {
     const fileName = `${baseName || "image"}-${uniqueId}.webp`;
 
     let publicUrl = "";
-    const client = supabaseAdmin || supabase;
 
-    // 1. Primary: Upload directly to Supabase Storage CDN if configured
-    if (isSupabaseConfigured && client) {
+    // 1. Primary: Upload to Cloudinary (Zero-Card Free Tier, saves Supabase Egress)
+    const cloudinaryUrl = await uploadToCloudinary(buffer, fileName);
+    if (cloudinaryUrl) {
+      publicUrl = cloudinaryUrl;
+    }
+
+    // 2. Secondary Fallback: Supabase Storage CDN (only if Cloudinary not configured)
+    const client = supabaseAdmin || supabase;
+    if (!publicUrl && isSupabaseConfigured && client) {
       try {
         await ensureSupabaseBucket(client);
 
