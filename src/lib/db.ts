@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { isSupabaseConfigured, supabase, supabaseAdmin } from "./supabase";
 import { Category, Order, Product, SiteSettings, OrderStatus, MediaItem } from "./types";
 import {
@@ -43,6 +44,39 @@ function writeJsonFile<T>(filename: string, data: T) {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
   } catch (e) {
     console.error(`Error writing ${filename}`, e);
+  }
+}
+
+async function deleteFromCloudinary(fileUrl: string) {
+  if (!fileUrl || !fileUrl.includes("cloudinary.com")) return;
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloudName || !apiKey || !apiSecret) return;
+
+  try {
+    const parts = fileUrl.split("/image/upload/");
+    if (parts.length < 2) return;
+    const afterUpload = parts[1];
+    const withoutVersion = afterUpload.replace(/^v\d+\//, "");
+    const publicId = withoutVersion.replace(/\.[^/.]+$/, "");
+
+    const timestamp = Math.round(new Date().getTime() / 1000);
+    const strToSign = `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+    const signature = crypto.createHash("sha1").update(strToSign).digest("hex");
+
+    const form = new URLSearchParams();
+    form.append("public_id", publicId);
+    form.append("api_key", apiKey);
+    form.append("timestamp", timestamp.toString());
+    form.append("signature", signature);
+
+    await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`, {
+      method: "POST",
+      body: form,
+    });
+  } catch (err) {
+    console.error("Cloudinary delete error:", err);
   }
 }
 
@@ -1236,6 +1270,9 @@ export const db = {
     cachedMedia = readJsonFile("media.json", cachedMedia);
     const item = cachedMedia.find((m) => m.id === id || m.url === id);
     if (item) {
+      if (item.url.includes("cloudinary.com")) {
+        await deleteFromCloudinary(item.url);
+      }
       if (isSupabaseConfigured && dbClient && item.url.includes("/product-images/")) {
         try {
           const fileName = item.url.split("/product-images/").pop()?.split("?")[0];
@@ -1255,6 +1292,9 @@ export const db = {
   },
 
   async deleteFileByUrl(url: string): Promise<boolean> {
+    if (url.includes("cloudinary.com")) {
+      await deleteFromCloudinary(url);
+    }
     if (isSupabaseConfigured && dbClient && url.includes("/product-images/")) {
       try {
         const fileName = url.split("/product-images/").pop()?.split("?")[0];
