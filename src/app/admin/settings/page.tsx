@@ -13,6 +13,9 @@ import {
   Loader2,
   Share2,
   CheckCircle2,
+  Bell,
+  Send,
+  HelpCircle,
 } from "lucide-react";
 import { SiteSettings } from "@/lib/types";
 import { useToast } from "@/context/ToastContext";
@@ -25,6 +28,8 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [savedModalOpen, setSavedModalOpen] = useState(false);
   const [activeTestCourier, setActiveTestCourier] = useState<"steadfast" | "pathao" | null>(null);
+  const [testingTelegram, setTestingTelegram] = useState(false);
+  const [showTelegramHelp, setShowTelegramHelp] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings", { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
@@ -74,6 +79,36 @@ export default function AdminSettingsPage() {
       showToast(e?.message || "Error updating settings. Please check your connection.", "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTestTelegram = async () => {
+    if (!settings?.telegramBotToken?.trim() || !settings?.telegramChatId?.trim()) {
+      showToast("দয়া করে Telegram Bot Token এবং Chat ID ইনপুট দিন (Enter Token & Chat ID first)", "error");
+      return;
+    }
+
+    setTestingTelegram(true);
+    try {
+      const res = await fetch("/api/admin/telegram-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          botToken: settings.telegramBotToken.trim(),
+          chatId: settings.telegramChatId.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast("টেলিগ্রাম টেস্ট মেসেজ সফলভাবে পাঠানো হয়েছে! আপনার টেলিগ্রাম চেক করুন।", "success");
+      } else {
+        throw new Error(data.error || "Failed to send test message to Telegram.");
+      }
+    } catch (err: any) {
+      showToast(err.message || "টেলিগ্রাম টেস্ট মেসেজ পাঠাতে ব্যর্থ হয়েছে।", "error");
+    } finally {
+      setTestingTelegram(false);
     }
   };
 
@@ -465,6 +500,114 @@ export default function AdminSettingsPage() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Telegram Bot Order Notifications */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2.5 text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center">
+                <Bell className="w-4 h-4 text-sky-400" />
+              </div>
+              <div>
+                <span>Telegram Bot Order Notifications</span>
+                <p className="text-[11px] font-normal text-slate-400">
+                  ওয়েবসাইটে নতুন অর্ডার আসতেই এডমিন টেলিগ্রামে তাৎক্ষণিক পুশ নোটিফিকেশন পান (100% Free)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="telegramActive"
+                checked={settings.telegramEnabled ?? true}
+                onChange={(e) => setSettings({ ...settings, telegramEnabled: e.target.checked })}
+                className="w-4 h-4 rounded text-sky-500 cursor-pointer"
+              />
+              <label htmlFor="telegramActive" className="text-slate-300 font-bold text-xs cursor-pointer">
+                Enabled
+              </label>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-bold text-slate-300 mb-1">
+                  Telegram Bot Token <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="e.g. 7123456789:AAHxxxxxxxxxxxxxxxxxxxx"
+                  value={settings.telegramBotToken || ""}
+                  onChange={(e) => setSettings({ ...settings, telegramBotToken: e.target.value.trim() })}
+                  className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-sky-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-300 mb-1">
+                  Telegram Chat ID / Group ID <span className="text-rose-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 123456789 or -100123456789"
+                  value={settings.telegramChatId || ""}
+                  onChange={(e) => setSettings({ ...settings, telegramChatId: e.target.value.trim() })}
+                  className="w-full bg-slate-900 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-sky-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowTelegramHelp(!showTelegramHelp)}
+                className="text-sky-400 hover:text-sky-300 text-xs flex items-center gap-1.5 transition-colors self-start cursor-pointer"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>{showTelegramHelp ? "সহায়িকা লুকান" : "কীভাবে টেলিগ্রাম বট ও চ্যাট আইডি পাবেন? (Setup Guide)"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleTestTelegram}
+                disabled={testingTelegram}
+                className="bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 px-4 py-2 rounded-xl font-bold text-xs transition-all shrink-0 shadow-sm flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {testingTelegram ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5" />
+                )}
+                <span>{testingTelegram ? "মেসেজ পাঠানো হচ্ছে..." : "Send Test Notification"}</span>
+              </button>
+            </div>
+
+            {showTelegramHelp && (
+              <div className="bg-slate-900/90 border border-sky-500/30 rounded-xl p-4 text-[11px] text-slate-300 space-y-2 mt-2">
+                <p className="font-bold text-sky-400 text-xs">১ মিনিটে সম্পূর্ণ বিনামূল্যে টেলিগ্রাম বট সেটআপ করুন:</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-slate-300 pl-1 leading-relaxed">
+                  <li>
+                    Telegram অ্যাপে গিয়ে সার্চবারে <strong className="text-white">@BotFather</strong> খুঁজুন এবং তাকে <code className="bg-slate-800 px-1 py-0.5 rounded text-sky-300">/newbot</code> লিখে পাঠান।
+                  </li>
+                  <li>
+                    বটের একটি নাম ও ইউজারনেম দিন (যেমন: <code className="bg-slate-800 px-1 py-0.5 rounded text-sky-300">HazenOrderBot</code>)। BotFather আপনাকে একটি <strong>HTTP API Token</strong> দেবে, সেটি উপরের <strong>Bot Token</strong> বক্সে বসান।
+                  </li>
+                  <li>
+                    তৈরি করা বটের লিংকে ক্লিক করে <strong className="text-white">/start</strong> প্রেস করুন (অথবা টিম মেম্বারদের নিয়ে একটি প্রাইভেট গ্রুপ খুলে বটটিকে অ্যাড করুন)।
+                  </li>
+                  <li>
+                    আপনার Chat ID পেতে টেলিগ্রামে <strong className="text-white">@userinfobot</strong> কে একটি হাই বা স্টার্ট দিন, সে আপনার <strong>Id</strong> জানিয়ে দেবে। (গ্রুপের জন্য সাধারণত <code className="bg-slate-800 px-1 py-0.5 rounded text-sky-300">-100...</code> দিয়ে শুরু হয়)।
+                  </li>
+                  <li>
+                    Chat ID বসিয়ে <strong className="text-white">Send Test Notification</strong> এ ক্লিক করে চেক করুন!
+                  </li>
+                </ol>
+              </div>
+            )}
           </div>
         </div>
 

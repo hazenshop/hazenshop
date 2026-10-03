@@ -132,6 +132,9 @@ ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS pathao_sandbox BOOLEAN DEFAUL
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS facebook_pixel_id TEXT;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS facebook_access_token TEXT;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS blacklisted_phones JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_enabled BOOLEAN DEFAULT TRUE;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_bot_token TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_chat_id TEXT;
 
 -- 5. Create Media / Storage Table
 CREATE TABLE IF NOT EXISTS media (

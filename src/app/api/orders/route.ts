@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { OrderStatus } from "@/lib/types";
+import { sendTelegramOrderNotification } from "@/lib/telegram";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -46,6 +47,15 @@ export async function POST(req: NextRequest) {
     }
 
     const createdOrder = await db.createOrder(body);
+
+    // Send instant Telegram notification to admin (failsafe, non-blocking to customer response)
+    try {
+      const settings = await db.getSettings();
+      await sendTelegramOrderNotification(createdOrder, settings);
+    } catch (tgErr) {
+      console.error("[Orders POST] Telegram notification error:", tgErr);
+    }
+
     return NextResponse.json({ success: true, order: createdOrder }, { status: 201 });
   } catch (error) {
     console.error("Orders POST error:", error);

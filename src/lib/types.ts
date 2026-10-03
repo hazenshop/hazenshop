@@ -158,6 +158,10 @@ export type SiteSettings = {
   pathaoStoreId?: string;
   pathaoSandbox?: boolean;
   pathaoEnabled?: boolean;
+  // Telegram Bot Notifications
+  telegramBotToken?: string;
+  telegramChatId?: string;
+  telegramEnabled?: boolean;
   blacklistedPhones?: string[];
   socialLinks?: Record<string, string>;
   heroBanners?: {
