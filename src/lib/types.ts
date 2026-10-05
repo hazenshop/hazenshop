@@ -141,6 +141,7 @@ export type SiteSettings = {
   tagline?: string;
   logoUrl?: string;
   facebookPixelId?: string;
+  facebookAccessToken?: string;
   facebookTestEventCode?: string;
   googleTagManagerId?: string;
   googleAnalyticsId?: string;

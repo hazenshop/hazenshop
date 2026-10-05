@@ -68,7 +68,7 @@ export default async function RootLayout({
         <GoogleAnalytics gaId={settings.googleAnalyticsId || "G-4YDHNQ6JPF"} />
         <FacebookPixel
           pixelId={settings.facebookPixelId || "2147237946145364"}
-          testEventCode={settings.facebookTestEventCode || "TEST82490"}
+          testEventCode={settings.facebookTestEventCode || undefined}
         />
         <CartProvider>
           <ToastProvider>

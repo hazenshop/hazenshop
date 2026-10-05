@@ -31,7 +31,7 @@ function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventC
 
 export default function FacebookPixel({
   pixelId = "2147237946145364",
-  testEventCode = "TEST82490",
+  testEventCode,
 }: {
   pixelId?: string;
   testEventCode?: string;

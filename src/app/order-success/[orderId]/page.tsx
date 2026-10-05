@@ -45,16 +45,20 @@ export default function OrderSuccessPage() {
       .then(([orderData, setData]) => {
         if (orderData.order) {
           setOrder(orderData.order);
-          trackPurchase({
-            id: orderData.order.id,
-            totalAmount: orderData.order.totalAmount,
-            items: orderData.order.items?.map((it: any) => ({
-              productId: it.productId,
-              productName: it.productName,
-              quantity: it.quantity,
-              price: it.price,
-            })),
-          });
+          const trackedKey = `fb_tracked_${orderData.order.id}`;
+          if (typeof window !== "undefined" && !sessionStorage.getItem(trackedKey)) {
+            sessionStorage.setItem(trackedKey, "1");
+            trackPurchase({
+              id: orderData.order.id,
+              totalAmount: orderData.order.totalAmount,
+              items: orderData.order.items?.map((it: any) => ({
+                productId: it.productId,
+                productName: it.productName,
+                quantity: it.quantity,
+                price: it.price,
+              })),
+            });
+          }
         }
         if (setData.settings) setSettings(setData.settings);
       })

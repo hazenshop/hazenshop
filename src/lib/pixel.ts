@@ -7,20 +7,26 @@ declare global {
   }
 }
 
-export function setPixelTestCode(code: string) {
+export function setPixelTestCode(code?: string) {
   if (typeof window !== "undefined") {
-    window._fb_test_code = code;
+    window._fb_test_code = code?.trim() || undefined;
   }
 }
 
-export function trackPixelEvent(eventName: string, data?: Record<string, any>) {
+export function trackPixelEvent(
+  eventName: string,
+  data?: Record<string, any>,
+  options?: { eventID?: string }
+) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
     const payload = { ...(data || {}) };
     if (window._fb_test_code && !payload.test_event_code) {
       payload.test_event_code = window._fb_test_code;
     }
 
-    if (Object.keys(payload).length > 0) {
+    if (options?.eventID) {
+      window.fbq("track", eventName, payload, { eventID: options.eventID });
+    } else if (Object.keys(payload).length > 0) {
       window.fbq("track", eventName, payload);
     } else {
       window.fbq("track", eventName);
@@ -66,12 +72,22 @@ export function trackPurchase(order: {
   totalAmount: number;
   items?: { productId: string; productName: string; quantity: number; price: number }[];
 }) {
-  trackPixelEvent("Purchase", {
-    content_type: "product",
-    content_ids: order.items?.map((item) => item.productId) || [],
-    value: order.totalAmount,
-    currency: "BDT",
-    num_items: order.items?.reduce((sum, item) => sum + item.quantity, 0) || 1,
-    order_id: order.id,
-  });
+  trackPixelEvent(
+    "Purchase",
+    {
+      content_type: "product",
+      content_ids: order.items?.map((item) => item.productId) || [],
+      contents:
+        order.items?.map((item) => ({
+          id: item.productId,
+          quantity: item.quantity,
+          item_price: item.price,
+        })) || [],
+      value: order.totalAmount,
+      currency: "BDT",
+      num_items: order.items?.reduce((sum, item) => sum + item.quantity, 0) || 1,
+      order_id: order.id,
+    },
+    { eventID: order.id }
+  );
 }

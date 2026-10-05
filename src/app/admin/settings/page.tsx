@@ -30,6 +30,9 @@ export default function AdminSettingsPage() {
   const [activeTestCourier, setActiveTestCourier] = useState<"steadfast" | "pathao" | null>(null);
   const [testingTelegram, setTestingTelegram] = useState(false);
   const [showTelegramHelp, setShowTelegramHelp] = useState(false);
+  const [testingMeta, setTestingMeta] = useState(false);
+  const [metaTestResult, setMetaTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showMetaHelp, setShowMetaHelp] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings", { cache: "no-store", headers: { "Cache-Control": "no-cache" } })
@@ -109,6 +112,46 @@ export default function AdminSettingsPage() {
       showToast(err.message || "টেলিগ্রাম টেস্ট মেসেজ পাঠাতে ব্যর্থ হয়েছে।", "error");
     } finally {
       setTestingTelegram(false);
+    }
+  };
+
+  const handleTestMetaCapi = async () => {
+    if (!settings?.facebookPixelId) {
+      showToast("Please enter your Facebook Pixel ID first.", "error");
+      return;
+    }
+    if (!settings?.facebookAccessToken) {
+      showToast("Please enter your Meta Conversions API Access Token.", "error");
+      return;
+    }
+
+    setTestingMeta(true);
+    setMetaTestResult(null);
+
+    try {
+      const res = await fetch("/api/admin/meta-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pixelId: settings.facebookPixelId,
+          accessToken: settings.facebookAccessToken,
+          testEventCode: settings.facebookTestEventCode,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMetaTestResult({ success: true, message: data.message });
+        showToast("Meta Conversions API test event sent successfully!", "success");
+      } else {
+        setMetaTestResult({ success: false, message: data.error || "Failed to send test event" });
+        showToast(data.error || "Meta test event failed", "error");
+      }
+    } catch (err: any) {
+      setMetaTestResult({ success: false, message: err?.message || "Network error testing Meta CAPI" });
+      showToast("Network error testing Meta CAPI", "error");
+    } finally {
+      setTestingMeta(false);
     }
   };
 
@@ -286,45 +329,158 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
-        {/* Marketing & Analytics Integrations (Facebook Pixel) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg">
-          <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-white font-bold text-sm">
-            <span className="w-5 h-5 rounded-full bg-blue-600/30 text-blue-400 font-black flex items-center justify-center text-xs">f</span>
-            <span>Facebook Pixel / Meta Ads Tracking Integration</span>
+        {/* Marketing & Analytics Integrations (Facebook Pixel & Conversions API CAPI) */}
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-5 shadow-lg">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2.5 text-white font-bold text-sm">
+              <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-xs shadow-md">
+                f
+              </span>
+              <div>
+                <span>Meta Pixel & Conversions API (CAPI) Integration</span>
+                <p className="text-[11px] font-normal text-slate-400">
+                  Dual tracking (Browser + Server-side) ensures 100% Purchase tracking and accurate Cost per Order (CPO) in Ads Manager.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowMetaHelp(!showMetaHelp)}
+                className="text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 py-1 px-2.5 rounded-lg bg-blue-500/10 border border-blue-500/20 transition-colors"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+                <span>{showMetaHelp ? "হাইড গাইড" : "CAPI সেটআপ গাইড"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleTestMetaCapi}
+                disabled={testingMeta || !settings.facebookPixelId || !settings.facebookAccessToken}
+                className="text-xs bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-1.5 px-3 rounded-xl transition-all shadow flex items-center gap-1.5"
+              >
+                {testingMeta ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>পাঠানো হচ্ছে...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-3.5 h-3.5" />
+                    <span>Test CAPI Event</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Setup Guide Accordion */}
+          {showMetaHelp && (
+            <div className="bg-slate-950/80 border border-blue-900/50 rounded-2xl p-4 text-xs text-slate-300 space-y-2.5 leading-relaxed">
+              <h4 className="font-bold text-blue-300 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-blue-400" />
+                Meta Conversions API (CAPI) এক্সেস টোকেন কীভাবে পাবেন?
+              </h4>
+              <ol className="list-decimal list-inside space-y-1.5 text-slate-400 pl-1">
+                <li>
+                  <strong className="text-white">Meta Events Manager</strong> এ যান (<span className="text-blue-400">business.facebook.com/events_manager2</span>)।
+                </li>
+                <li>আপনার Pixel/Dataset সিলেক্ট করে <strong>Settings</strong> ট্যাবে ক্লিক করুন।</li>
+                <li>নিচে স্ক্রল করে <strong>Conversions API</strong> সেকশনে যান।</li>
+                <li>
+                  <strong className="text-emerald-400">"Generate access token"</strong> লিংকে ক্লিক করে টোকেন কপি করুন এবং নিচের ঘরে পেস্ট করুন।
+                </li>
+                <li>
+                  <strong className="text-amber-400">গুরুত্বপূর্ণ:</strong> লাইভ ক্যাম্পেইনে Cost per Order (CPO) দেখতে <strong>Test Event Code ফাঁকা রাখুন</strong>। টেস্ট কোড থাকলে ফেসবুক সেলস হিসেবে কাউন্ট করে না।
+                </li>
+              </ol>
+            </div>
+          )}
+
+          {/* Test Event Result Banner */}
+          {metaTestResult && (
+            <div
+              className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${
+                metaTestResult.success
+                  ? "bg-emerald-950/40 border-emerald-800 text-emerald-300"
+                  : "bg-rose-950/40 border-rose-800 text-rose-300"
+              }`}
+            >
+              {metaTestResult.success ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              ) : (
+                <HelpCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              )}
+              <div className="flex-1">
+                <span className="font-bold block mb-0.5">
+                  {metaTestResult.success ? "Meta CAPI সফল হয়েছে!" : "Meta CAPI পরীক্ষা ব্যর্থ"}
+                </span>
+                <span>{metaTestResult.message}</span>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="block font-bold text-slate-300">
-                Facebook Pixel ID (Meta Pixel Dataset ID)
+              <label className="block font-bold text-slate-300 text-xs">
+                Facebook Pixel ID (Meta Pixel Dataset ID) <span className="text-rose-400">*</span>
               </label>
               <input
                 type="text"
-                placeholder="e.g. 2242388576616945"
+                placeholder="e.g. 2147237946145364"
                 value={settings.facebookPixelId || ""}
                 onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-sm focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
               />
-              <p className="text-[11px] text-slate-400 leading-normal">
-                মেটা বিজনেস ম্যানেজারের Pixel/Dataset ID। স্বয়ংক্রিয়ভাবে PageView, ViewContent, AddToCart ও Purchase ট্র্যাক হবে।
+              <p className="text-[11px] text-slate-400">
+                ব্রাউজার ও সার্ভার উভয় ইভেন্টের জন্য ব্যবহৃত মেটা পিক্সেল আইডি।
               </p>
             </div>
 
             <div className="space-y-1.5">
-              <label className="block font-bold text-slate-300">
-                Meta Test Event Code (Optional)
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block font-bold text-slate-300 text-xs">
+                  Meta Conversions API Access Token (CAPI)
+                </label>
+                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
+                  Server-to-Server
+                </span>
+              </div>
               <input
-                type="text"
-                placeholder="e.g. TEST82490"
-                value={settings.facebookTestEventCode || ""}
-                onChange={(e) => setSettings({ ...settings, facebookTestEventCode: e.target.value.trim() })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-sm focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
+                type="password"
+                placeholder="EAAG..."
+                value={settings.facebookAccessToken || ""}
+                onChange={(e) => setSettings({ ...settings, facebookAccessToken: e.target.value.trim() })}
+                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
               />
-              <p className="text-[11px] text-slate-400 leading-normal">
-                Meta Events Manager &gt; Test Events ট্যাবের টেস্ট কোড (যেমন: TEST82490)। লাইভ টেস্ট চেক করতে ব্যবহার করুন।
+              <p className="text-[11px] text-slate-400">
+                এড-ব্লকার ও iOS রেস্ট্রিকশন এড়িয়ে শতভাগ অর্ডার ট্র্যাকিংয়ের জন্য মেটা সিএপিআই এক্সেস টোকেন।
               </p>
             </div>
+          </div>
+
+          <div className="space-y-1.5 pt-1 border-t border-slate-800/80">
+            <div className="flex items-center justify-between">
+              <label className="block font-bold text-slate-300 text-xs">
+                Meta Test Event Code (ঐচ্ছিক - শুধুমাত্র টেস্ট করার জন্য)
+              </label>
+              {settings.facebookTestEventCode?.trim() && (
+                <span className="text-[10px] font-bold text-amber-400 bg-amber-950/70 border border-amber-800 px-2 py-0.5 rounded">
+                  ⚠️ টেস্ট মোড সক্রিয় (লাইভ ক্যাম্পেইনে ফাঁকা রাখুন)
+                </span>
+              )}
+            </div>
+            <input
+              type="text"
+              placeholder="e.g. TEST82490 (লাইভ ক্যাম্পেইনে ফাঁকা রাখবেন)"
+              value={settings.facebookTestEventCode || ""}
+              onChange={(e) => setSettings({ ...settings, facebookTestEventCode: e.target.value.trim() })}
+              className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
+            />
+            <p className="text-[11px] text-slate-400">
+              <strong className="text-amber-400">সতর্কতা:</strong> এখানে কোনো কোড থাকলে মেটা সেটিকে টেস্ট ডেটা হিসেবে আলাদা রাখে এবং <strong>লাইভ ক্যাম্পেইনের CPO বা রেজাল্টে যোগ করে না</strong>। টেস্ট শেষ হলে এটি ফাঁকা রেখে Save করুন।
+            </p>
           </div>
         </div>
 
@@ -661,7 +817,7 @@ export default function AdminSettingsPage() {
             <span>মার্কেটিং ও ট্র্যাকিং অ্যানালিটিক্স (Google Analytics, Tag Manager & Pixel)</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-300 mb-1">Google Analytics (GA4) ID</label>
               <input
@@ -684,30 +840,6 @@ export default function AdminSettingsPage() {
                 className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
               />
               <p className="text-[10px] text-slate-500 mt-1">Default: GTM-TCS2PCSC</p>
-            </div>
-
-            <div>
-              <label className="block font-bold text-slate-300 mb-1">Facebook Pixel ID</label>
-              <input
-                type="text"
-                placeholder="2242388576616945"
-                value={settings.facebookPixelId || ""}
-                onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
-              />
-              <p className="text-[10px] text-slate-500 mt-1">Default: 2242388576616945</p>
-            </div>
-
-            <div>
-              <label className="block font-bold text-slate-300 mb-1">FB Pixel Test Event Code</label>
-              <input
-                type="text"
-                placeholder="TEST82490"
-                value={settings.facebookTestEventCode || ""}
-                onChange={(e) => setSettings({ ...settings, facebookTestEventCode: e.target.value.trim() })}
-                className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono"
-              />
-              <p className="text-[10px] text-slate-500 mt-1">Optional (For FB Events testing)</p>
             </div>
           </div>
         </div>
