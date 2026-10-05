@@ -135,12 +135,6 @@ ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS blacklisted_phones JSONB DEFA
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_enabled BOOLEAN DEFAULT TRUE;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_bot_token TEXT;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_chat_id TEXT;
-ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS homepage_poster_url TEXT;
-ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS homepage_poster_link TEXT;
-ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS homepage_poster_active BOOLEAN DEFAULT TRUE;
-
--- Safe Column Upgrades for Categories Table
-ALTER TABLE categories ADD COLUMN IF NOT EXISTS cover_image TEXT;
 
 -- 5. Create Media / Storage Table
 CREATE TABLE IF NOT EXISTS media (

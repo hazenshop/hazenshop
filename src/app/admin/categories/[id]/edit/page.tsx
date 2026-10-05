@@ -25,7 +25,6 @@ export default function EditCategoryPage() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
-  const [coverImage, setCoverImage] = useState("");
   const [featured, setFeatured] = useState(true);
   const [productCount, setProductCount] = useState(0);
 
@@ -44,7 +43,6 @@ export default function EditCategoryPage() {
             setSlug(c.slug);
             setDescription(c.description || "");
             setImage(c.image || "");
-            setCoverImage(c.coverImage || c.image || "");
             setFeatured(c.featured ?? true);
             setProductCount(c.productCount || 0);
           }
@@ -82,7 +80,6 @@ export default function EditCategoryPage() {
           slug: finalSlug,
           description: description.trim(),
           image: image.trim() || "/logo.jpg",
-          coverImage: coverImage.trim() || image.trim() || "/logo.jpg",
           featured,
         }),
       });
@@ -225,35 +222,10 @@ export default function EditCategoryPage() {
             />
           </div>
 
-          {/* 16:9 Category Cover Banner */}
-          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-white uppercase tracking-wider">
-                16:9 Category Cover Banner (১৬:৯ কভার ব্যানার)
-              </label>
-              <span className="text-[10px] text-brand-400 font-mono bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
-                16:9 Widescreen
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              ক্যাটাগরি পেজের শীর্ষে ১৬:৯ অনুপাতে কভার ব্যানার হিসেবে প্রদর্শিত হবে।
-            </p>
-            <ImageUploader
-              images={coverImage ? [coverImage] : []}
-              onChange={(imgs) => setCoverImage(imgs[0] || image || "/logo.jpg")}
-              categorySlug={slug}
-              maxImages={1}
-            />
-          </div>
-
-          {/* Category Icon / Thumbnail */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
-              Category Icon / Thumbnail (ছোট আইকন/থাম্বনেইল)
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Category Cover Image & WebP Compressor (কভার ছবি)
             </label>
-            <p className="text-[11px] text-slate-400 mb-2">
-              ফিল্টার ও নেভিগেশন লিস্টের জন্য ছোট ইমেজ
-            </p>
             <ImageUploader
               images={image ? [image] : []}
               onChange={(imgs) => setImage(imgs[0] || "/logo.jpg")}
@@ -284,54 +256,33 @@ export default function EditCategoryPage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5" />
-                Live Previews
+                Live Card Preview
               </span>
               <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
                 Storefront View
               </span>
             </div>
 
-            {/* 16:9 Cover Banner Preview */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-bold text-slate-400">16:9 Category Page Banner Preview:</span>
-              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 flex flex-col justify-end p-4 text-white shadow-md">
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center flex flex-col items-center">
+              <div className="relative w-24 h-24 rounded-full overflow-hidden mb-3.5 bg-slate-900 border border-slate-800">
                 <Image
-                  src={coverImage || image || "/logo.jpg"}
-                  alt={name || "Cover Preview"}
+                  src={image || "/logo.jpg"}
+                  alt={name || "Category Preview"}
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-                <div className="relative z-10 space-y-1">
-                  <span className="inline-block bg-brand-maroon-700/90 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded">
-                    Category Banner
-                  </span>
-                  <h4 className="font-heading font-black text-sm text-white line-clamp-1">
-                    {name || "Category Name"}
-                  </h4>
-                  <p className="text-[10px] text-slate-300 line-clamp-1">
-                    {description || "Category description will appear here..."}
-                  </p>
-                </div>
               </div>
-            </div>
-
-            {/* Card Thumbnail Preview */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <span className="text-[11px] font-bold text-slate-400">Grid Card Icon Preview:</span>
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-center flex flex-col items-center">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden mb-2 bg-slate-900 border border-slate-800">
-                  <Image
-                    src={image || "/logo.jpg"}
-                    alt={name || "Category Preview"}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="font-heading font-bold text-xs text-white leading-tight">
-                  {name || "Category Name"}
-                </h3>
-              </div>
+              <h3 className="font-heading font-bold text-sm text-white leading-tight">
+                {name || "Category Name"}
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
+                {description || "Category description..."}
+              </p>
+              {featured && (
+                <span className="mt-3 bg-brand-500/20 text-brand-300 font-bold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-brand-500/30">
+                  Featured on Home
+                </span>
+              )}
             </div>
 
             <div className="bg-slate-950 rounded-2xl p-4 border border-slate-800 text-xs space-y-2">

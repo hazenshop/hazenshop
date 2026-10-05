@@ -22,9 +22,6 @@ export default function NewCategoryPage() {
   const [image, setImage] = useState(
     "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop"
   );
-  const [coverImage, setCoverImage] = useState(
-    "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1600&auto=format&fit=crop"
-  );
   const [featured, setFeatured] = useState(true);
 
   // Quick Preset Categories for Bedsheets & Window Curtains
@@ -34,35 +31,30 @@ export default function NewCategoryPage() {
       slug: "luxury-bedsheets",
       description: "100% Egyptian Cotton & Organic Combed Cotton 300+ TC bedsheet sets with matching pillow & bolster covers.",
       image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=800&auto=format&fit=crop",
-      coverImage: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1600&auto=format&fit=crop",
     },
     {
       name: "Window Curtains & Porda (জানালার পর্দা)",
       slug: "window-curtains",
       description: "Premium Jacquard, textured drapery, and velvet window drapes with rust-free brass eyelet rings.",
       image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop",
-      coverImage: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1600&auto=format&fit=crop",
     },
     {
       name: "100% Blackout Curtains (ব্ল্যাকআউট পর্দা)",
       slug: "blackout-curtains",
       description: "Triple-weave thermal insulated room-darkening curtains for deep peaceful sleep and room cooling.",
       image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop",
-      coverImage: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1600&auto=format&fit=crop",
     },
     {
       name: "Comforters & AC Quilts (কমফোর্টার ও এসি কুইল্ট)",
       slug: "comforters-quilts",
       description: "All-season 350 GSM cloud microfiber quilts and reversible luxury duvet bedding sets.",
       image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=800&auto=format&fit=crop",
-      coverImage: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=1600&auto=format&fit=crop",
     },
     {
       name: "Fitted Elastic Bedsheets (ফিটেড চাদর)",
       slug: "fitted-bedsheets",
       description: "360-degree all-around deep pocket elastic grip bedsheets that stay wrinkle-free on any mattress.",
       image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=800&auto=format&fit=crop",
-      coverImage: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=1600&auto=format&fit=crop",
     },
   ];
 
@@ -71,7 +63,6 @@ export default function NewCategoryPage() {
     setSlug(preset.slug);
     setDescription(preset.description);
     setImage(preset.image);
-    setCoverImage(preset.coverImage || preset.image);
     showToast(`Applied preset: ${preset.name}`);
   };
 
@@ -99,7 +90,6 @@ export default function NewCategoryPage() {
       slug: finalSlug,
       description: description.trim(),
       image: image.trim() || "/logo.jpg",
-      coverImage: coverImage.trim() || image.trim() || "/logo.jpg",
       featured,
     };
 
@@ -141,7 +131,7 @@ export default function NewCategoryPage() {
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-white">Create New Category</h1>
             <p className="text-xs text-slate-400 mt-0.5">
-              Add a department with 16:9 cover banner, description, and products
+              Add a department for Bedsheets, Curtains, Comforters, or Living textiles
             </p>
           </div>
         </div>
@@ -218,7 +208,7 @@ export default function NewCategoryPage() {
               Description (বিবরণ)
             </label>
             <textarea
-              rows={3}
+              rows={4}
               placeholder="Detailed description of products in this department for SEO & customer guidance..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -226,35 +216,10 @@ export default function NewCategoryPage() {
             />
           </div>
 
-          {/* 16:9 Category Cover Banner */}
-          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-white uppercase tracking-wider">
-                16:9 Category Cover Banner (১৬:৯ কভার ব্যানার)
-              </label>
-              <span className="text-[10px] text-brand-400 font-mono bg-brand-500/10 px-2 py-0.5 rounded border border-brand-500/20">
-                16:9 Widescreen
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">
-              ক্যাটাগরি পেজের শীর্ষে ১৬:৯ অনুপাতে কভার ব্যানার হিসেবে প্রদর্শিত হবে।
-            </p>
-            <ImageUploader
-              images={coverImage ? [coverImage] : []}
-              onChange={(imgs) => setCoverImage(imgs[0] || image || "/logo.jpg")}
-              categorySlug={slug}
-              maxImages={1}
-            />
-          </div>
-
-          {/* Category Icon / Thumbnail */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
-              Category Icon / Thumbnail (ছোট আইকন/থাম্বনেইল)
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
+              Category Cover Image & WebP Compressor (কভার ছবি)
             </label>
-            <p className="text-[11px] text-slate-400 mb-2">
-              ফিল্টার ও নেভিগেশন লিস্টের জন্য ছোট ইমেজ
-            </p>
             <ImageUploader
               images={image ? [image] : []}
               onChange={(imgs) => setImage(imgs[0] || "/logo.jpg")}
@@ -285,54 +250,33 @@ export default function NewCategoryPage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <ImageIcon className="w-3.5 h-3.5" />
-                Live Previews
+                Live Card Preview
               </span>
               <span className="text-[10px] text-emerald-400 font-bold bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
                 Storefront View
               </span>
             </div>
 
-            {/* 16:9 Cover Banner Preview */}
-            <div className="space-y-1.5">
-              <span className="text-[11px] font-bold text-slate-400">16:9 Category Page Banner Preview:</span>
-              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 flex flex-col justify-end p-4 text-white shadow-md">
+            <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center flex flex-col items-center">
+              <div className="relative w-24 h-24 rounded-full overflow-hidden mb-3.5 bg-slate-900 border border-slate-800">
                 <Image
-                  src={coverImage || image || "/logo.jpg"}
-                  alt={name || "Cover Preview"}
+                  src={image || "/logo.jpg"}
+                  alt={name || "Category Preview"}
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
-                <div className="relative z-10 space-y-1">
-                  <span className="inline-block bg-brand-maroon-700/90 text-white text-[9px] font-extrabold uppercase px-2 py-0.5 rounded">
-                    Category Banner
-                  </span>
-                  <h4 className="font-heading font-black text-sm text-white line-clamp-1">
-                    {name || "Category Name (বিভাগের নাম)"}
-                  </h4>
-                  <p className="text-[10px] text-slate-300 line-clamp-1">
-                    {description || "Category description will appear here..."}
-                  </p>
-                </div>
               </div>
-            </div>
-
-            {/* Card Thumbnail Preview */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-800">
-              <span className="text-[11px] font-bold text-slate-400">Grid Card Icon Preview:</span>
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-center flex flex-col items-center">
-                <div className="relative w-16 h-16 rounded-full overflow-hidden mb-2 bg-slate-900 border border-slate-800">
-                  <Image
-                    src={image || "/logo.jpg"}
-                    alt={name || "Category Preview"}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="font-heading font-bold text-xs text-white leading-tight">
-                  {name || "Category Name"}
-                </h3>
-              </div>
+              <h3 className="font-heading font-bold text-sm text-white leading-tight">
+                {name || "Category Name (বিভাগের নাম)"}
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
+                {description || "Category description will appear here..."}
+              </p>
+              {featured && (
+                <span className="mt-3 bg-brand-500/20 text-brand-300 font-bold text-[10px] uppercase tracking-wider px-2.5 py-0.5 rounded-full border border-brand-500/30">
+                  Featured on Home
+                </span>
+              )}
             </div>
 
             <div className="text-[11px] text-slate-500 space-y-1 pt-2">

@@ -28,7 +28,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${category.name} Collection | HAZENSHOP BD`,
       description: category.description,
-      images: [category.coverImage || category.image || "/logo.jpg"],
+      images: category.image ? [category.image] : ["/logo.jpg"],
     },
   };
 }
@@ -69,8 +69,6 @@ export default async function CategoryDetailPage({ params }: { params: { slug: s
     ],
   };
 
-  const coverUrl = category.coverImage || category.image || "/logo.jpg";
-
   return (
     <>
       <script
@@ -78,50 +76,25 @@ export default async function CategoryDetailPage({ params }: { params: { slug: s
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-16">
-      {/* 16:9 Widescreen Category Cover Banner */}
-      <div className="relative w-full aspect-[16/9] rounded-2xl sm:rounded-3xl overflow-hidden shadow-card border border-black/[0.06] bg-slate-950 flex flex-col justify-between p-4 sm:p-8 lg:p-10 text-white">
-        {/* Background Cover Image (16:9) */}
-        <Image
-          src={coverUrl}
-          alt={category.name}
-          fill
-          priority
-          sizes="(max-width: 1280px) 100vw, 1280px"
-          className="object-cover"
-        />
-
-        {/* Sophisticated Dark Gradient Overlays for contrast & elegance */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-transparent pointer-events-none" />
-
-        {/* Top Navigation & Count Badge */}
-        <div className="relative z-10 flex items-center justify-between gap-3">
+      {/* Category Banner */}
+      <div className="relative rounded-3xl overflow-hidden bg-brand-maroon-700 text-white p-5 sm:p-10 border border-white/10 shadow-card flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6">
+        <div className="space-y-2.5 sm:space-y-3 max-w-xl">
           <Link
             href="/products"
-            className="inline-flex items-center gap-1.5 text-xs text-white/90 bg-black/40 hover:bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full font-bold transition-all border border-white/15 shadow-sm min-h-[36px]"
+            className="inline-flex items-center gap-1.5 text-xs text-brand-gold-300 font-bold hover:text-white mb-1 transition-colors min-h-[36px] py-1"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-brand-gold-300" />
-            <span>সকল কালেকশন</span>
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>কালেকশনে ফিরে যান (Back to Collections)</span>
           </Link>
-
-          <span className="inline-flex items-center text-[11px] sm:text-xs font-bold bg-black/40 hover:bg-black/50 backdrop-blur-md px-3.5 py-1.5 rounded-full text-brand-gold-300 border border-white/20 shadow-sm">
-            {products.length}টি কালেকশন রেডি
+          <h1 className="font-heading text-xl sm:text-4xl font-extrabold text-white tracking-tight">{category.name}</h1>
+          <p className="text-xs sm:text-sm text-slate-200 font-normal leading-relaxed">{category.description}</p>
+          <span className="inline-block bg-white/15 text-brand-gold-300 font-bold text-xs px-3.5 py-1 rounded-full border border-white/20 backdrop-blur-sm">
+            {products.length}টি কালেকশন ডিজাইন রেডি (Cash on Delivery)
           </span>
         </div>
 
-        {/* Bottom Banner Content */}
-        <div className="relative z-10 max-w-2xl space-y-1.5 sm:space-y-2.5">
-          <div className="inline-block bg-brand-maroon-700/90 text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm">
-            HAZEN Signature Department
-          </div>
-          <h1 className="font-heading text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight drop-shadow-md">
-            {category.name}
-          </h1>
-          {category.description && (
-            <p className="text-xs sm:text-sm text-slate-200 font-normal leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-xl drop-shadow">
-              {category.description}
-            </p>
-          )}
+        <div className="relative w-full md:w-64 aspect-[4/3] rounded-2xl overflow-hidden border border-white/15 shrink-0 shadow-subtle bg-black/20">
+          <Image src={category.image || "/logo.jpg"} alt={category.name} fill className="object-cover" />
         </div>
       </div>
 
