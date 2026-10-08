@@ -58,13 +58,20 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${plusJakarta.variable} scroll-smooth`}>
       <head>
+        {/* GA4 Data Layer Initialization */}
+        <script
+          id="ga4-datalayer-init"
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];`,
+          }}
+        />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="icon" href="/logo.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/logo.jpg" />
       </head>
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
-        <GoogleTagManager gtmId={settings.googleTagManagerId || "GTM-TCS2PCSC"} />
+        <GoogleTagManager gtmId={settings.googleTagManagerId || "GTM-TMTNQ7JS"} />
         <GoogleAnalytics gaId={settings.googleAnalyticsId || "G-4YDHNQ6JPF"} />
         <FacebookPixel
           pixelId={settings.facebookPixelId || "2147237946145364"}

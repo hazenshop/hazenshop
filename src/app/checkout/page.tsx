@@ -22,6 +22,7 @@ import { useToast } from "@/context/ToastContext";
 import { DeliveryZone, SiteSettings } from "@/lib/types";
 import { formatPrice, getDeliveryFee, generateOrderId } from "@/lib/utils";
 import { trackInitiateCheckout, trackPurchase } from "@/lib/pixel";
+import { trackGA4BeginCheckout } from "@/lib/gtm";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -37,6 +38,7 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMobileSummary, setShowMobileSummary] = useState(false);
+  const hasTrackedBeginCheckout = React.useRef(false);
 
   useEffect(() => {
     fetch("/api/settings", { cache: "no-store" })
@@ -48,10 +50,12 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (cart.length > 0) {
+    if (!hasTrackedBeginCheckout.current && cart.length > 0) {
+      hasTrackedBeginCheckout.current = true;
       trackInitiateCheckout(subtotal, cart.length);
+      trackGA4BeginCheckout(cart, subtotal);
     }
-  }, []);
+  }, [cart, subtotal]);
 
   const deliveryFee = getDeliveryFee(deliveryZone, {
     dhaka: settings?.dhakaDeliveryFee !== undefined ? Number(settings.dhakaDeliveryFee) : 60,

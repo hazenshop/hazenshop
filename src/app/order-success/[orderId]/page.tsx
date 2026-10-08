@@ -18,6 +18,7 @@ import {
 import { Order, SiteSettings } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 import { trackPurchase } from "@/lib/pixel";
+import { trackGA4Purchase } from "@/lib/gtm";
 
 export default function OrderSuccessPage() {
   const params = useParams();
@@ -53,6 +54,23 @@ export default function OrderSuccessPage() {
               totalAmount: orderData.order.totalAmount,
               items: orderData.order.items?.map((it: any) => ({
                 productId: it.productId,
+                productName: it.productName,
+                quantity: it.quantity,
+                price: it.price,
+              })),
+            });
+          }
+
+          const ga4TrackedKey = `ga4_tracked_${orderData.order.id}`;
+          if (typeof window !== "undefined" && !sessionStorage.getItem(ga4TrackedKey)) {
+            sessionStorage.setItem(ga4TrackedKey, "1");
+            trackGA4Purchase({
+              id: orderData.order.id,
+              totalAmount: orderData.order.totalAmount,
+              deliveryFee: orderData.order.deliveryFee,
+              items: orderData.order.items?.map((it: any) => ({
+                productId: it.productId,
+                variantId: it.variantId,
                 productName: it.productName,
                 quantity: it.quantity,
                 price: it.price,

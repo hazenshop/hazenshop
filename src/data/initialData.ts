@@ -99,6 +99,7 @@ export const initialSiteSettings: SiteSettings = {
     "luxury bedding"
   ],
   facebookPixelId: "2147237946145364",
+  googleTagManagerId: "GTM-TMTNQ7JS",
   facebookAccessToken: "",
   facebookTestEventCode: "",
   // Steadfast Courier API

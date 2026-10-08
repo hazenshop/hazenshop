@@ -22,6 +22,7 @@ import {
   generateWhatsAppOrderUrl,
 } from "@/lib/utils";
 import { trackViewContent, trackAddToCart as trackFBCart } from "@/lib/pixel";
+import { trackGA4ViewItem } from "@/lib/gtm";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductCard from "@/components/product/ProductCard";
 import { useCart } from "@/context/CartContext";
@@ -45,9 +46,17 @@ export default function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null);
 
-  // Trigger Facebook Pixel ViewContent on load
+  // Trigger Facebook Pixel ViewContent and GA4 view_item on load
   useEffect(() => {
     trackViewContent(product, defaultVariant);
+
+    const currentItemId = String(defaultVariant?.sku || product.sku || defaultVariant?.id || product.id);
+    if (typeof window !== "undefined" && window._ga4_last_view_item === currentItemId) {
+      // Already pushed via SSR script on initial HTML load
+      window._ga4_last_view_item = undefined;
+    } else {
+      trackGA4ViewItem(product, defaultVariant);
+    }
   }, [product, defaultVariant]);
 
   const unitPrice = defaultVariant

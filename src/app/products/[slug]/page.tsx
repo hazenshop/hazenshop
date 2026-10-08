@@ -71,11 +71,42 @@ export default async function ProductDetailPage({
     },
   };
 
+  const defaultVariant =
+    product.variants && product.variants.length > 0 ? product.variants[0] : undefined;
+  const unitPrice = defaultVariant
+    ? (defaultVariant.salePrice ?? defaultVariant.price)
+    : (product.salePrice ?? product.price);
+  const itemId = defaultVariant?.sku || product.sku || defaultVariant?.id || product.id;
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* GA4 Ecommerce view_item Data Layer Event */}
+      <script
+        id="ga4-view-item"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ 'ecommerce': null });
+            window.dataLayer.push({
+              'event': 'view_item',
+              'ecommerce': {
+                'currency': 'BDT',
+                'value': ${Number(unitPrice)},
+                'items': [{
+                  'item_id': ${JSON.stringify(String(itemId))},
+                  'item_name': ${JSON.stringify(product.name)},
+                  'price': ${Number(unitPrice)},
+                  'quantity': 1
+                }]
+              }
+            });
+            window._ga4_last_view_item = ${JSON.stringify(String(itemId))};
+          `,
+        }}
       />
       <ProductDetailClient
         product={product}
