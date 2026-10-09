@@ -135,6 +135,9 @@ ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS blacklisted_phones JSONB DEFA
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_enabled BOOLEAN DEFAULT TRUE;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_bot_token TEXT;
 ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS telegram_chat_id TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_analytics_id TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS google_tag_manager_id TEXT;
+ALTER TABLE site_settings ADD COLUMN IF NOT EXISTS facebook_test_event_code TEXT;
 
 -- 5. Create Media / Storage Table
 CREATE TABLE IF NOT EXISTS media (

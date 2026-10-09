@@ -424,17 +424,17 @@ export default function AdminSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block font-bold text-slate-300 text-xs">
-                Facebook Pixel ID (Meta Pixel Dataset ID) <span className="text-rose-400">*</span>
+                Facebook Pixel ID (Meta Pixel Dataset ID)
               </label>
               <input
                 type="text"
-                placeholder="e.g. 2147237946145364"
+                placeholder="e.g. 123456789012345"
                 value={settings.facebookPixelId || ""}
                 onChange={(e) => setSettings({ ...settings, facebookPixelId: e.target.value.trim() })}
                 className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono text-xs focus:border-blue-500 focus:outline-none placeholder:text-slate-600"
               />
               <p className="text-[11px] text-slate-400">
-                ব্রাউজার ও সার্ভার উভয় ইভেন্টের জন্য ব্যবহৃত মেটা পিক্সেল আইডি।
+                ব্রাউজার ও সার্ভার উভয় ইভেন্টের জন্য ব্যবহৃত মেটা পিক্সেল আইডি (ফাঁকা রাখলে পিক্সেল লোড হবে না)।
               </p>
             </div>
 
@@ -822,24 +822,24 @@ export default function AdminSettingsPage() {
               <label className="block font-bold text-slate-300 mb-1">Google Analytics (GA4) ID</label>
               <input
                 type="text"
-                placeholder="G-4YDHNQ6JPF"
+                placeholder="e.g. G-XXXXXXXXXX"
                 value={settings.googleAnalyticsId || ""}
                 onChange={(e) => setSettings({ ...settings, googleAnalyticsId: e.target.value.trim() })}
                 className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Default: G-4YDHNQ6JPF</p>
+              <p className="text-[10px] text-slate-500 mt-1">গুগল অ্যানালিটিক্স মেজারমেন্ট আইডি দিন (ফাঁকা রাখলে ট্র্যাকিং বন্ধ থাকবে)</p>
             </div>
 
             <div>
               <label className="block font-bold text-slate-300 mb-1">Google Tag Manager ID</label>
               <input
                 type="text"
-                placeholder="GTM-TCS2PCSC"
+                placeholder="e.g. GTM-XXXXXXX"
                 value={settings.googleTagManagerId || ""}
                 onChange={(e) => setSettings({ ...settings, googleTagManagerId: e.target.value.trim() })}
                 className="w-full bg-slate-950 text-white rounded-xl p-3 border border-slate-800 font-mono font-bold"
               />
-              <p className="text-[10px] text-slate-500 mt-1">Default: GTM-TCS2PCSC</p>
+              <p className="text-[10px] text-slate-500 mt-1">গুগল ট্যাগ ম্যানেজার কন্টেইনার আইডি দিন (ফাঁকা রাখলে ট্র্যাকিং বন্ধ থাকবে)</p>
             </div>
           </div>
         </div>

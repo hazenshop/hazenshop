@@ -58,25 +58,33 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${plusJakarta.variable} scroll-smooth`}>
       <head>
-        {/* GA4 Data Layer Initialization */}
-        <script
-          id="ga4-datalayer-init"
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];`,
-          }}
-        />
+        {/* GA4 Data Layer Initialization if GA or GTM is active */}
+        {(settings.googleTagManagerId?.trim() || settings.googleAnalyticsId?.trim()) ? (
+          <script
+            id="ga4-datalayer-init"
+            dangerouslySetInnerHTML={{
+              __html: `window.dataLayer = window.dataLayer || [];`,
+            }}
+          />
+        ) : null}
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="icon" href="/logo.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/logo.jpg" />
       </head>
       <body className="antialiased min-h-screen bg-slate-900 selection:bg-brand-500 selection:text-brand-dark">
-        <GoogleTagManager gtmId={settings.googleTagManagerId || "GTM-TMTNQ7JS"} />
-        <GoogleAnalytics gaId={settings.googleAnalyticsId || "G-4YDHNQ6JPF"} />
-        <FacebookPixel
-          pixelId={settings.facebookPixelId || "2147237946145364"}
-          testEventCode={settings.facebookTestEventCode || undefined}
-        />
+        {settings.googleTagManagerId?.trim() ? (
+          <GoogleTagManager gtmId={settings.googleTagManagerId.trim()} />
+        ) : null}
+        {settings.googleAnalyticsId?.trim() ? (
+          <GoogleAnalytics gaId={settings.googleAnalyticsId.trim()} />
+        ) : null}
+        {settings.facebookPixelId?.trim() ? (
+          <FacebookPixel
+            pixelId={settings.facebookPixelId.trim()}
+            testEventCode={settings.facebookTestEventCode?.trim() || undefined}
+          />
+        ) : null}
         <CartProvider>
           <ToastProvider>
             <StorefrontShell settings={settings} categories={categories}>

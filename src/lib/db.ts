@@ -1042,9 +1042,11 @@ export const db = {
             seoTitle: data.seo_title || base.seoTitle,
             seoDescription: data.seo_description || base.seoDescription,
             seoKeywords: Array.isArray(data.seo_keywords) ? data.seo_keywords : base.seoKeywords,
-            facebookPixelId: data.facebook_pixel_id || base.facebookPixelId,
-            facebookAccessToken: data.facebook_access_token || base.facebookAccessToken,
-            facebookTestEventCode: data.facebook_test_event_code || base.facebookTestEventCode,
+            facebookPixelId: data.facebook_pixel_id !== undefined ? (data.facebook_pixel_id || "") : (base.facebookPixelId || ""),
+            facebookAccessToken: data.facebook_access_token !== undefined ? (data.facebook_access_token || "") : (base.facebookAccessToken || ""),
+            facebookTestEventCode: data.facebook_test_event_code !== undefined ? (data.facebook_test_event_code || "") : (base.facebookTestEventCode || ""),
+            googleTagManagerId: data.google_tag_manager_id !== undefined ? (data.google_tag_manager_id || "") : (base.googleTagManagerId || ""),
+            googleAnalyticsId: data.google_analytics_id !== undefined ? (data.google_analytics_id || "") : (base.googleAnalyticsId || ""),
             socialLinks: data.social_links ?? base.socialLinks,
             steadfastApiKey: data.steadfast_api_key || base.steadfastApiKey,
             steadfastSecretKey: data.steadfast_secret_key || base.steadfastSecretKey,
@@ -1080,52 +1082,76 @@ export const db = {
       outsideDhakaDeliveryFee: updates.outsideDhakaDeliveryFee !== undefined ? Number(updates.outsideDhakaDeliveryFee) : (base.outsideDhakaDeliveryFee !== undefined ? Number(base.outsideDhakaDeliveryFee) : 120),
       suburbsDeliveryFee: updates.suburbsDeliveryFee !== undefined ? Number(updates.suburbsDeliveryFee) : (base.suburbsDeliveryFee !== undefined ? Number(base.suburbsDeliveryFee) : 100),
       freeShippingThreshold: updates.freeShippingThreshold !== undefined ? Number(updates.freeShippingThreshold) : (base.freeShippingThreshold !== undefined ? Number(base.freeShippingThreshold) : 2500),
+      facebookPixelId: updates.facebookPixelId !== undefined ? updates.facebookPixelId : (base.facebookPixelId || ""),
+      facebookAccessToken: updates.facebookAccessToken !== undefined ? updates.facebookAccessToken : (base.facebookAccessToken || ""),
+      facebookTestEventCode: updates.facebookTestEventCode !== undefined ? updates.facebookTestEventCode : (base.facebookTestEventCode || ""),
+      googleTagManagerId: updates.googleTagManagerId !== undefined ? updates.googleTagManagerId : (base.googleTagManagerId || ""),
+      googleAnalyticsId: updates.googleAnalyticsId !== undefined ? updates.googleAnalyticsId : (base.googleAnalyticsId || ""),
     };
     writeJsonFile("settings.json", cachedSettings);
 
     if (isSupabaseConfigured && dbClient) {
       try {
-        const { error } = await dbClient
-          .from("site_settings")
-          .upsert({
-            id: "primary",
-            store_name: cachedSettings.siteName,
-            tagline: cachedSettings.tagline,
-            logo_url: cachedSettings.logoUrl,
-            hotline: cachedSettings.hotline,
-            whatsapp_number: cachedSettings.whatsappNumber,
-            support_email: cachedSettings.supportEmail,
-            announcement_bar_text: cachedSettings.announcementBarText,
-            announcement_bar_active: cachedSettings.announcementBarActive,
-            dhaka_delivery_fee: Number(cachedSettings.dhakaDeliveryFee),
-            outside_dhaka_delivery_fee: Number(cachedSettings.outsideDhakaDeliveryFee),
-            suburbs_delivery_fee: Number(cachedSettings.suburbsDeliveryFee),
-            free_shipping_threshold: Number(cachedSettings.freeShippingThreshold),
-            hero_banners: cachedSettings.heroBanners,
-            seo_title: cachedSettings.seoTitle,
-            seo_description: cachedSettings.seoDescription,
-            seo_keywords: cachedSettings.seoKeywords,
-            facebook_pixel_id: cachedSettings.facebookPixelId,
-            facebook_access_token: cachedSettings.facebookAccessToken,
-            social_links: cachedSettings.socialLinks,
-            steadfast_api_key: cachedSettings.steadfastApiKey,
-            steadfast_secret_key: cachedSettings.steadfastSecretKey,
-            steadfast_enabled: cachedSettings.steadfastEnabled,
-            pathao_client_id: cachedSettings.pathaoClientId,
-            pathao_client_secret: cachedSettings.pathaoClientSecret,
-            pathao_username: cachedSettings.pathaoUsername,
-            pathao_password: cachedSettings.pathaoPassword,
-            pathao_store_id: cachedSettings.pathaoStoreId,
-            pathao_sandbox: cachedSettings.pathaoSandbox,
-            pathao_enabled: cachedSettings.pathaoEnabled,
-            telegram_bot_token: cachedSettings.telegramBotToken,
-            telegram_chat_id: cachedSettings.telegramChatId,
-            telegram_enabled: cachedSettings.telegramEnabled,
-            blacklisted_phones: cachedSettings.blacklistedPhones || [],
-            updated_at: new Date().toISOString(),
-          });
+        const payload: Record<string, any> = {
+          id: "primary",
+          store_name: cachedSettings.siteName,
+          tagline: cachedSettings.tagline,
+          logo_url: cachedSettings.logoUrl,
+          hotline: cachedSettings.hotline,
+          whatsapp_number: cachedSettings.whatsappNumber,
+          support_email: cachedSettings.supportEmail,
+          announcement_bar_text: cachedSettings.announcementBarText,
+          announcement_bar_active: cachedSettings.announcementBarActive,
+          dhaka_delivery_fee: Number(cachedSettings.dhakaDeliveryFee),
+          outside_dhaka_delivery_fee: Number(cachedSettings.outsideDhakaDeliveryFee),
+          suburbs_delivery_fee: Number(cachedSettings.suburbsDeliveryFee),
+          free_shipping_threshold: Number(cachedSettings.freeShippingThreshold),
+          hero_banners: cachedSettings.heroBanners,
+          seo_title: cachedSettings.seoTitle,
+          seo_description: cachedSettings.seoDescription,
+          seo_keywords: cachedSettings.seoKeywords,
+          facebook_pixel_id: cachedSettings.facebookPixelId || null,
+          facebook_access_token: cachedSettings.facebookAccessToken || null,
+          social_links: cachedSettings.socialLinks,
+          steadfast_api_key: cachedSettings.steadfastApiKey,
+          steadfast_secret_key: cachedSettings.steadfastSecretKey,
+          steadfast_enabled: cachedSettings.steadfastEnabled,
+          pathao_client_id: cachedSettings.pathaoClientId,
+          pathao_client_secret: cachedSettings.pathaoClientSecret,
+          pathao_username: cachedSettings.pathaoUsername,
+          pathao_password: cachedSettings.pathaoPassword,
+          pathao_store_id: cachedSettings.pathaoStoreId,
+          pathao_sandbox: cachedSettings.pathaoSandbox,
+          pathao_enabled: cachedSettings.pathaoEnabled,
+          telegram_bot_token: cachedSettings.telegramBotToken,
+          telegram_chat_id: cachedSettings.telegramChatId,
+          telegram_enabled: cachedSettings.telegramEnabled,
+          blacklisted_phones: cachedSettings.blacklistedPhones || [],
+          updated_at: new Date().toISOString(),
+        };
+
+        if (cachedSettings.googleTagManagerId !== undefined) {
+          payload.google_tag_manager_id = cachedSettings.googleTagManagerId || null;
+        }
+        if (cachedSettings.googleAnalyticsId !== undefined) {
+          payload.google_analytics_id = cachedSettings.googleAnalyticsId || null;
+        }
+        if (cachedSettings.facebookTestEventCode !== undefined) {
+          payload.facebook_test_event_code = cachedSettings.facebookTestEventCode || null;
+        }
+
+        const { error } = await dbClient.from("site_settings").upsert(payload);
         if (error) {
-          console.warn("Supabase site_settings upsert error:", error);
+          // If upsert failed due to missing column in remote database, safely retry without newly added columns
+          if (error.message?.includes("column") || error.code === "PGRST204" || error.code === "42703") {
+            delete payload.google_tag_manager_id;
+            delete payload.google_analytics_id;
+            delete payload.facebook_test_event_code;
+            const { error: retryErr } = await dbClient.from("site_settings").upsert(payload);
+            if (retryErr) console.warn("Supabase site_settings upsert retry error:", retryErr);
+          } else {
+            console.warn("Supabase site_settings upsert error:", error);
+          }
         }
       } catch (err) {
         console.warn("Supabase settings upsert error (saved locally):", err);

@@ -30,13 +30,16 @@ function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventC
 }
 
 export default function FacebookPixel({
-  pixelId = "2147237946145364",
+  pixelId,
   testEventCode,
 }: {
   pixelId?: string;
   testEventCode?: string;
 }) {
-  const activePixelId = pixelId || "2147237946145364";
+  const activePixelId = pixelId?.trim();
+  if (!activePixelId) {
+    return null;
+  }
 
   return (
     <>
@@ -53,7 +56,7 @@ export default function FacebookPixel({
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             fbq('init', '${activePixelId}');
-            fbq('track', 'PageView'${testEventCode ? `, { test_event_code: '${testEventCode}' }` : ""});
+            fbq('track', 'PageView'${testEventCode?.trim() ? `, { test_event_code: '${testEventCode.trim()}' }` : ""});
           `,
         }}
       />
@@ -67,7 +70,7 @@ export default function FacebookPixel({
         />
       </noscript>
       <Suspense fallback={null}>
-        <PixelTracker pixelId={activePixelId} testEventCode={testEventCode} />
+        <PixelTracker pixelId={activePixelId} testEventCode={testEventCode?.trim()} />
       </Suspense>
     </>
   );

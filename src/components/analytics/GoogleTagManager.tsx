@@ -4,11 +4,14 @@ import React from "react";
 import Script from "next/script";
 
 export default function GoogleTagManager({
-  gtmId = "GTM-TMTNQ7JS",
+  gtmId,
 }: {
   gtmId?: string;
 }) {
-  const activeGtmId = gtmId || "GTM-TMTNQ7JS";
+  const activeGtmId = gtmId?.trim();
+  if (!activeGtmId) {
+    return null;
+  }
 
   return (
     <>

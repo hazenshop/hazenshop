@@ -67,12 +67,12 @@ export async function sendMetaPurchaseEvent(
   settings?: SiteSettings
 ): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
-    const pixelId = settings?.facebookPixelId || process.env.NEXT_PUBLIC_FB_PIXEL_ID || "2147237946145364";
-    const accessToken = settings?.facebookAccessToken || process.env.FB_CONVERSIONS_API_TOKEN;
+    const pixelId = (settings?.facebookPixelId || process.env.NEXT_PUBLIC_FB_PIXEL_ID || "").trim();
+    const accessToken = (settings?.facebookAccessToken || process.env.FB_CONVERSIONS_API_TOKEN || "").trim();
 
-    if (!accessToken) {
-      console.log("[Meta CAPI] No facebookAccessToken configured. Skipping server-side event.");
-      return { success: false, error: "No Access Token configured" };
+    if (!pixelId || !accessToken) {
+      console.log("[Meta CAPI] facebookPixelId or facebookAccessToken not configured. Skipping server-side event.");
+      return { success: false, error: "Pixel ID or Access Token not configured" };
     }
 
     const { clientIp, userAgent, fbp, fbc } = extractClientInfo(req);

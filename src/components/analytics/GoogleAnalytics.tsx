@@ -4,11 +4,14 @@ import React from "react";
 import Script from "next/script";
 
 export default function GoogleAnalytics({
-  gaId = "G-4YDHNQ6JPF",
+  gaId,
 }: {
   gaId?: string;
 }) {
-  const activeGaId = gaId || "G-4YDHNQ6JPF";
+  const activeGaId = gaId?.trim();
+  if (!activeGaId) {
+    return null;
+  }
 
   return (
     <>
