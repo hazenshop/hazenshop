@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -46,18 +46,24 @@ export default function ProductDetailClient({
   const [quantity, setQuantity] = useState(1);
   const [selectedBundleId, setSelectedBundleId] = useState<string | null>(null);
 
+  const hasTrackedFBView = useRef<string | null>(null);
+
   // Trigger Facebook Pixel ViewContent and GA4 view_item on load
   useEffect(() => {
-    trackViewContent(product, defaultVariant);
-
     const currentItemId = String(defaultVariant?.sku || product.sku || defaultVariant?.id || product.id);
+
+    if (hasTrackedFBView.current !== currentItemId) {
+      hasTrackedFBView.current = currentItemId;
+      trackViewContent(product, defaultVariant);
+    }
+
     if (typeof window !== "undefined" && window._ga4_last_view_item === currentItemId) {
       // Already pushed via SSR script on initial HTML load
       window._ga4_last_view_item = undefined;
     } else {
       trackGA4ViewItem(product, defaultVariant);
     }
-  }, [product, defaultVariant]);
+  }, [product.id, defaultVariant?.id]);
 
   const unitPrice = defaultVariant
     ? defaultVariant.salePrice ?? defaultVariant.price

@@ -13,12 +13,40 @@ export function setPixelTestCode(code?: string) {
   }
 }
 
+// Deduplication caches for Meta Pixel events
+const recentEvents = new Map<string, number>();
+let lastViewContentKey = "";
+let lastViewContentTime = 0;
+let lastAddToCartKey = "";
+let lastAddToCartTime = 0;
+
 export function trackPixelEvent(
   eventName: string,
   data?: Record<string, any>,
   options?: { eventID?: string }
 ) {
   if (typeof window !== "undefined" && typeof window.fbq === "function") {
+    // Deduplication check: prevent identical event with same name and eventID / payload from firing within 1000ms
+    const eventKey = options?.eventID
+      ? `${eventName}_${options.eventID}`
+      : `${eventName}_${JSON.stringify(data || {})}`;
+
+    const now = Date.now();
+    const lastTime = recentEvents.get(eventKey);
+    if (lastTime && now - lastTime < 1000) {
+      return;
+    }
+    recentEvents.set(eventKey, now);
+
+    // Prune stale cache entries
+    if (recentEvents.size > 50) {
+      recentEvents.forEach((time, key) => {
+        if (now - time > 10000) {
+          recentEvents.delete(key);
+        }
+      });
+    }
+
     const payload = { ...(data || {}) };
     if (window._fb_test_code && !payload.test_event_code) {
       payload.test_event_code = window._fb_test_code;
@@ -35,6 +63,15 @@ export function trackPixelEvent(
 }
 
 export function trackViewContent(product: Product, variant?: ProductVariant) {
+  const currentId = String(variant?.id || product.id);
+  const now = Date.now();
+  // Prevent duplicate ViewContent within 2000ms for the same product/variant
+  if (lastViewContentKey === currentId && now - lastViewContentTime < 2000) {
+    return;
+  }
+  lastViewContentKey = currentId;
+  lastViewContentTime = now;
+
   const price = variant ? (variant.salePrice ?? variant.price) : (product.salePrice ?? product.price);
   trackPixelEvent("ViewContent", {
     content_name: product.name,
@@ -47,6 +84,15 @@ export function trackViewContent(product: Product, variant?: ProductVariant) {
 }
 
 export function trackAddToCart(product: Product, variant?: ProductVariant, quantity: number = 1) {
+  const currentId = String(variant?.id || product.id);
+  const now = Date.now();
+  // Prevent duplicate AddToCart within 800ms for the same item (accidental double-click)
+  if (lastAddToCartKey === currentId && now - lastAddToCartTime < 800) {
+    return;
+  }
+  lastAddToCartKey = currentId;
+  lastAddToCartTime = now;
+
   const price = variant ? (variant.salePrice ?? variant.price) : (product.salePrice ?? product.price);
   trackPixelEvent("AddToCart", {
     content_name: product.name,
@@ -72,6 +118,14 @@ export function trackPurchase(order: {
   totalAmount: number;
   items?: { productId: string; productName: string; quantity: number; price: number }[];
 }) {
+  if (typeof window !== "undefined") {
+    const trackedKey = `fb_tracked_${order.id}`;
+    if (sessionStorage.getItem(trackedKey)) {
+      return; // Already tracked this order in this browser session
+    }
+    sessionStorage.setItem(trackedKey, "1");
+  }
+
   trackPixelEvent(
     "Purchase",
     {

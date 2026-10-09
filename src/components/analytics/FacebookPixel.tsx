@@ -2,12 +2,13 @@
 
 import React, { Suspense, useEffect, useRef } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import Script from "next/script";
 import { setPixelTestCode } from "@/lib/pixel";
 
 function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventCode?: string }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isFirstRender = useRef(true);
+  const lastTrackedUrl = useRef<string | null>(null);
 
   useEffect(() => {
     if (testEventCode) {
@@ -16,13 +17,24 @@ function PixelTracker({ pixelId, testEventCode }: { pixelId?: string; testEventC
   }, [testEventCode]);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
+    if (!pixelId) return;
+
+    const queryString = searchParams?.toString();
+    const currentUrl = `${pathname}${queryString ? `?${queryString}` : ""}`;
+
+    // On initial mount: the inline script already tracked PageView for this initial URL
+    if (lastTrackedUrl.current === null) {
+      lastTrackedUrl.current = currentUrl;
       return;
     }
-    if (typeof window !== "undefined" && (window as any).fbq) {
-      const extra = testEventCode ? { test_event_code: testEventCode } : undefined;
-      (window as any).fbq("track", "PageView", extra);
+
+    // Only track if the URL has actually changed (client-side route navigation)
+    if (lastTrackedUrl.current !== currentUrl) {
+      lastTrackedUrl.current = currentUrl;
+      if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
+        const extra = testEventCode ? { test_event_code: testEventCode } : undefined;
+        (window as any).fbq("track", "PageView", extra);
+      }
     }
   }, [pathname, searchParams, pixelId, testEventCode]);
 
@@ -43,8 +55,9 @@ export default function FacebookPixel({
 
   return (
     <>
-      <script
+      <Script
         id="fb-pixel"
+        strategy="afterInteractive"
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -55,8 +68,11 @@ export default function FacebookPixel({
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${activePixelId}');
-            fbq('track', 'PageView'${testEventCode?.trim() ? `, { test_event_code: '${testEventCode.trim()}' }` : ""});
+            if (!window._fbq_initialized) {
+              window._fbq_initialized = true;
+              fbq('init', '${activePixelId}');
+              fbq('track', 'PageView'${testEventCode?.trim() ? `, { test_event_code: '${testEventCode.trim()}' }` : ""});
+            }
           `,
         }}
       />

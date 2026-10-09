@@ -21,7 +21,7 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { DeliveryZone, SiteSettings } from "@/lib/types";
 import { formatPrice, getDeliveryFee, generateOrderId } from "@/lib/utils";
-import { trackInitiateCheckout, trackPurchase } from "@/lib/pixel";
+import { trackInitiateCheckout } from "@/lib/pixel";
 import { trackGA4BeginCheckout } from "@/lib/gtm";
 
 export default function CheckoutPage() {
@@ -146,18 +146,6 @@ export default function CheckoutPage() {
       if (!res.ok) {
         throw new Error("Failed to create order");
       }
-
-      // Track Facebook Pixel Purchase Event
-      trackPurchase({
-        id: orderId,
-        totalAmount: grandTotal,
-        items: cart.map((item) => ({
-          productId: item.productId,
-          productName: item.productName,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-      });
 
       clearCart();
       showToast("অর্ডার সফল হয়েছে! ক্যাশ অন ডেলিভারিতে পাঠানো হচ্ছে।", "success");
