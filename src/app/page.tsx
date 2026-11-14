@@ -14,7 +14,23 @@ export default async function HomePage() {
   const categories = await db.getCategories();
   const allProducts = await db.getProducts();
 
-  const flashSaleProducts = allProducts.filter((p) => p.flashSale);
+  const isComforter = (value?: string) => (value || "").toLowerCase().includes("comforter");
+
+  const orderedCategories = [...categories].sort((a, b) => {
+    const aIsComforter = isComforter(a.slug) || isComforter(a.name);
+    const bIsComforter = isComforter(b.slug) || isComforter(b.name);
+    if (aIsComforter === bIsComforter) return 0;
+    return aIsComforter ? -1 : 1;
+  });
+
+  const orderedProducts = [...allProducts].sort((a, b) => {
+    const aIsComforter = isComforter(a.category) || isComforter(a.name);
+    const bIsComforter = isComforter(b.category) || isComforter(b.name);
+    if (aIsComforter === bIsComforter) return 0;
+    return aIsComforter ? -1 : 1;
+  });
+
+  const flashSaleProducts = orderedProducts.filter((p) => p.flashSale);
   const cleanWhatsApp = (settings.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
 
   return (
@@ -48,8 +64,8 @@ export default async function HomePage() {
       )}
 
       {/* 2. DYNAMIC CATEGORY SHOWCASE SECTIONS */}
-      {categories.map((category) => {
-        const catProducts = allProducts.filter((p) => p.category === category.slug);
+      {orderedCategories.map((category) => {
+        const catProducts = orderedProducts.filter((p) => p.category === category.slug);
         if (catProducts.length === 0) return null;
 
         return (
@@ -73,7 +89,7 @@ export default async function HomePage() {
       })}
 
       {/* 3. ALL PRODUCTS FALLBACK IF CATEGORIES HAVE NO PRODUCTS OR EMPTY */}
-      {allProducts.length > 0 && categories.every((c) => allProducts.filter((p) => p.category === c.slug).length === 0) && (
+      {orderedProducts.length > 0 && orderedCategories.every((c) => orderedProducts.filter((p) => p.category === c.slug).length === 0) && (
         <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="mb-4 sm:mb-6 pb-3 border-b border-black/[0.05]">
             <span className="text-[10px] font-bold uppercase text-brand-maroon-700 tracking-widest block mb-1">
@@ -85,7 +101,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-            {allProducts.map((product) => (
+            {orderedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
