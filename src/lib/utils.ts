@@ -157,3 +157,34 @@ export function getStatusColor(status: string): { bg: string; text: string; bord
       return { bg: "bg-slate-500/10", text: "text-slate-400", border: "border-slate-500/30" };
   }
 }
+
+/**
+ * Adds lightweight CDN resize/format parameters for Cloudinary and Unsplash URLs
+ * so images load fast without using Vercel Image Optimization credits.
+ */
+export function getOptimizedImageUrl(url?: string, width: number = 600): string {
+  if (!url) return "/logo.jpg";
+
+  if (url.includes("res.cloudinary.com") && url.includes("/image/upload/")) {
+    const parts = url.split("/image/upload/");
+    const rest = parts[1] || "";
+    // Only inject transforms if not already present (version segment starts with v\d+/)
+    if (/^v\d+\//.test(rest)) {
+      return `${parts[0]}/image/upload/f_auto,q_auto,w_${width},c_limit/${rest}`;
+    }
+  }
+
+  if (url.includes("images.unsplash.com")) {
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.set("w", String(width));
+      parsed.searchParams.set("q", "75");
+      parsed.searchParams.set("auto", "format");
+      return parsed.toString();
+    } catch {
+      return url;
+    }
+  }
+
+  return url;
+}

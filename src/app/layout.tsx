@@ -7,24 +7,24 @@ import StorefrontShell from "@/components/layout/StorefrontShell";
 import FacebookPixel from "@/components/analytics/FacebookPixel";
 import GoogleTagManager from "@/components/analytics/GoogleTagManager";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
-import { db } from "@/lib/db";
+import { getCachedCategories, getCachedSettings } from "@/lib/queries";
 
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["500", "600", "700", "800"],
 });
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-plus-jakarta",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await db.getSettings();
+  const settings = await getCachedSettings();
   return {
     metadataBase: new URL("https://hazenshopbd.com"),
     title: {
@@ -52,8 +52,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await db.getSettings();
-  const categories = await db.getCategories();
+  const [settings, categories] = await Promise.all([
+    getCachedSettings(),
+    getCachedCategories(),
+  ]);
 
   return (
     <html lang="en" className={`${outfit.variable} ${plusJakarta.variable} scroll-smooth`}>
@@ -67,6 +69,8 @@ export default async function RootLayout({
             }}
           />
         ) : null}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <link rel="dns-prefetch" href="https://images.unsplash.com" />
         <link rel="icon" href="/logo.jpg" type="image/jpeg" />

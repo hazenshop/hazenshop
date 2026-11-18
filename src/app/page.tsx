@@ -3,16 +3,18 @@ import {
   Sparkles,
   MessageCircle,
 } from "lucide-react";
-import { db } from "@/lib/db";
+import { getCachedCategories, getCachedProducts, getCachedSettings } from "@/lib/queries";
 import ProductCard from "@/components/product/ProductCard";
 import TrustBadges from "@/components/footer/TrustBadges";
 
 export const revalidate = 0; // Fresh dynamic data
 
 export default async function HomePage() {
-  const settings = await db.getSettings();
-  const categories = await db.getCategories();
-  const allProducts = await db.getProducts();
+  const [settings, categories, allProducts] = await Promise.all([
+    getCachedSettings(),
+    getCachedCategories(),
+    getCachedProducts(),
+  ]);
 
   const isComforter = (value?: string) => (value || "").toLowerCase().includes("comforter");
 
@@ -32,6 +34,7 @@ export default async function HomePage() {
 
   const flashSaleProducts = orderedProducts.filter((p) => p.flashSale);
   const cleanWhatsApp = (settings.whatsappNumber || "01700000000").replace(/[^0-9]/g, "");
+  let renderOrder = 0;
 
   return (
     <div className="space-y-10 sm:space-y-14 pb-16 pt-2 sm:pt-4">
@@ -56,7 +59,7 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
               {flashSaleProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} loadOrder={renderOrder++} />
               ))}
             </div>
           </div>
@@ -81,7 +84,7 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
               {catProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} loadOrder={renderOrder++} />
               ))}
             </div>
           </section>
@@ -102,7 +105,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {orderedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.id} product={product} loadOrder={renderOrder++} />
             ))}
           </div>
         </section>
