@@ -28,6 +28,7 @@ interface OrderProductsModalProps {
   onOpenInvoice?: (order: Order) => void;
   onOpenFraudCheck?: (order: Order) => void;
   onOpenCourier?: (order: Order) => void;
+  onEditOrder?: (order: Order) => void;
 }
 
 export default function OrderProductsModal({
@@ -37,6 +38,7 @@ export default function OrderProductsModal({
   onOpenInvoice,
   onOpenFraudCheck,
   onOpenCourier,
+  onEditOrder,
 }: OrderProductsModalProps) {
   if (!order) return null;
 
@@ -342,12 +344,18 @@ export default function OrderProductsModal({
         <div className="bg-slate-950 p-3 rounded-xl sm:rounded-2xl border border-slate-800 text-xs space-y-1">
           <div className="flex justify-between text-slate-400">
             <span>Items ({order.items.reduce((s, i) => s + i.quantity, 0)} pcs):</span>
-            <span className="text-slate-200 font-bold">{formatPrice(order.subtotal || order.totalAmount - (order.deliveryFee || 0))}</span>
+            <span className="text-slate-200 font-bold">{formatPrice(order.subtotal || order.totalAmount - (order.deliveryFee || 0) + (order.discount || 0))}</span>
           </div>
           <div className="flex justify-between text-slate-400">
             <span>Delivery ({order.deliveryZone.replace("_", " ").toUpperCase()}):</span>
             <span className="text-slate-200 font-bold">{order.deliveryFee === 0 ? "FREE" : formatPrice(order.deliveryFee)}</span>
           </div>
+          {(order.discount || 0) > 0 && (
+            <div className="flex justify-between text-emerald-400 font-bold">
+              <span>Discount:</span>
+              <span>-{formatPrice(order.discount)}</span>
+            </div>
+          )}
           <div className="flex justify-between text-white font-black text-sm pt-1 border-t border-slate-900">
             <span>Payable Amount (COD):</span>
             <span className="text-brand-400 text-base">{formatPrice(order.totalAmount)}</span>
@@ -366,6 +374,20 @@ export default function OrderProductsModal({
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp</span>
             </a>
+
+            {onEditOrder && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onEditOrder(order);
+                }}
+                className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-colors min-h-[42px]"
+              >
+                <Edit className="w-4 h-4" />
+                <span>Edit Order</span>
+              </button>
+            )}
 
             {onOpenInvoice && (
               <button

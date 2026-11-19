@@ -460,6 +460,7 @@ export default function OrderInvoiceModal({
           <div class="t-fin-row">
             Delivery Charge <strong>${order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
           </div>
+          ${(order.discount || 0) > 0 ? `<div class="t-fin-row">Discount <strong>-${order.discount} Tk</strong></div>` : ""}
           <div class="t-fin-row t-total-row">
             Sub Total <strong>${order.totalAmount.toLocaleString("en-BD")} Tk</strong>
           </div>
@@ -757,6 +758,7 @@ export default function OrderInvoiceModal({
           <div class="t-fin-row">
             Delivery Charge <strong>${order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
           </div>
+          ${(order.discount || 0) > 0 ? `<div class="t-fin-row">Discount <strong>-${order.discount} Tk</strong></div>` : ""}
           <div class="t-fin-row t-total-row">
             Sub Total <strong>${order.totalAmount.toLocaleString("en-BD")} Tk</strong>
           </div>
@@ -1122,6 +1124,11 @@ export default function OrderInvoiceModal({
                     <div className="font-bold text-black">
                       Delivery Charge <strong className="font-black">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
                     </div>
+                    {(order.discount || 0) > 0 && (
+                      <div className="font-bold text-black">
+                        Discount <strong className="font-black">-{order.discount} Tk</strong>
+                      </div>
+                    )}
                     <div className="text-[12px] font-black text-black mt-0.5">
                       Sub Total <strong className="font-black">{order.totalAmount.toLocaleString("en-BD")} Tk</strong>
                     </div>
@@ -1246,6 +1253,11 @@ export default function OrderInvoiceModal({
                     <div className="font-bold text-black">
                       Delivery Charge <strong className="font-black">{order.deliveryFee === 0 ? "0" : order.deliveryFee} Tk</strong>
                     </div>
+                    {(order.discount || 0) > 0 && (
+                      <div className="font-bold text-black">
+                        Discount <strong className="font-black">-{order.discount} Tk</strong>
+                      </div>
+                    )}
                     <div className="text-[11px] font-black text-black mt-0.5">
                       Sub Total <strong className="font-black">{order.totalAmount.toLocaleString("en-BD")} Tk</strong>
                     </div>
@@ -1370,6 +1382,12 @@ export default function OrderInvoiceModal({
                       {order.deliveryFee === 0 ? "FREE" : formatPrice(order.deliveryFee)}
                     </span>
                   </div>
+                  {(order.discount || 0) > 0 && (
+                    <div className="flex justify-between text-emerald-700 font-bold">
+                      <span>Discount:</span>
+                      <span>-{formatPrice(order.discount)}</span>
+                    </div>
+                  )}
                   <div className="border-t border-slate-900 pt-2 flex justify-between items-center text-sm font-black text-slate-900">
                     <span>Total Payable (COD):</span>
                     <span className="text-base text-brand-maroon-700">{formatPrice(order.totalAmount)}</span>

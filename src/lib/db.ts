@@ -997,6 +997,101 @@ export const db = {
     return cachedOrders[idx];
   },
 
+  async updateOrder(
+    id: string,
+    updates: Partial<Order>
+  ): Promise<Order | null> {
+    const existing = await this.getOrderById(id);
+    if (!existing) return null;
+
+    const rawItems = Array.isArray(updates.items) && updates.items.length > 0 ? updates.items : existing.items;
+    const normalizedItems = rawItems.map((item) => {
+      const price = Math.max(0, Number(item.price) || 0);
+      const quantity = Math.max(1, Math.round(Number(item.quantity) || 1));
+      return {
+        ...item,
+        price,
+        quantity,
+        total: price * quantity,
+      };
+    });
+
+    const subtotal = normalizedItems.reduce((sum, item) => sum + item.total, 0);
+    const deliveryFee =
+      updates.deliveryFee !== undefined && !isNaN(Number(updates.deliveryFee))
+        ? Math.max(0, Number(updates.deliveryFee))
+        : existing.deliveryFee;
+    const discount =
+      updates.discount !== undefined && !isNaN(Number(updates.discount))
+        ? Math.max(0, Number(updates.discount))
+        : existing.discount || 0;
+    const totalAmount = Math.max(0, subtotal + deliveryFee - discount);
+    const nowIso = new Date().toISOString();
+
+    const mergedOrder: Order = {
+      ...existing,
+      customerName: updates.customerName !== undefined ? String(updates.customerName).trim() : existing.customerName,
+      customerPhone: updates.customerPhone !== undefined ? String(updates.customerPhone).trim() : existing.customerPhone,
+      customerAddress: updates.customerAddress !== undefined ? String(updates.customerAddress).trim() : existing.customerAddress,
+      customerCity: updates.customerCity !== undefined ? String(updates.customerCity).trim() : existing.customerCity,
+      deliveryZone: updates.deliveryZone || existing.deliveryZone,
+      deliveryFee,
+      subtotal,
+      discount,
+      totalAmount,
+      status: updates.status || existing.status,
+      notes: updates.notes !== undefined ? String(updates.notes) : existing.notes,
+      items: normalizedItems,
+      courierName: updates.courierName !== undefined ? updates.courierName : existing.courierName,
+      trackingCode: updates.trackingCode !== undefined ? updates.trackingCode : existing.trackingCode,
+      updatedAt: nowIso,
+    };
+
+    if (isSupabaseConfigured && dbClient) {
+      try {
+        const { data, error } = await dbClient
+          .from("orders")
+          .update({
+            customer_name: mergedOrder.customerName,
+            customer_phone: mergedOrder.customerPhone,
+            customer_address: mergedOrder.customerAddress,
+            customer_city: mergedOrder.customerCity,
+            delivery_zone: mergedOrder.deliveryZone,
+            delivery_fee: mergedOrder.deliveryFee,
+            subtotal: mergedOrder.subtotal,
+            discount: mergedOrder.discount,
+            total_amount: mergedOrder.totalAmount,
+            status: mergedOrder.status,
+            notes: mergedOrder.notes,
+            items: mergedOrder.items,
+            courier_name: mergedOrder.courierName,
+            tracking_code: mergedOrder.trackingCode,
+            updated_at: mergedOrder.updatedAt,
+          })
+          .eq("id", existing.id)
+          .select()
+          .maybeSingle();
+
+        if (!error && data) {
+          mergedOrder.updatedAt = data.updated_at || nowIso;
+        }
+      } catch (err) {
+        console.warn("Supabase updateOrder error:", err);
+      }
+    }
+
+    cachedOrders = readJsonFile("orders.json", cachedOrders);
+    const idx = cachedOrders.findIndex((o) => o.id === existing.id);
+    if (idx > -1) {
+      cachedOrders[idx] = mergedOrder;
+    } else {
+      cachedOrders.unshift(mergedOrder);
+    }
+    writeJsonFile("orders.json", cachedOrders);
+
+    return mergedOrder;
+  },
+
   async deleteOrder(id: string): Promise<boolean> {
     if (isSupabaseConfigured && dbClient) {
       try {

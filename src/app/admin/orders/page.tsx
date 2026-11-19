@@ -30,6 +30,7 @@ import { Order, OrderItem, OrderStatus, Product, SiteSettings } from "@/lib/type
 import { formatPrice, getStatusColor, generateOrdersCSV, getCourierTrackingUrl } from "@/lib/utils";
 import OrderInvoiceModal from "@/components/admin/OrderInvoiceModal";
 import OrderProductsModal from "@/components/admin/OrderProductsModal";
+import OrderEditModal from "@/components/admin/OrderEditModal";
 import FraudCheckModal from "@/components/admin/FraudCheckModal";
 import HelpGuideModal from "@/components/admin/HelpGuideModal";
 import { useToast } from "@/context/ToastContext";
@@ -46,6 +47,7 @@ export default function AdminOrdersPage() {
   // Modals & bulk state
   const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<Order | null>(null);
   const [selectedProductsOrder, setSelectedProductsOrder] = useState<Order | null>(null);
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [selectedFraudCheckOrder, setSelectedFraudCheckOrder] = useState<Order | null>(null);
   const [editingCourierOrder, setEditingCourierOrder] = useState<Order | null>(null);
   const [courierName, setCourierName] = useState("");
@@ -527,6 +529,11 @@ export default function AdminOrdersPage() {
                     <span className="font-black text-white text-sm block">
                       {formatPrice(order.totalAmount)}
                     </span>
+                    {(order.discount || 0) > 0 && (
+                      <span className="text-[10px] text-emerald-400 font-bold block">
+                        -{formatPrice(order.discount)} Discount
+                      </span>
+                    )}
                     <span className="text-[10px] text-emerald-400 font-bold uppercase">Cash on Delivery</span>
                   </div>
                 </div>
@@ -649,6 +656,14 @@ export default function AdminOrdersPage() {
                       title="View Ordered Products & Live Page"
                     >
                       <Eye className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingOrder(order)}
+                      className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 min-h-[40px] min-w-[40px] flex items-center justify-center"
+                      title="Edit Order & Add Phone Deal Discount"
+                    >
+                      <Edit2 className="w-4 h-4" />
                     </button>
                     <a
                       href={getWhatsAppConfirmationLink(order)}
@@ -876,6 +891,11 @@ export default function AdminOrdersPage() {
                         <span className="font-black text-brand-400 block text-sm">
                           {formatPrice(order.totalAmount)}
                         </span>
+                        {(order.discount || 0) > 0 && (
+                          <span className="text-[10px] text-emerald-400 font-bold block">
+                            -{formatPrice(order.discount)} off
+                          </span>
+                        )}
                         <span className="text-[10px] text-slate-400">COD</span>
                       </td>
 
@@ -942,6 +962,13 @@ export default function AdminOrdersPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
+                          <button
+                            onClick={() => setEditingOrder(order)}
+                            className="p-2 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors"
+                            title="Edit Order & Add Phone Deal Discount"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
                           <a
                             href={getWhatsAppConfirmationLink(order)}
                             target="_blank"
@@ -1001,6 +1028,7 @@ export default function AdminOrdersPage() {
           order={selectedProductsOrder}
           products={products}
           onClose={() => setSelectedProductsOrder(null)}
+          onEditOrder={(o) => setEditingOrder(o)}
           onOpenInvoice={(o) => setSelectedInvoiceOrder(o)}
           onOpenFraudCheck={(o) => setSelectedFraudCheckOrder(o)}
           onOpenCourier={(o) => {
@@ -1008,6 +1036,23 @@ export default function AdminOrdersPage() {
             setCourierFeedback(null);
             setCourierName(o.courierName || "");
             setTrackingCode(o.trackingCode || "");
+          }}
+        />
+      )}
+
+      {/* Edit Order & Phone Deal Modal */}
+      {editingOrder && (
+        <OrderEditModal
+          order={editingOrder}
+          products={products}
+          settings={settings}
+          onClose={() => setEditingOrder(null)}
+          onSaved={(updatedOrder) => {
+            setOrders((prev) =>
+              prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
+            );
+            setEditingOrder(null);
+            showToast(`Order #${updatedOrder.id} updated (${formatPrice(updatedOrder.totalAmount)})`);
           }}
         />
       )}

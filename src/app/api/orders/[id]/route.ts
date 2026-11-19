@@ -19,6 +19,28 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await req.json();
+
+    const isFullOrderEdit =
+      body.customerName !== undefined ||
+      body.customerPhone !== undefined ||
+      body.customerAddress !== undefined ||
+      body.deliveryZone !== undefined ||
+      body.deliveryFee !== undefined ||
+      body.discount !== undefined ||
+      body.notes !== undefined ||
+      Array.isArray(body.items);
+
+    if (isFullOrderEdit) {
+      if (Array.isArray(body.items) && body.items.length === 0) {
+        return NextResponse.json({ error: "Order must contain at least one item." }, { status: 400 });
+      }
+      const updated = await db.updateOrder(params.id, body);
+      if (!updated) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, order: updated });
+    }
+
     const updated = await db.updateOrderStatus(params.id, body.status, {
       courierName: body.courierName,
       trackingCode: body.trackingCode,
